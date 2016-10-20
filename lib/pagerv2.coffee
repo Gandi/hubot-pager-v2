@@ -4,14 +4,14 @@
 # Dependencies:
 #
 # Configuration:
-#  PAGERDUTY_V2_API_KEY
+#  PAGERV2_API_KEY
 #
 # Author:
 #   mose
 
 Promise = require 'bluebird'
 
-class PagerdutyV2
+class Pagerv2
 
   constructor: (@robot, env) ->
     storageLoaded = =>
@@ -21,3 +21,7 @@ class PagerdutyV2
       @robot.logger.debug 'Pagerduty V2 Data Loaded: ' + JSON.stringify(@data, null, 2)
     @robot.brain.on 'loaded', storageLoaded
     storageLoaded()
+
+
+
+module.exports = Pagerv2
