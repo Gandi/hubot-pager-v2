@@ -40,6 +40,15 @@
 #   hubot pd note <#,#,#> <note> - create a note for incidents <#,#,#>
 #   hubot pd notes <#>           - read notes for incident <#>
 #
+#   hubot pd [who is] oncall        - tells who is currently on call
+#   hubot pd [who is] next [oncall] - tells who is next on call
+#   hubot pd escalation             - tells who is involved in the escalation process
+#
+#   hubot pd maintenances           - lists currently active maintenances
+#   hubot pd stfu|down [for] <duration> [because <reason>] - creates a maintenance
+#   hubot pd up|end|back <maintenance> - ends <maintenance>
+#
+#
 # Author:
 #   mose
 
@@ -183,5 +192,44 @@ module.exports = (robot) ->
 #   hubot pd notes <#>           - read notes for incident <#>
   robot.respond /pd notes ([\d, ]+)\s+$/, (res) ->
     [ _, incident ] = res.match
+    res.send "Not yet implemented"
+    res.finish()
+
+# TODO
+#   hubot pd [who is] oncall     - tells who is currently on call
+  robot.respond /pd (?:who(?: is|'s) )?(?:on ?call)\s+$/, (res) ->
+    res.send "Not yet implemented"
+    res.finish()
+
+# TODO
+#   hubot pd [who is] next [oncall] - tells who is next on call
+  robot.respond /pd (?:who(?: is|'s) )?next(?: on ?call)?\s+$/, (res) ->
+    res.send "Not yet implemented"
+    res.finish()
+
+# TODO
+#   hubot pd escalation          - tells who is involved in the escalation process
+  robot.respond /pd escalation\s+$/, (res) ->
+    res.send "Not yet implemented"
+    res.finish()
+
+# TODO
+#   hubot pd maintenances           - lists currently active maintenances
+  robot.respond /pd maintenances?\s+$/, (res) ->
+    res.send "Not yet implemented"
+    res.finish()
+
+# TODO
+#   hubot pd stfu|down [for] <duration> [because <reason>] - creates a maintenance
+  robot.respond /pd (?:stfu|down)(?: for)?\s*([0-9]+)?(?: min(?:utes)?)?(?: because (.+))?\s+$/, 
+    (res) ->
+    [ _, duration ] = res.match
+    res.send "Not yet implemented"
+    res.finish()
+
+# TODO
+#   hubot pd up|end|back <maintenance> - ends <maintenance>
+  robot.respond /pd (?:up|back|end) ([A-Z0-9]+)\s+$/, (res) ->
+    [ _, maintenance ] = res.match
     res.send "Not yet implemented"
     res.finish()
