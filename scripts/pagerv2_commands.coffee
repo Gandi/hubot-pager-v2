@@ -25,3 +25,8 @@ module.exports = (robot) ->
     pkg = require path.join __dirname, '..', 'package.json'
     res.send "hubot-pager-v2 is version #{pkg.version}"
     res.finish()
+
+  robot.respond /pd test *$/, (res) ->
+    pagerv2.request('GET', '/users', null)
+    .then (body) ->
+      console.log body
