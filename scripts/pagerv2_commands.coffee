@@ -71,7 +71,11 @@ module.exports = (robot) ->
 # TODO
 #   hubot pd me - check if the caller is known by pagerduty plugin
   robot.respond /pd me\s*$/, (res) ->
-    res.send "Not yet implemented"
+    pagerv2.getUser(res.envelope.user, res.envelope.user)
+    .then (data) ->
+      console.log data
+    .catch (e) ->
+      res.send e
     res.finish()
 
 # TODO

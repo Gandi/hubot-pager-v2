@@ -1,8 +1,8 @@
 require('es6-promise').polyfill()
 
-Helper = require('hubot-test-helper')
+Helper = require 'hubot-test-helper'
 helper = new Helper('../scripts/pagerv2_commands.coffee')
-Hubot = require('../node_modules/hubot')
+Hubot = require '../node_modules/hubot'
 
 path   = require 'path'
 nock   = require 'nock'
@@ -43,6 +43,8 @@ describe 'pagerv2_commands', ->
       cb()
 
   beforeEach ->
+    do nock.enableNetConnect
+
     process.env.PAGERV2_API_KEY = 'xxx'
     room = helper.createRoom { httpd: false }
     room.robot.brain.userForId 'user', {
@@ -68,3 +70,43 @@ describe 'pagerv2_commands', ->
       expect(hubotResponse()).to.match /hubot-pager-v2 is version [0-9]+\.[0-9]+\.[0-9]+/
 
   # ------------------------------------------------------------------------------------------------
+  context 'with a first time user,', ->
+    say 'pd me', ->
+      it 'asks to declare email', ->
+        expect(hubotResponse())
+          .to.eql "Sorry, I can't figure out your email address :( " +
+                  "Can you tell me with `.pd me as <email>`?"
+
+  context 'with a user that has unknown email,', ->
+    beforeEach ->
+      room.robot.brain.data.pagerv2 = {
+        users: {
+          momo: {
+            id: 'momo',
+            name: 'momo',
+            email: 'momo@example.com'
+          }
+        }
+      }
+      @response = require('./fixtures/users_list-nomatch.json')
+      nock('https://api.pagerduty.com')
+        .get('/users')
+        .reply(200, @response)
+
+    say 'pd me', ->
+      it 'asks to declare email', ->
+        expect(hubotResponse())
+          .to.eql "Sorry, I can't figure out your email address :( " +
+                  "Can you tell me with `.pd me as <email>`?"
+
+  # ------------------------------------------------------------------------------------------------
+  # context 'user unknown', ->
+  #   beforeEach ->
+  #     @response = require('./fixtures/users_list-nomatch.json')
+  #     nock('https://api.pagerduty.com')
+  #       .get('/users')
+  #       .reply(200, @response)
+
+  #   say 'pd me as xxx@example.com', ->
+  #     it 'says couac', ->
+  #       expect(hubotResponse()).to.eql 'couac'
