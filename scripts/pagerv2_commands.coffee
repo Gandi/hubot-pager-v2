@@ -221,8 +221,9 @@ module.exports = (robot) ->
 
 # TODO
 #   hubot pd stfu|down [for] <duration> [because <reason>] - creates a maintenance
-  robot.respond /pd (?:stfu|down)(?: for)?\s*([0-9]+)?(?: min(?:utes)?)?(?: because (.+))?\s+$/, 
-    (res) ->
+  robot.respond (
+    /pd (?:stfu|down)(?: for)?\s*([0-9]+)?(?: min(?:utes)?)?(?: because (.+))?\s+$/
+  ), (res) ->
     [ _, duration ] = res.match
     res.send "Not yet implemented"
     res.finish()
