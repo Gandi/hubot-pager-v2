@@ -48,6 +48,7 @@
 #   hubot pd stfu|down [for] <duration> [because <reason>] - creates a maintenance
 #   hubot pd up|end|back <maintenance> - ends <maintenance>
 #
+#   hubot pd schedules [<search>]   - lists schedules (optionaly filtered by <search>)
 #
 # Author:
 #   mose
@@ -83,10 +84,11 @@ module.exports = (robot) ->
 # TODO
 #   hubot pd <user> as <email> - declare what email should be use to find <user> pagerduty id
   robot.respond /pd ([^\s]+) as ([^\s@]+@[^\s]+)\s*$/, (res) ->
-    # need admin perms
-    [ _, who, email ] = res.match
-    res.send "Not yet implemented"
-    res.finish()
+    pagerv2.getPermission(res.envelope.user, 'pdadmin')
+    .then ->
+      [ _, who, email ] = res.match
+      res.send "Not yet implemented"
+      res.finish()
 
 # TODO
 #   hubot pd me <duration>     - creates an override for <duration> minutes
@@ -232,5 +234,12 @@ module.exports = (robot) ->
 #   hubot pd up|end|back <maintenance> - ends <maintenance>
   robot.respond /pd (?:up|back|end) ([A-Z0-9]+)\s+$/, (res) ->
     [ _, maintenance ] = res.match
+    res.send "Not yet implemented"
+    res.finish()
+
+# TODO
+#   hubot pd schedules [<search>]   - lists schedules (optionaly filtered by <search>)
+  robot.respond /pd sched(?:ules?)?(?: ([A-Z0-9]+))?\s+$/, (res) ->
+    [ _, filter ] = res.match
     res.send "Not yet implemented"
     res.finish()
