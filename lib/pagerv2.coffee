@@ -75,7 +75,7 @@ class Pagerv2
             @request('GET', '/users', query)
             .then (body) ->
               if body.result['0']?
-                user.pdid = body['result']['0']['pdid']
+                user.pdid = body['result']['0']['id']
                 res user.pdid
               else
                 err "Sorry, I cannot find #{email} :("
