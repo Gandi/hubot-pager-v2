@@ -15,28 +15,25 @@ querystring = require 'querystring'
 
 class Pagerv2
 
-  constructor: (@robot, env) ->
-    storageLoaded = =>
-      @data = @robot.brain.data.pagerv2 ||= {
-        users: { }
-      }
-      @robot.logger.debug 'Pagerduty V2 Data Loaded: ' + JSON.stringify(@data, null, 2)
-    @robot.brain.on 'loaded', storageLoaded
-    storageLoaded()
+  constructor: (data, @logger) ->
+    @logger.debug 'Pagerv2 Loaded'
+    @data = data
 
-  request: (method, endpoint, query) =>
+  request: (method, endpoint, query) ->
     return new Promise (res, err) ->
       if process.env.PAGERV2_API_KEY?
         auth = "Token token=#{process.env.PAGERV2_API_KEY}"
         body = querystring.stringify(query)
-        options = 
+        options = {
           hostname: 'api.pagerduty.com'
           post: 443
           method: method
           path: endpoint
-          headers:
+          headers: {
             Authorization: auth
             Accept: 'application/vnd.pagerduty+json;version=2'
+          }
+        }
         req = https.request options, (response) ->
           data = ''
           response.on 'data', (chunk) ->
@@ -44,10 +41,10 @@ class Pagerv2
           response.on 'end', ->
             res JSON.parse(data)
         req.end()
-        req.on 'error', (error) =>
+        req.on 'error', (error) ->
           err "#{error.code} #{error.message}"
       else
-        err "PAGERV2_API_KEY is not set in your environment."
+        err 'PAGERV2_API_KEY is not set in your environment.'
 
   getUser: (from, user) =>
     return new Promise (res, err) =>
@@ -56,6 +53,7 @@ class Pagerv2
       if @data.users[user.id]?.pdid?
         res @data.users[user.id].pdid
       else
+        console.log @data
         @data.users[user.id] ?= {
           name: user.name,
           id: user.id
@@ -65,7 +63,6 @@ class Pagerv2
           res @data.users[user.id].pdid
         else
           email = @data.users[user.id].email_address or
-                  @robot.brain.userForId(user.id)?.email_address or
                   user.email_address
           unless email
             err @_ask_for_email(from, user)
@@ -102,5 +99,6 @@ class Pagerv2
       else
         res()
 
+        
 
 module.exports = Pagerv2

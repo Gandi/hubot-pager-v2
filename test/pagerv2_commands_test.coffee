@@ -75,9 +75,23 @@ describe 'pagerv2_commands', ->
       it 'asks to declare email', ->
         expect(hubotResponse())
           .to.eql "Sorry, I can't figure out your email address :( " +
-                  "Can you tell me with `.pd me as <email>`?"
+                  'Can you tell me with `.pd me as <email>`?'
 
   context 'with a user that has unknown email,', ->
+    beforeEach ->
+      room.robot.brain.data.pagerv2 = { users: { } }
+      @response = require('./fixtures/users_list-nomatch.json')
+      nock('https://api.pagerduty.com')
+        .get('/users')
+        .reply(200, @response)
+
+    say 'pd me', ->
+      it 'asks to declare email', ->
+        expect(hubotResponse())
+          .to.eql "Sorry, I can't figure out your email address :( " +
+                  'Can you tell me with `.pd me as <email>`?'
+
+  context 'with a user that has a known email,', ->
     beforeEach ->
       room.robot.brain.data.pagerv2 = {
         users: {
@@ -88,7 +102,7 @@ describe 'pagerv2_commands', ->
           }
         }
       }
-      @response = require('./fixtures/users_list-nomatch.json')
+      @response = require('./fixtures/users_list-match.json')
       nock('https://api.pagerduty.com')
         .get('/users')
         .reply(200, @response)
@@ -97,7 +111,7 @@ describe 'pagerv2_commands', ->
       it 'asks to declare email', ->
         expect(hubotResponse())
           .to.eql "Sorry, I can't figure out your email address :( " +
-                  "Can you tell me with `.pd me as <email>`?"
+                  'Can you tell me with `.pd me as <email>`?'
 
   # ------------------------------------------------------------------------------------------------
   # context 'user unknown', ->
