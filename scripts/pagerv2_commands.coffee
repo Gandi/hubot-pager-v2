@@ -62,17 +62,14 @@ module.exports = (robot) ->
   robot.brain.on 'loaded', ->
 
     robot.brain.data.pagerv2 ?= {
-      users: { x: 1 }
+      users: { }
     }
     robot.pagerv2 ?= new Pagerv2 robot.brain.data.pagerv2, robot.logger
-    robot.brain.data.pagerv2 = {
-      users: { x: 2 }
-    }
     pagerv2 = robot.pagerv2
     # console.log robot.pagerv2.data
 
   #   hubot pd version - give the version of hubot-pager-v2 loaded
-    robot.respond /pd version\s*$/, (res) ->
+    robot.respond /pd version\s*$/, 'pd_version', (res) ->
       pkg = require path.join __dirname, '..', 'package.json'
       res.send "hubot-pager-v2 is version #{pkg.version}"
       res.finish()

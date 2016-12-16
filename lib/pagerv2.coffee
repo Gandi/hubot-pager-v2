@@ -9,8 +9,8 @@
 # Author:
 #   mose
 
-Promise = require 'bluebird'
 https = require 'https'
+Promise = require 'bluebird'
 querystring = require 'querystring'
 
 class Pagerv2
@@ -53,7 +53,6 @@ class Pagerv2
       if @data.users[user.id]?.pdid?
         res @data.users[user.id].pdid
       else
-        console.log @data
         @data.users[user.id] ?= {
           name: user.name,
           id: user.id
@@ -99,6 +98,6 @@ class Pagerv2
       else
         res()
 
-        
+
 
 module.exports = Pagerv2
