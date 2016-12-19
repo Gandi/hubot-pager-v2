@@ -107,11 +107,11 @@ describe 'pagerv2_commands', ->
         .get('/users')
         .reply(200, @response)
 
-    say 'pd me', ->
+    only 'pd me', ->
       it 'asks to declare email', ->
         expect(hubotResponse())
-          .to.eql "Sorry, I can't figure out your email address :( " +
-                  'Can you tell me with `.pd me as <email>`?'
+          .to.eql 'Oh I know you, you are PXPGF42.'
+        expect(room.robot.brain.data.pagerv2.users['momo'].pdid).to.eql 'PXPGF42'
 
   # ------------------------------------------------------------------------------------------------
   # context 'user unknown', ->

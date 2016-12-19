@@ -64,7 +64,7 @@ module.exports = (robot) ->
     robot.brain.data.pagerv2 ?= {
       users: { }
     }
-    robot.pagerv2 ?= new Pagerv2 robot.brain.data.pagerv2, robot.logger
+    robot.pagerv2 ?= new Pagerv2 robot, process.env
     pagerv2 = robot.pagerv2
     # console.log robot.pagerv2.data
 
@@ -79,7 +79,7 @@ module.exports = (robot) ->
     robot.respond /pd me\s*$/, (res) ->
       pagerv2.getUser(res.envelope.user, res.envelope.user)
       .then (data) ->
-        console.log data
+        res.send "Oh I know you, you are #{data}."
       .catch (e) ->
         res.send e
       res.finish()

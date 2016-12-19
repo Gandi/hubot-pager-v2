@@ -15,9 +15,12 @@ querystring = require 'querystring'
 
 class Pagerv2
 
-  constructor: (data, @logger) ->
+  constructor: (@robot) ->
+    @robot.brain.data.pagerv2 ?= {
+      users: { }
+    }
+    @logger = @robot.logger
     @logger.debug 'Pagerv2 Loaded'
-    @data = data
 
   request: (method, endpoint, query) ->
     return new Promise (res, err) ->
@@ -48,6 +51,7 @@ class Pagerv2
 
   getUser: (from, user) =>
     return new Promise (res, err) =>
+      @data = @robot.brain.data.pagerv2
       unless user.id?
         user.id = user.name
       if @data.users[user.id]?.pdid?
@@ -61,7 +65,7 @@ class Pagerv2
           @data.users[user.id].pdid = user.pdid
           res @data.users[user.id].pdid
         else
-          email = @data.users[user.id].email_address or
+          email = @data.users[user.id].email or
                   user.email_address
           unless email
             err @_ask_for_email(from, user)
@@ -69,10 +73,10 @@ class Pagerv2
             user = @data.users[user.id]
             query = { 'query': email }
             @request('GET', '/users', query)
-            .then (body) ->
-              if body.result['0']?
-                user.pdid = body['users']['0']['id']
-                res user.pdid
+            .then (body) =>
+              if body['users'][0]?
+                @robot.brain.data.pagerv2.users[user.id].pdid = body['users'][0]['id']
+                res body['users'][0]['id']
               else
                 err "Sorry, I cannot find #{email} :("
 
