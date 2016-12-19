@@ -74,9 +74,9 @@ class Pagerv2
             query = { 'query': email }
             @request('GET', '/users', query)
             .then (body) =>
-              if body['users'][0]?
-                @robot.brain.data.pagerv2.users[user.id].pdid = body['users'][0]['id']
-                res body['users'][0]['id']
+              if body.users[0]?
+                @robot.brain.data.pagerv2.users[user.id].pdid = body.users[0].id
+                res body.users[0].id
               else
                 err "Sorry, I cannot find #{email} :("
 
