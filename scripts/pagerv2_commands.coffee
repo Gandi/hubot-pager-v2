@@ -84,11 +84,14 @@ module.exports = (robot) ->
         res.send e
       res.finish()
 
-  # TODO
   #   hubot pd me as <email> - declare what email should be use to find user pagerduty id
     robot.respond /pd me as ([^\s@]+@[^\s]+)\s*$/, (res) ->
       [ _, email ] = res.match
-      res.send 'Not yet implemented'
+      pagerv2.setUser(res.envelope.user, email)
+      .then (data) ->
+        res.send "Oh I know you, you are #{data}."
+      .catch (e) ->
+        res.send e
       res.finish()
 
   # TODO
@@ -97,8 +100,12 @@ module.exports = (robot) ->
       pagerv2.getPermission(res.envelope.user, 'pdadmin')
       .then ->
         [ _, who, email ] = res.match
-        res.send 'Not yet implemented'
-        res.finish()
+        pagerv2.setUser(who, email)
+      .then (data) ->
+        res.send "Oh I know #{who}, he is #{data}."
+      .catch (e) ->
+        res.send e
+      res.finish()
 
   # TODO
   #   hubot pd me <duration>     - creates an override for <duration> minutes
