@@ -131,7 +131,6 @@ class Pagerv2
         err 'Sorry you cannot set an override of more than 1 day.'
       else
         duration = parseInt duration
-        @data = @robot.brain.data.pagerv2
         schedule_id = process.env.PAGERV2_SCHEDULE_ID
         overriders = process.env.PAGERV2_SCHEDULE_ID.split(',')
         if not who? or who is 'me'
@@ -151,8 +150,11 @@ class Pagerv2
             }
           }
           # TODO - with user on call, res a relevant message
-
-          res 'ok'
+          @request('POST', "/schedules/#{schedule_id}/overrides", query)
+          .then (body) ->
+            res body.override.id
+          .catch (error) ->
+            err error
         .catch (error) ->
           err error
 
