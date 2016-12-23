@@ -118,7 +118,7 @@ class Pagerv2
       'Can you tell me with `.pd me as <email>`?'
     else
       if @robot.auth? and (@robot.auth.hasRole(from, ['pdadmin']) or
-          @robot.auth.isAdmin(from))
+         @robot.auth.isAdmin(from))
         "Sorry, I can't figure #{user.name} email address. " +
         "Can you help me with `.pd #{user.name} as <email>`?"
       else
@@ -135,28 +135,35 @@ class Pagerv2
         overriders = process.env.PAGERV2_SCHEDULE_ID.split(',')
         if not who? or who is 'me'
           who = from.name
-        id = null
-        @getUser(who)
-        .bind(id)
-        .then (id) ->
-          getOncall()
-        .then (oncall_name) ->
-          query  = {
-            'start': moment().format(),
-            'end': moment().add(duration, 'minutes').format(),
-            'user': {
-              'id': id,
-              'type': 'user_reference'
+        else
+          if who not in overriders
+            unless @robot.auth? and
+               (@robot.auth.hasRole(from, ['pdadmin']) or @robot.auth.isAdmin(from))
+              who = null
+              err "You cannot force #{who} to take the override."
+        if who?
+          id = null
+          @getUser(who)
+          .bind(id)
+          .then (id) ->
+            getOncall()
+          .then (oncall_name) ->
+            query  = {
+              'start': moment().format(),
+              'end': moment().add(duration, 'minutes').format(),
+              'user': {
+                'id': id,
+                'type': 'user_reference'
+              }
             }
-          }
-          # TODO - with user on call, res a relevant message
-          @request('POST', "/schedules/#{schedule_id}/overrides", query)
-          .then (body) ->
-            res body.override.id
+            # TODO - with user on call, res a relevant message
+            @request('POST', "/schedules/#{schedule_id}/overrides", query)
+            .then (body) ->
+              res body.override.id
+            .catch (error) ->
+              err error
           .catch (error) ->
             err error
-        .catch (error) ->
-          err error
 
   getOncall: (schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
     return new Promise (res, err) =>
