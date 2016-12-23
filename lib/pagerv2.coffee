@@ -128,8 +128,9 @@ class Pagerv2
   setOverride: (from, who, duration) ->
     return new Promise (res, err) =>
       if duration > 1440
-        err "Sorry you cannot set an override of more than 1 day."
+        err 'Sorry you cannot set an override of more than 1 day.'
       else
+        duration = parseInt duration
         @data = @robot.brain.data.pagerv2
         schedule_id = process.env.PAGERV2_SCHEDULE_ID
         overriders = process.env.PAGERV2_SCHEDULE_ID.split(',')
@@ -139,17 +140,11 @@ class Pagerv2
         @getUser(who)
         .bind(id)
         .then (id) ->
-          getOncall(schedule_id)
+          getOncall()
         .then (oncall_name) ->
-          start     = moment().format()
-          minutes   = parseInt msg.match[1]
-          if minutes > 1440
-            msg.send "You want to override more than 24h? Are you drunk or something?"
-            return
-          end       = moment().add(minutes, 'minutes').format()
-          override  = {
-            'start': start,
-            'end': end,
+          query  = {
+            'start': moment().format(),
+            'end': moment().add(duration, 'minutes').format(),
             'user': {
               'id': id,
               'type': 'user_reference'
@@ -157,7 +152,7 @@ class Pagerv2
           }
           # TODO - with user on call, res a relevant message
 
-          res "ok"
+          res 'ok'
         .catch (error) ->
           err error
 
@@ -172,6 +167,7 @@ class Pagerv2
         res body.users[0].name
       .catch (error) ->
         err error
+
 
 
 module.exports = Pagerv2
