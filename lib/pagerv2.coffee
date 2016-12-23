@@ -5,6 +5,8 @@
 #
 # Configuration:
 #  PAGERV2_API_KEY
+#  PAGERV2_SCHEDULE_ID  # the schedule used for oncall and overrides
+#  PAGERV2_OVERRIDERS   # list of user_id that can be targets of overrides
 #
 # Author:
 #   mose
@@ -21,6 +23,15 @@ class Pagerv2
     }
     @logger = @robot.logger
     @logger.debug 'Pagerv2 Loaded'
+
+  getPermission: (user, group) =>
+    return new Promise (res, err) =>
+      isAuthorized = @robot.auth?.hasRole(user, [group, 'pdadmin']) or
+                     @robot.auth?.isAdmin(user)
+      if @robot.auth? and not isAuthorized
+        err "You don't have permission to do that."
+      else
+        res()
 
   request: (method, endpoint, query) ->
     return new Promise (res, err) ->
@@ -113,15 +124,53 @@ class Pagerv2
         "Sorry, I can't figure #{user.name} email address. " +
         'Can you ask them to `.pd me as <email>`?'
 
-  getPermission: (user, group) =>
+  setOverride: (from, who, duration) ->
     return new Promise (res, err) =>
-      isAuthorized = @robot.auth?.hasRole(user, [group, 'pdadmin']) or
-                     @robot.auth?.isAdmin(user)
-      if @robot.auth? and not isAuthorized
-        err "You don't have permission to do that."
+      if duration > 1440
+        err "Sorry you cannot set an override of more than 1 day."
       else
-        res()
+        @data = @robot.brain.data.pagerv2
+        schedule_id = process.env.PAGERV2_SCHEDULE_ID
+        overriders = process.env.PAGERV2_SCHEDULE_ID.split(',')
+        if not who? or who is 'me'
+          who = from.name
+        id = null
+        @getUser(who)
+        .bind(id)
+        .then (id) ->
+          getOncall(schedule_id)
+        .then (oncall_name) ->
+          start     = moment().format()
+          minutes   = parseInt msg.match[1]
+          if minutes > 1440
+            msg.send "You want to override more than 24h? Are you drunk or something?"
+            return
+          end       = moment().add(minutes, 'minutes').format()
+          override  = {
+            'start': start,
+            'end': end,
+            'user': {
+              'id': id,
+              'type': 'user_reference'
+            }
+          }
+          # TODO - with user on call, res a relevant message
 
+          res "ok"
+        .catch (error) ->
+          err error
+
+  getOncall: (schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
+    return new Promise (res, err) =>
+      query = {
+        since: moment().format(),
+        until: moment().add(1, 'minutes').format()
+      }
+      @request('GET', "/schedules/#{schedule_id}/users", query)
+      .then (body) ->
+        res body[0].name
+      .catch (error) ->
+        err error
 
 
 module.exports = Pagerv2

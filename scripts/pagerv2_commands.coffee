@@ -109,10 +109,13 @@ module.exports = (robot) ->
 
   # TODO
   #   hubot pd me <duration>     - creates an override for <duration> minutes
-  #   hubot pd noc <duration>    - creates an override for <duration> minutes
-    robot.respond /pd (me|noc) (\d+)(?: min(?:utes)?)?\s*$/, (res) ->
+    robot.respond /pd (?:([^ ]+) )?(?:for )?(\d+)(?: min(?:utes)?)?\s*$/, (res) ->
       [ _, who, duration ] = res.match
-      res.send 'Not yet implemented'
+      pagerv2.setOverride(res.envelope.user, who, duration)
+      .then (data) ->
+        console.log data
+      .catch (e) ->
+        res.send e
       res.finish()
 
   # TODO
