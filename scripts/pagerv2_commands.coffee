@@ -74,7 +74,6 @@ module.exports = (robot) ->
       res.send "hubot-pager-v2 is version #{pkg.version}"
       res.finish()
 
-  # TODO
   #   hubot pd me - check if the caller is known by pagerduty plugin
     robot.respond /pd me\s*$/, (res) ->
       pagerv2.getUser(res.envelope.user, res.envelope.user)
@@ -94,13 +93,14 @@ module.exports = (robot) ->
         res.send e
       res.finish()
 
-  # TODO
   #   hubot pd <user> as <email> - declare what email should be use to find <user> pagerduty id
     robot.respond /pd ([^\s]+) as ([^\s@]+@[^\s]+)\s*$/, (res) ->
+      who = null
       pagerv2.getPermission(res.envelope.user, 'pdadmin')
       .then ->
         [ _, who, email ] = res.match
         pagerv2.setUser(who, email)
+      .bind(who)
       .then (data) ->
         res.send "Oh I know #{who}, he is #{data}."
       .catch (e) ->

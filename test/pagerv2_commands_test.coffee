@@ -156,6 +156,53 @@ describe 'pagerv2_commands', ->
           expect(hubotResponse())
             .to.eql 'Sorry, I cannot find toto@example.com'
 
+    context 'with a known email,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = { users: { } }
+        nock('https://api.pagerduty.com')
+          .get('/users')
+          .reply 200, require('./fixtures/users_list-match.json')
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pd me as toto@example.com', ->
+        it 'returns information from pager', ->
+          expect(hubotResponse())
+            .to.eql 'Oh I know you, you are PXPGF42.'
+
+  # ------------------------------------------------------------------------------------------------
+  describe '".pd <user> as <email>"', ->
+    context 'with an unknown email,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = { users: { } }
+        nock('https://api.pagerduty.com')
+          .get('/users')
+          .reply 200, require('./fixtures/users_list-nomatch.json')
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pd toto as toto@example.com', ->
+        it 'asks to declare email', ->
+          expect(hubotResponse())
+            .to.eql 'Sorry, I cannot find toto@example.com'
+
+    context 'with a known email,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = { users: { } }
+        nock('https://api.pagerduty.com')
+          .get('/users')
+          .reply 200, require('./fixtures/users_list-match.json')
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pd toto as toto@example.com', ->
+        it 'returns information from pager', ->
+          expect(hubotResponse())
+            .to.eql 'Oh I know toto, he is PXPGF42.'
+
   # ------------------------------------------------------------------------------------------------
   # context 'user unknown', ->
   #   beforeEach ->
