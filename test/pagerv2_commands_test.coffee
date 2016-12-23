@@ -46,6 +46,7 @@ describe 'pagerv2_commands', ->
     do nock.enableNetConnect
 
     process.env.PAGERV2_API_KEY = 'xxx'
+    process.env.PAGERV2_SCHEDULE_ID = '42'
     room = helper.createRoom { httpd: false }
     room.robot.brain.userForId 'user', {
       name: 'user'
@@ -63,6 +64,7 @@ describe 'pagerv2_commands', ->
 
   afterEach ->
     delete process.env.PAGERV2_API_KEY
+    delete process.env.PAGERV2_SCHEDULE_ID
 
   # ------------------------------------------------------------------------------------------------
   say 'pd version', ->
@@ -204,13 +206,18 @@ describe 'pagerv2_commands', ->
             .to.eql 'Oh I know toto, he is PXPGF42.'
 
   # ------------------------------------------------------------------------------------------------
-  # context 'user unknown', ->
-  #   beforeEach ->
-  #     @response = require('./fixtures/users_list-nomatch.json')
-  #     nock('https://api.pagerduty.com')
-  #       .get('/users')
-  #       .reply(200, @response)
+  describe '".pd oncall"', ->
+    context 'when everything goes right,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = { users: { } }
+        nock('https://api.pagerduty.com')
+          .get('/schedules/42/users')
+          .reply 200, require('./fixtures/oncall_list-ok.json')
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
 
-  #   say 'pd me as xxx@example.com', ->
-  #     it 'says couac', ->
-  #       expect(hubotResponse()).to.eql 'couac'
+      say 'pd oncall', ->
+        it 'returns name of who is on call', ->
+          expect(hubotResponse())
+            .to.eql 'Kyler Kuhn is currently on call.'

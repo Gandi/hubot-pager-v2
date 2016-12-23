@@ -12,6 +12,7 @@
 #   mose
 
 https = require 'https'
+moment = require 'moment'
 Promise = require 'bluebird'
 querystring = require 'querystring'
 
@@ -168,7 +169,7 @@ class Pagerv2
       }
       @request('GET', "/schedules/#{schedule_id}/users", query)
       .then (body) ->
-        res body[0].name
+        res body.users[0].name
       .catch (error) ->
         err error
 

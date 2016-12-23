@@ -107,6 +107,15 @@ module.exports = (robot) ->
         res.send e
       res.finish()
 
+  #   hubot pd oncall - returns who is on call
+    robot.respond /(?:pd )?oncall\s*$/, (res) ->
+      pagerv2.getOncall()
+      .then (name) ->
+        res.send "#{name} is currently on call."
+      .catch (e) ->
+        res.send e
+      res.finish()
+
   # TODO
   #   hubot pd me <duration>     - creates an override for <duration> minutes
     robot.respond /pd (?:([^ ]+) )?(?:for )?(\d+)(?: min(?:utes)?)?\s*$/, (res) ->
@@ -120,7 +129,6 @@ module.exports = (robot) ->
 
   # TODO
   #   hubot pd me now            - creates an override until the end of current oncall
-  #   hubot pd noc now           - creates an override until the end of current oncall
     robot.respond /pd (me|noc) now\s*$/, (res) ->
       [ _, who ] = res.match
       res.send 'Not yet implemented'
@@ -128,7 +136,6 @@ module.exports = (robot) ->
 
   # TODO
   #   hubot pd not me            - cancels an override if any
-  #   hubot pd not noc           - cancels an override if any
     robot.respond /pd not (me|noc)\s*$/, (res) ->
       [ _, who ] = res.match
       res.send 'Not yet implemented'
