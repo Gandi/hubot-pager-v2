@@ -116,7 +116,6 @@ module.exports = (robot) ->
         res.send e
       res.finish()
 
-  # TODO
   #   hubot pd me <duration>     - creates an override for <duration> minutes
     robot.respond /pd (?:([^ ]+) )?(?:for )?(\d+)(?: min(?:utes)?)?\s*$/, (res) ->
       [ _, who, duration ] = res.match
