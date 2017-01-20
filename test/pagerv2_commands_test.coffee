@@ -214,7 +214,7 @@ describe 'pagerv2_commands', ->
       say 'pd toto as toto@example.com', ->
         it 'returns information from pager', ->
           expect(hubotResponse())
-          .to.eql 'Oh I know toto, he is PXPGF42.'
+          .to.eql 'Ok now I know toto is PXPGF42.'
 
   # ------------------------------------------------------------------------------------------------
   describe '".pd oncall"', ->

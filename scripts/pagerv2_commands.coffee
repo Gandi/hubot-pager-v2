@@ -102,7 +102,7 @@ module.exports = (robot) ->
         pagerv2.setUser(who, email)
       .bind(who)
       .then (data) ->
-        res.send "Oh I know #{who}, he is #{data}."
+        res.send "Ok now I know #{who} is #{data}."
       .catch (e) ->
         res.send e
       res.finish()
