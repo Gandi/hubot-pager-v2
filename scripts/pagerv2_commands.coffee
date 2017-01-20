@@ -128,9 +128,15 @@ module.exports = (robot) ->
 
   # TODO
   #   hubot pd me now            - creates an override until the end of current oncall
-    robot.respond /pd (me|noc) now\s*$/, (res) ->
+    robot.respond /pd (?:([^ ]+) )?now\s*$/, (res) ->
       [ _, who ] = res.match
-      res.send 'Not yet implemented'
+      pagerv2.currentDuration()
+      .then (duration) ->
+        pagerv2.setOverride(res.envelope.user, who, duration)
+      .then (data) ->
+        res.send "Rejoice #{data.user.summary}! #{data.over.name} is now on pager duty."
+      .catch (e) ->
+        res.send e
       res.finish()
 
   # TODO

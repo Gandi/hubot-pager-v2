@@ -125,6 +125,9 @@ class Pagerv2
         "Sorry, I can't figure #{user.name} email address. " +
         'Can you ask them to `.pd me as <email>`?'
 
+  getSchedule: (schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
+    @request('GET', "/schedules/#{schedule_id}")
+
   getOncall: (schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
     return new Promise (res, err) =>
       query = {
@@ -137,7 +140,7 @@ class Pagerv2
       .catch (error) ->
         err error
 
-  setOverride: (from, who, duration) ->
+  setOverride: (from, who, duration, end = false) ->
     return new Promise (res, err) =>
       if duration > 1440
         err 'Sorry you cannot set an override of more than 1 day.'
@@ -162,7 +165,7 @@ class Pagerv2
           .then (oncall_name) =>
             query  = {
               'start': moment().format(),
-              'end': moment().add(duration, 'minutes').format(),
+              'end': end or moment().add(duration, 'minutes').format(),
               'user': {
                 'id': @id,
                 'type': 'user_reference'
@@ -179,6 +182,20 @@ class Pagerv2
               err error
           .catch (error) ->
             err error
+
+  curentDuration: ->
+    tz_offset = moment.tz.zone('Europe/Paris').offset(moment()) / 60
+    this_hour = moment().utc().hour()
+    start = moment().utc().format()
+    switch
+      when this_hour < (2 + paris_offset)
+        end = moment().utc().hour(1 + paris_offset).minute(59).second(59).format()
+      when this_hour < (10 + paris_offset)
+        end = moment().utc().hour(9 + paris_offset).minute(59).second(59).format()
+      when this_hour < (18 + paris_offset)
+        end = moment().utc().hour(17 + paris_offset).minute(59).second(59).format()
+      else
+        end = moment().utc().add(1, 'days').hour(1 + paris_offset).minute(59).second(59).format()
 
 
 
