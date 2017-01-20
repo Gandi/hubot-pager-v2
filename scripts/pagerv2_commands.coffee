@@ -88,7 +88,7 @@ module.exports = (robot) ->
       [ _, email ] = res.match
       pagerv2.setUser(res.envelope.user, email)
       .then (data) ->
-        res.send "Oh I know you, you are #{data}."
+        res.send "Ok now I know you are #{data}."
       .catch (e) ->
         res.send e
       res.finish()

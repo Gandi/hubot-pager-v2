@@ -182,7 +182,7 @@ describe 'pagerv2_commands', ->
       say 'pd me as toto@example.com', ->
         it 'returns information from pager', ->
           expect(hubotResponse())
-          .to.eql 'Oh I know you, you are PXPGF42.'
+          .to.eql 'Ok now I know you are PXPGF42.'
 
   # ------------------------------------------------------------------------------------------------
   describe '".pd <user> as <email>"', ->
