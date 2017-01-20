@@ -122,7 +122,7 @@ module.exports = (robot) ->
       [ _, who, duration ] = res.match
       pagerv2.setOverride(res.envelope.user, who, duration)
       .then (data) ->
-        console.log data
+        res.send "Rejoice #{data.user.summary}! #{data.over.name} is now on pager duty."
       .catch (e) ->
         res.send e
       res.finish()

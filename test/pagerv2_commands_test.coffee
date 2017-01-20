@@ -55,6 +55,16 @@ describe 'pagerv2_commands', ->
       name: 'user_with_email',
       email_address: 'user@example.com'
     }
+    # room.robot.brain.data.pagerv2 = {
+    #   users: {
+    #     momo: {
+    #       id: 'momo',
+    #       name: 'momo',
+    #       email: 'momo@example.com',
+    #       pdid: 'AAAAA42'
+    #     }
+    #   }
+    # }
 
     room.receive = (userName, message) ->
       new Promise (resolve) =>
@@ -77,15 +87,15 @@ describe 'pagerv2_commands', ->
       say 'pd me', ->
         it 'asks to declare email', ->
           expect(hubotResponse())
-            .to.eql "Sorry, I can't figure out your email address :( " +
-                    'Can you tell me with `.pd me as <email>`?'
+          .to.eql "Sorry, I can't figure out your email address :( " +
+                  'Can you tell me with `.pd me as <email>`?'
 
     context 'with a user that has unknown email,', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-          .get('/users')
-          .reply 200, require('./fixtures/users_list-nomatch.json')
+        .get('/users')
+        .reply 200, require('./fixtures/users_list-nomatch.json')
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
@@ -93,8 +103,8 @@ describe 'pagerv2_commands', ->
       say 'pd me', ->
         it 'asks to declare email', ->
           expect(hubotResponse())
-            .to.eql "Sorry, I can't figure out your email address :( " +
-                    'Can you tell me with `.pd me as <email>`?'
+          .to.eql "Sorry, I can't figure out your email address :( " +
+                  'Can you tell me with `.pd me as <email>`?'
 
     context 'with a user that has a known email,', ->
       beforeEach ->
@@ -108,8 +118,8 @@ describe 'pagerv2_commands', ->
           }
         }
         nock('https://api.pagerduty.com')
-          .get('/users')
-          .reply 200, require('./fixtures/users_list-match.json')
+        .get('/users')
+        .reply 200, require('./fixtures/users_list-match.json')
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
@@ -117,9 +127,10 @@ describe 'pagerv2_commands', ->
       say 'pd me', ->
         it 'gets user information from PD', ->
           expect(hubotResponse())
-            .to.eql 'Oh I know you, you are PXPGF42.'
+          .to.eql 'Oh I know you, you are PXPGF42.'
         it 'records PDid in brain', ->
-          expect(room.robot.brain.data.pagerv2.users['momo'].pdid).to.eql 'PXPGF42'
+          expect(room.robot.brain.data.pagerv2.users['momo'].pdid)
+          .to.eql 'PXPGF42'
 
     context 'with a user that already has a pdid,', ->
       beforeEach ->
@@ -139,7 +150,7 @@ describe 'pagerv2_commands', ->
       say 'pd me', ->
         it 'returns information from brain', ->
           expect(hubotResponse())
-            .to.eql 'Oh I know you, you are AAAAA42.'
+          .to.eql 'Oh I know you, you are AAAAA42.'
 
   # ------------------------------------------------------------------------------------------------
   describe '".pd me as <email>"', ->
@@ -147,8 +158,8 @@ describe 'pagerv2_commands', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-          .get('/users')
-          .reply 200, require('./fixtures/users_list-nomatch.json')
+        .get('/users')
+        .reply 200, require('./fixtures/users_list-nomatch.json')
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
@@ -156,14 +167,14 @@ describe 'pagerv2_commands', ->
       say 'pd me as toto@example.com', ->
         it 'asks to declare email', ->
           expect(hubotResponse())
-            .to.eql 'Sorry, I cannot find toto@example.com'
+          .to.eql 'Sorry, I cannot find toto@example.com'
 
     context 'with a known email,', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-          .get('/users')
-          .reply 200, require('./fixtures/users_list-match.json')
+        .get('/users')
+        .reply 200, require('./fixtures/users_list-match.json')
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
@@ -171,7 +182,7 @@ describe 'pagerv2_commands', ->
       say 'pd me as toto@example.com', ->
         it 'returns information from pager', ->
           expect(hubotResponse())
-            .to.eql 'Oh I know you, you are PXPGF42.'
+          .to.eql 'Oh I know you, you are PXPGF42.'
 
   # ------------------------------------------------------------------------------------------------
   describe '".pd <user> as <email>"', ->
@@ -179,8 +190,8 @@ describe 'pagerv2_commands', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-          .get('/users')
-          .reply 200, require('./fixtures/users_list-nomatch.json')
+        .get('/users')
+        .reply 200, require('./fixtures/users_list-nomatch.json')
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
@@ -188,14 +199,14 @@ describe 'pagerv2_commands', ->
       say 'pd toto as toto@example.com', ->
         it 'asks to declare email', ->
           expect(hubotResponse())
-            .to.eql 'Sorry, I cannot find toto@example.com'
+          .to.eql 'Sorry, I cannot find toto@example.com'
 
     context 'with a known email,', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-          .get('/users')
-          .reply 200, require('./fixtures/users_list-match.json')
+        .get('/users')
+        .reply 200, require('./fixtures/users_list-match.json')
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
@@ -203,7 +214,7 @@ describe 'pagerv2_commands', ->
       say 'pd toto as toto@example.com', ->
         it 'returns information from pager', ->
           expect(hubotResponse())
-            .to.eql 'Oh I know toto, he is PXPGF42.'
+          .to.eql 'Oh I know toto, he is PXPGF42.'
 
   # ------------------------------------------------------------------------------------------------
   describe '".pd oncall"', ->
@@ -211,8 +222,8 @@ describe 'pagerv2_commands', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-          .get('/schedules/42/users')
-          .reply 200, require('./fixtures/oncall_list-ok.json')
+        .get('/schedules/42/users')
+        .reply 200, require('./fixtures/oncall_list-ok.json')
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
@@ -220,4 +231,39 @@ describe 'pagerv2_commands', ->
       say 'pd oncall', ->
         it 'returns name of who is on call', ->
           expect(hubotResponse())
-            .to.eql 'Kyler Kuhn is currently on call.'
+          .to.eql 'Kyler Kuhn is currently on call.'
+
+  # ------------------------------------------------------------------------------------------------
+  describe '".pd 120000"', ->
+    context 'when everything goes right,', ->
+      say 'pd 120000', ->
+        it 'warns that this duration does not make any sense', ->
+          expect(hubotResponse())
+          .to.eql 'Sorry you cannot set an override of more than 1 day.'
+
+  describe '".pd 120"', ->
+    context 'when everything goes right,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = {
+          users: {
+            momo: {
+              id: 'momo',
+              name: 'momo',
+              email: 'momo@example.com',
+              pdid: 'AAAAA42'
+            }
+          }
+        }
+        nock('https://api.pagerduty.com')
+        .get('/schedules/42/users')
+        .reply(200, require('./fixtures/oncall_list-ok.json'))
+        .post('/schedules/42/overrides')
+        .reply(200, require('./fixtures/override_create-ok.json'))
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pd 120', ->
+        it 'says override is done', ->
+          expect(hubotResponse())
+          .to.eql 'Rejoice Aurelio Rice! momo is now on pager duty.'

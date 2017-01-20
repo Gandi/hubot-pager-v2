@@ -125,46 +125,6 @@ class Pagerv2
         "Sorry, I can't figure #{user.name} email address. " +
         'Can you ask them to `.pd me as <email>`?'
 
-  setOverride: (from, who, duration) ->
-    return new Promise (res, err) =>
-      if duration > 1440
-        err 'Sorry you cannot set an override of more than 1 day.'
-      else
-        duration = parseInt duration
-        schedule_id = process.env.PAGERV2_SCHEDULE_ID
-        overriders = process.env.PAGERV2_SCHEDULE_ID.split(',')
-        if not who? or who is 'me'
-          who = from.name
-        else
-          if who not in overriders
-            unless @robot.auth? and
-               (@robot.auth.hasRole(from, ['pdadmin']) or @robot.auth.isAdmin(from))
-              who = null
-              err "You cannot force #{who} to take the override."
-        if who?
-          id = null
-          @getUser(who)
-          .bind(id)
-          .then (id) ->
-            getOncall()
-          .then (oncall_name) ->
-            query  = {
-              'start': moment().format(),
-              'end': moment().add(duration, 'minutes').format(),
-              'user': {
-                'id': id,
-                'type': 'user_reference'
-              }
-            }
-            # TODO - with user on call, res a relevant message
-            @request('POST', "/schedules/#{schedule_id}/overrides", query)
-            .then (body) ->
-              res body.override.id
-            .catch (error) ->
-              err error
-          .catch (error) ->
-            err error
-
   getOncall: (schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
     return new Promise (res, err) =>
       query = {
@@ -176,6 +136,49 @@ class Pagerv2
         res body.users[0].name
       .catch (error) ->
         err error
+
+  setOverride: (from, who, duration) ->
+    return new Promise (res, err) =>
+      if duration > 1440
+        err 'Sorry you cannot set an override of more than 1 day.'
+      else
+        duration = parseInt duration
+        schedule_id = process.env.PAGERV2_SCHEDULE_ID
+        overriders = process.env.PAGERV2_OVERRIDERS?.split(',')
+        if not who? or who is 'me'
+          who = { name: from.name }
+        else
+          if overriders and who not in overriders
+            unless @robot.auth? and
+               (@robot.auth.hasRole(from, ['pdadmin']) or @robot.auth.isAdmin(from))
+              who = null
+              err "You cannot force #{who.name} to take the override."
+        if who?
+          @getUser(from, who)
+          .bind({ id: null })
+          .then (id) =>
+            @id = id
+            @getOncall()
+          .then (oncall_name) =>
+            query  = {
+              'start': moment().format(),
+              'end': moment().add(duration, 'minutes').format(),
+              'user': {
+                'id': @id,
+                'type': 'user_reference'
+              }
+            }
+            # TODO - with user on call, res a relevant message
+            @request('POST', "/schedules/#{schedule_id}/overrides", query)
+            .then (body) ->
+              body.override.over = {
+                name: who.name
+              }
+              res body.override
+            .catch (error) ->
+              err error
+          .catch (error) ->
+            err error
 
 
 
