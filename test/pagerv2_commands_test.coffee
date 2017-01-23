@@ -231,7 +231,7 @@ describe 'pagerv2_commands', ->
       say 'pd oncall', ->
         it 'returns name of who is on call', ->
           expect(hubotResponse())
-          .to.eql 'Regina Phalange is on call until Wednesday 06:00.'
+          .to.eql 'Regina Phalange is on call until Tuesday 22:00 (utc).'
 
   # ------------------------------------------------------------------------------------------------
   describe '".pd 120000"', ->

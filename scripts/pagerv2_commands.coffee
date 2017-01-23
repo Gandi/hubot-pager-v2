@@ -112,12 +112,12 @@ module.exports = (robot) ->
       pagerv2.getSchedule()
       .then (data) ->
         nowDate = moment().utc()
-        endDate = moment(data.end)
+        endDate = moment(data.end).utc()
         if nowDate.isSame(endDate, 'day')
           endDate = endDate.format('HH:mm')
         else
           endDate = endDate.format('dddd HH:mm')
-        res.send "#{data.user.summary} is on call until #{endDate}."
+        res.send "#{data.user.summary} is on call until #{endDate} (utc)."
       .catch (e) ->
         res.send e
       res.finish()
