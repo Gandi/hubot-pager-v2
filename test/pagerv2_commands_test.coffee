@@ -267,3 +267,32 @@ describe 'pagerv2_commands', ->
         it 'says override is done', ->
           expect(hubotResponse())
           .to.eql 'Rejoice Aurelio Rice! momo is now on call.'
+
+  # ------------------------------------------------------------------------------------------------
+  describe '".pd not me"', ->
+    context 'when everything goes right,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = {
+          users: {
+            momo: {
+              id: 'momo',
+              name: 'momo',
+              email: 'momo@example.com',
+              pdid: 'PEYSGVF'
+            }
+          }
+        }
+        nock('https://api.pagerduty.com')
+        .get('/schedules/42/overrides')
+        .reply(200, require('./fixtures/override_get-ok.json'))
+        .delete('/schedules/42/overrides/PQ47DCP')
+        .reply(200, require('./fixtures/override_get-ok.json'))
+
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pd not me', ->
+        it 'returns name of who is on call', ->
+          expect(hubotResponse())
+          .to.eql 'Ok, momo! Aurelio Rice override is cancelled.'

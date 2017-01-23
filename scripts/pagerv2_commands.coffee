@@ -148,7 +148,8 @@ module.exports = (robot) ->
       [ _, who ] = res.match
       pagerv2.dropOverride(res.envelope.user, who)
       .then (data) ->
-        res.send "Ok, #{who}! #{data.overrides[0].user.summary} override is cancelled."
+        res.send "Ok, #{res.envelope.user.name}! " +
+                 "#{data.overrides[0].user.summary} override is cancelled."
       .catch (e) ->
         res.send e
       res.finish()
