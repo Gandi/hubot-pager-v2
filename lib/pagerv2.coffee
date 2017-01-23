@@ -136,6 +136,18 @@ class Pagerv2
     .then (body) ->
       body.schedule.final_schedule.rendered_schedule_entries[0]
 
+  getOverride: (schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
+    query = {
+      since: moment().format(),
+      until: moment().add(1, 'minutes').format(),
+      editable: 'true',
+      overflow: 'true'
+    }
+    @request('GET', "/schedules/#{schedule_id}/overrides", query)
+    .then (body) ->
+      body.overrides
+
+
   setOverride: (from, who, duration) ->
     return new Promise (res, err) =>
       if duration > 1440
@@ -182,19 +194,34 @@ class Pagerv2
           .catch (error) ->
             err error
 
-  curentDuration: ->
-    tz_offset = moment.tz.zone('Europe/Paris').offset(moment()) / 60
-    this_hour = moment().utc().hour()
-    start = moment().utc().format()
-    switch
-      when this_hour < (2 + paris_offset)
-        end = moment().utc().hour(1 + paris_offset).minute(59).second(59).format()
-      when this_hour < (10 + paris_offset)
-        end = moment().utc().hour(9 + paris_offset).minute(59).second(59).format()
-      when this_hour < (18 + paris_offset)
-        end = moment().utc().hour(17 + paris_offset).minute(59).second(59).format()
+  dropOverride: (from, who) ->
+    return new Promise (res, err) =>
+      schedule_id = process.env.PAGERV2_SCHEDULE_ID
+      if not who? or who is 'me'
+        who = { name: from.name }
       else
-        end = moment().utc().add(1, 'days').hour(1 + paris_offset).minute(59).second(59).format()
+        if overriders and who not in overriders
+          unless @robot.auth? and
+             (@robot.auth.hasRole(from, ['pdadmin']) or @robot.auth.isAdmin(from))
+            who = null
+            err "You cannot force #{who.name} to take the override."
+      if who?
+        @getUser(from, who)
+        .bind({ id: null })
+        .then (id) =>
+          @id = id
+          @getOverride()
+        .then (data) =>
+          todo = null
+          for over in data
+            if over.user.id is @id
+              todo = over.id
+          if todo?
+            @request('DELETE', "/schedules/#{schedule_id}/overrides/#{todo}")
+            .then (data) ->
+              res data
+          else
+            res null
 
 
 

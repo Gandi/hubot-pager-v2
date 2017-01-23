@@ -132,7 +132,6 @@ module.exports = (robot) ->
         res.send e
       res.finish()
 
-  # TODO
   #   hubot pd me now            - creates an override until the end of current oncall
     robot.respond /pd (?:([^ ]+) )?now\s*$/, (res) ->
       [ _, who ] = res.match
@@ -145,9 +144,13 @@ module.exports = (robot) ->
 
   # TODO
   #   hubot pd not me            - cancels an override if any
-    robot.respond /pd not (me|noc)\s*$/, (res) ->
+    robot.respond /pd not ([^ ]+)\s*$/, (res) ->
       [ _, who ] = res.match
-      res.send 'Not yet implemented'
+      pagerv2.dropOverride(res.envelope.user, who)
+      .then (data) ->
+        res.send "Ok, #{who}! #{data.overrides[0].user.summary} override is cancelled."
+      .catch (e) ->
+        res.send e
       res.finish()
 
   # TODO

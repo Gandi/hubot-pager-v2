@@ -1,0 +1,16 @@
+{
+  "overrides": [
+    {
+      "id": "PQ47DCP",
+      "start": "2012-07-01T00:00:00-04:00",
+      "end": "2012-07-02T00:00:00-04:00",
+      "user": {
+        "id": "PEYSGVF",
+        "type": "user_reference",
+        "summary": "Aurelio Rice",
+        "self": "https://api.pagerduty.com/users/PEYSGVF",
+        "html_url": "https://subdomain.pagerduty.com/users/PEYSGVF"
+      }
+    }
+  ]
+}
