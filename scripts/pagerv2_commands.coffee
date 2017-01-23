@@ -109,9 +109,15 @@ module.exports = (robot) ->
 
   #   hubot pd oncall - returns who is on call
     robot.respond /(?:pd )?oncall\s*$/, (res) ->
-      pagerv2.getOncall()
-      .then (name) ->
-        res.send "#{name} is currently on call."
+      pagerv2.getSchedule()
+      .then (data) ->
+        nowDate = moment().utc()
+        endDate = moment(data.end)
+        if nowDate.isSame(endDate, 'day')
+          endDate = endDate.format('HH:mm')
+        else
+          endDate = endDate.format('dddd HH:mm')
+        res.send "#{data.user.summary} is on call until #{endDate}."
       .catch (e) ->
         res.send e
       res.finish()
@@ -121,7 +127,7 @@ module.exports = (robot) ->
       [ _, who, duration ] = res.match
       pagerv2.setOverride(res.envelope.user, who, duration)
       .then (data) ->
-        res.send "Rejoice #{data.user.summary}! #{data.over.name} is now on pager duty."
+        res.send "Rejoice #{data.user.summary}! #{data.over.name} is now on call."
       .catch (e) ->
         res.send e
       res.finish()
@@ -130,11 +136,9 @@ module.exports = (robot) ->
   #   hubot pd me now            - creates an override until the end of current oncall
     robot.respond /pd (?:([^ ]+) )?now\s*$/, (res) ->
       [ _, who ] = res.match
-      pagerv2.currentDuration()
-      .then (duration) ->
-        pagerv2.setOverride(res.envelope.user, who, duration)
+      pagerv2.setOverride(res.envelope.user, who, false)
       .then (data) ->
-        res.send "Rejoice #{data.user.summary}! #{data.over.name} is now on pager duty."
+        res.send "Rejoice #{data.user.summary}! #{data.over.name} is now on call."
       .catch (e) ->
         res.send e
       res.finish()

@@ -126,21 +126,17 @@ class Pagerv2
         'Can you ask them to `.pd me as <email>`?'
 
   getSchedule: (schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
-    @request('GET', "/schedules/#{schedule_id}")
+    query = {
+      since: moment().format(),
+      until: moment().add(1, 'minutes').format(),
+      time_zone: 'UTC',
+      overflow: 'true'
+    }
+    @request('GET', "/schedules/#{schedule_id}", query)
+    .then (body) ->
+      body.schedule.final_schedule.rendered_schedule_entries[0]
 
-  getOncall: (schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
-    return new Promise (res, err) =>
-      query = {
-        since: moment().format(),
-        until: moment().add(1, 'minutes').format()
-      }
-      @request('GET', "/schedules/#{schedule_id}/users", query)
-      .then (body) ->
-        res body.users[0].name
-      .catch (error) ->
-        err error
-
-  setOverride: (from, who, duration, end = false) ->
+  setOverride: (from, who, duration) ->
     return new Promise (res, err) =>
       if duration > 1440
         err 'Sorry you cannot set an override of more than 1 day.'
@@ -161,16 +157,19 @@ class Pagerv2
           .bind({ id: null })
           .then (id) =>
             @id = id
-            @getOncall()
-          .then (oncall_name) =>
+            @getSchedule()
+          .then (data) =>
             query  = {
               'start': moment().format(),
-              'end': end or moment().add(duration, 'minutes').format(),
               'user': {
                 'id': @id,
                 'type': 'user_reference'
               }
             }
+            if duration?
+              query.end = moment().add(duration, 'minutes').format()
+            else
+              query.end = moment(data.end)
             # TODO - with user on call, res a relevant message
             @request('POST', "/schedules/#{schedule_id}/overrides", query)
             .then (body) ->

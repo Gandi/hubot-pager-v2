@@ -222,8 +222,8 @@ describe 'pagerv2_commands', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-        .get('/schedules/42/users')
-        .reply 200, require('./fixtures/oncall_list-ok.json')
+        .get('/schedules/42')
+        .reply 200, require('./fixtures/schedule_get-ok.json')
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
@@ -231,7 +231,7 @@ describe 'pagerv2_commands', ->
       say 'pd oncall', ->
         it 'returns name of who is on call', ->
           expect(hubotResponse())
-          .to.eql 'Kyler Kuhn is currently on call.'
+          .to.eql 'Regina Phalange is on call until Wednesday 06:00.'
 
   # ------------------------------------------------------------------------------------------------
   describe '".pd 120000"', ->
@@ -255,8 +255,8 @@ describe 'pagerv2_commands', ->
           }
         }
         nock('https://api.pagerduty.com')
-        .get('/schedules/42/users')
-        .reply(200, require('./fixtures/oncall_list-ok.json'))
+        .get('/schedules/42')
+        .reply(200, require('./fixtures/schedule_get-ok.json'))
         .post('/schedules/42/overrides')
         .reply(200, require('./fixtures/override_create-ok.json'))
       afterEach ->
@@ -266,4 +266,4 @@ describe 'pagerv2_commands', ->
       say 'pd 120', ->
         it 'says override is done', ->
           expect(hubotResponse())
-          .to.eql 'Rejoice Aurelio Rice! momo is now on pager duty.'
+          .to.eql 'Rejoice Aurelio Rice! momo is now on call.'
