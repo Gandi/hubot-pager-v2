@@ -142,7 +142,6 @@ module.exports = (robot) ->
         res.send e
       res.finish()
 
-  # TODO
   #   hubot pd not me            - cancels an override if any
     robot.respond /pd not ([^ ]+)\s*$/, (res) ->
       [ _, who ] = res.match
