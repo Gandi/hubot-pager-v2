@@ -122,16 +122,6 @@ module.exports = (robot) ->
         res.send e
       res.finish()
 
-  #   hubot pd me <duration>     - creates an override for <duration> minutes
-    robot.respond /pd (?:([^ ]+) )?(?:for )?(\d+)(?: min(?:utes)?)?\s*$/, (res) ->
-      [ _, who, duration ] = res.match
-      pagerv2.setOverride(res.envelope.user, who, duration)
-      .then (data) ->
-        res.send "Rejoice #{data.user.summary}! #{data.over.name} is now on call."
-      .catch (e) ->
-        res.send e
-      res.finish()
-
   #   hubot pd me now            - creates an override until the end of current oncall
     robot.respond /pd (?:([^ ]+) )?now\s*$/, (res) ->
       [ _, who ] = res.match
@@ -155,9 +145,13 @@ module.exports = (robot) ->
 
   # TODO
   #   hubot pd <number>          - gives more information about incident number <number>
-    robot.respond /pd (\d+)\s*$/, (res) ->
+    robot.respond /pd (?:inc |incident )?([^ ]+)\s*$/, (res) ->
       [ _, incident ] = res.match
-      res.send 'Not yet implemented'
+      pagerv2.getIncident(incident)
+      .then (data) ->
+        res.send "#{data.incident.id} (#{data.incident.status}) #{data.incident.summary}"
+      .catch (e) ->
+        res.send e
       res.finish()
 
   # TODO
@@ -281,4 +275,14 @@ module.exports = (robot) ->
     robot.respond /pd sched(?:ules?)?(?: ([A-Z0-9]+))?\s+$/, (res) ->
       [ _, filter ] = res.match
       res.send 'Not yet implemented'
+      res.finish()
+
+  #   hubot pd me <duration>     - creates an override for <duration> minutes
+    robot.respond /pd (?:([^ ]+) )?(?:for )?(\d+)(?: min(?:utes)?)?\s*$/, (res) ->
+      [ _, who, duration ] = res.match
+      pagerv2.setOverride(res.envelope.user, who, duration)
+      .then (data) ->
+        res.send "Rejoice #{data.user.summary}! #{data.over.name} is now on call."
+      .catch (e) ->
+        res.send e
       res.finish()

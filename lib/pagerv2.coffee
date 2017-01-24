@@ -223,6 +223,9 @@ class Pagerv2
           else
             res null
 
+  getIncident: (incident) ->
+    @request('GET', "/incidents/#{incident}")
+
 
 
 module.exports = Pagerv2

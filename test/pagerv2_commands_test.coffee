@@ -296,3 +296,30 @@ describe 'pagerv2_commands', ->
         it 'returns name of who is on call', ->
           expect(hubotResponse())
           .to.eql 'Ok, momo! Aurelio Rice override is cancelled.'
+
+  # ------------------------------------------------------------------------------------------------
+  describe '".pd incident 1234"', ->
+    context 'when everything goes right,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = {
+          users: {
+            momo: {
+              id: 'momo',
+              name: 'momo',
+              email: 'momo@example.com',
+              pdid: 'PEYSGVF'
+            }
+          }
+        }
+        nock('https://api.pagerduty.com')
+        .get('/incidents/1234')
+        .reply(200, require('./fixtures/incident_get-ok.json'))
+
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pd incident 1234', ->
+        it 'returns details on the incident', ->
+          expect(hubotResponse())
+          .to.eql 'PT4KHLK (resolved) The server is on fire.'
