@@ -20,7 +20,7 @@
 #   hubot pd noc now             - creates a noc  override until the end of current oncall
 #   hubot pd not noc             - cancels a noc override if any
 #
-#   hubot pd <#>                 - gives more information about incident number <number>
+#   hubot pd incident <#>        - gives more information about incident number <number>
 #   hubot pd sup|inc|incidents   - lists currently unresolved incidents
 #
 #   hubot pd ack [all]           - acknowledges any unack incidents
@@ -143,7 +143,6 @@ module.exports = (robot) ->
         res.send e
       res.finish()
 
-  # TODO
   #   hubot pd incident <number> - gives more information about incident number <number>
     robot.respond /pd (?:inc |incident )(\d+|[A-Z0-9]{7})\s*$/, (res) ->
       [ _, incident ] = res.match
