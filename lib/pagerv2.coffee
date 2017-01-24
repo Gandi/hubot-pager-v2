@@ -226,6 +226,17 @@ class Pagerv2
   getIncident: (incident) ->
     @request('GET', "/incidents/#{incident}")
 
+  listIncidents: ->
+    query = {
+      date_range: 'all',
+      time_zone: 'UTC',
+      statuses: [
+        'triggered',
+        'acknowledged'
+      ]
+    }
+    @request('GET', '/incidents', query)
+
 
 
 module.exports = Pagerv2
