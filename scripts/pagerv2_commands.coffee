@@ -144,8 +144,8 @@ module.exports = (robot) ->
       res.finish()
 
   # TODO
-  #   hubot pd <number>          - gives more information about incident number <number>
-    robot.respond /pd (?:inc |incident )?([^ ]+)\s*$/, (res) ->
+  #   hubot pd incident <number> - gives more information about incident number <number>
+    robot.respond /pd (?:inc |incident )(\d+|[A-Z0-9]{7})\s*$/, (res) ->
       [ _, incident ] = res.match
       pagerv2.getIncident(incident)
       .then (data) ->
