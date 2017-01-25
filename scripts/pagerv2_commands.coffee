@@ -153,12 +153,12 @@ module.exports = (robot) ->
         res.send e
       res.finish()
 
-  # TODO
   #   hubot pd sup|inc|incidents - lists currently unresolved incidents
     robot.respond /pd (?:sup|inc(?:idents))\s*$/, (res) ->
       pagerv2.listIncidents()
       .then (data) ->
-        res.send "#{data.incident.id} (#{data.incident.status}) #{data.incident.summary}"
+        for inc in data.incidents
+          res.send "#{inc.id} (#{inc.status}) #{inc.summary}"
       .catch (e) ->
         res.send e
       res.finish()
