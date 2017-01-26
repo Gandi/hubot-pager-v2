@@ -166,7 +166,11 @@ module.exports = (robot) ->
   # TODO
   #   hubot pd ack               - acknowledges any unack incidents
     robot.respond /pd ack(?: all)?\s*$/, (res) ->
-      res.send 'Not yet implemented'
+      pagerv2.ackIncidents()
+      .then (data) ->
+        res.reply "Incidents #{data.incidents.join(', ')} acknowledged."
+      .catch (e) ->
+        res.send e
       res.finish()
 
   # TODO

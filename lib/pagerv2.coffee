@@ -34,7 +34,7 @@ class Pagerv2
       else
         res()
 
-  request: (method, endpoint, query) ->
+  request: (method, endpoint, query, from = false) ->
     return new Promise (res, err) ->
       if process.env.PAGERV2_API_KEY?
         auth = "Token token=#{process.env.PAGERV2_API_KEY}"
@@ -49,6 +49,8 @@ class Pagerv2
             Accept: 'application/vnd.pagerduty+json;version=2'
           }
         }
+        if from?
+          options.headers.From = from
         req = https.request options, (response) ->
           data = ''
           response.on 'data', (chunk) ->
@@ -226,16 +228,23 @@ class Pagerv2
   getIncident: (incident) ->
     @request('GET', "/incidents/#{incident}")
 
-  listIncidents: ->
+  listIncidents: (statuses = 'triggered,acknowledged') ->
     query = {
       date_range: 'all',
-      time_zone: 'UTC',
-      statuses: [
-        'triggered',
-        'acknowledged'
-      ]
+      time_zone: 'UTC'
     }
+    if statuses?
+      query.statuses = statuses.split(/,/)
     @request('GET', '/incidents', query)
+
+  ackIncidents: (user, incident = []) ->
+    @getUser(user, user)
+    .bind({ id: null })
+    .then (id) =>
+      @id = id
+      @listIncidents('triggered')
+    .then (data) ->
+      @request('PUT', '/incidents')
 
 
 
