@@ -94,6 +94,17 @@ class Pagerv2
               else
                 err "Sorry, I cannot find #{email}"
 
+  getUserEmail: (user) ->
+    return new Promise (res, err) =>
+      unless user.id?
+        user.id = user.name
+      @data = @robot.brain.data.pagerv2
+      email = @data.users[user.id].email or user.email_address
+      if email?
+        res email
+      else
+        err @_ask_for_email(from, user)
+
   setUser: (user, email) =>
     return new Promise (res, err) =>
       @data = @robot.brain.data.pagerv2
@@ -237,14 +248,33 @@ class Pagerv2
       query.statuses = statuses.split(/,/)
     @request('GET', '/incidents', query)
 
-  ackIncidents: (user, incident = []) ->
-    @getUser(user, user)
-    .bind({ id: null })
-    .then (id) =>
-      @id = id
-      @listIncidents('triggered')
-    .then (data) ->
-      @request('PUT', '/incidents')
+  updateIncidents: (user, which = 'triggered', status = 'acknowledged', incidents = []) ->
+    @getUserEmail(user)
+    .bind({ from: null })
+    .then (email) =>
+      @from = email
+      if incidents.length > 0
+        new Promise (res, err) =>
+          incidents
+      else
+        @listIncidents(which)
+        .then (data) ->
+          (inc.id for inc in data.incidents)
+    .then (incidents) =>
+      if incidents.length > 0
+        payload = {
+          incidents: []
+        }
+        for inc in incidents
+          payload.incidents.push {
+            id: inc,
+            type: 'incident_reference',
+            status: status
+          }
+
+        @request('PUT', '/incidents', payload)
+      else
+        "There is no #{which} incidents at the moment."
 
 
 

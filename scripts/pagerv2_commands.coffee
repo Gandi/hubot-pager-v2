@@ -166,7 +166,7 @@ module.exports = (robot) ->
   # TODO
   #   hubot pd ack               - acknowledges any unack incidents
     robot.respond /pd ack(?: all)?\s*$/, (res) ->
-      pagerv2.ackIncidents()
+      pagerv2.updateIncidents(res.envelope.user)
       .then (data) ->
         res.reply "Incidents #{data.incidents.join(', ')} acknowledged."
       .catch (e) ->
