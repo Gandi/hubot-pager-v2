@@ -163,7 +163,6 @@ module.exports = (robot) ->
         res.send e
       res.finish()
 
-  # TODO
   #   hubot pd ack               - acknowledges any unack incidents
     robot.respond /pd ack(?: all)?\s*$/, (res) ->
       pagerv2.updateIncidents(res.envelope.user)
@@ -176,17 +175,29 @@ module.exports = (robot) ->
         res.send e
       res.finish()
 
-  # TODO
   #   hubot pd ack <#>           - acknowledges incident <number>
-    robot.respond /pd ack ([\d, ]+)\s*$/, (res) ->
+    robot.respond /pd ack (.+)\s*$/, (res) ->
       [ _, incidents ] = res.match
-      res.send 'Not yet implemented'
+      pagerv2.updateIncidents(res.envelope.user, incidents)
+      .then (data) ->
+        plural = ''
+        if data.incidents.length > 1
+          plural = 's'
+        res.send "Incident#{plural} #{data.incidents.map( (e) -> e.id).join(', ')} acknowledged."
+      .catch (e) ->
+        res.send e
       res.finish()
 
-  # TODO
   #   hubot pd res|resolve       - acknowledges any unack incidents
     robot.respond /pd res(?:olve)?(?: all)?\s*$/, (res) ->
-      res.send 'Not yet implemented'
+      pagerv2.updateIncidents(res.envelope.user, '', 'acknowledged', 'resoled')
+      .then (data) ->
+        plural = ''
+        if data.incidents.length > 1
+          plural = 's'
+        res.send "Incident#{plural} #{data.incidents.map( (e) -> e.id).join(', ')} resolved."
+      .catch (e) ->
+        res.send e
       res.finish()
 
   # TODO

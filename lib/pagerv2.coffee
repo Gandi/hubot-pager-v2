@@ -248,14 +248,14 @@ class Pagerv2
       query.statuses = statuses.split(/,/)
     @request('GET', '/incidents', query)
 
-  updateIncidents: (user, which = 'triggered', status = 'acknowledged', incidents = []) ->
+  updateIncidents: (user, incidents = '', which = 'triggered', status = 'acknowledged') ->
     @getUserEmail(user)
     .bind({ from: null })
     .then (email) =>
       @from = email
-      if incidents.length > 0
+      if incidents isnt ''
         new Promise (res, err) ->
-          incidents
+          res incidents.split /, ?/
       else
         @listIncidents(which)
         .then (data) ->
