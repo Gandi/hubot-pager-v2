@@ -190,7 +190,7 @@ module.exports = (robot) ->
 
   #   hubot pd res|resolve       - acknowledges any unack incidents
     robot.respond /pd res(?:olve)?(?: all)?\s*$/, (res) ->
-      pagerv2.updateIncidents(res.envelope.user, '', 'acknowledged', 'resoled')
+      pagerv2.updateIncidents(res.envelope.user, '', 'acknowledged', 'resolved')
       .then (data) ->
         plural = ''
         if data.incidents.length > 1
@@ -200,11 +200,17 @@ module.exports = (robot) ->
         res.send e
       res.finish()
 
-  # TODO
   #   hubot pd res|resolve <#>   - acknowledges incident <number>
-    robot.respond /pd res(?:olve)? ([\d, ]+)\s*$/, (res) ->
+    robot.respond /pd res(?:olve)? (.+)\s*$/, (res) ->
       [ _, incidents ] = res.match
-      res.send 'Not yet implemented'
+      pagerv2.updateIncidents(res.envelope.user, incidents, 'acknowledged', 'resolved')
+      .then (data) ->
+        plural = ''
+        if data.incidents.length > 1
+          plural = 's'
+        res.send "Incident#{plural} #{data.incidents.map( (e) -> e.id).join(', ')} resolved."
+      .catch (e) ->
+        res.send e
       res.finish()
 
   # TODO
