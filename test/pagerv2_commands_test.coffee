@@ -350,3 +350,32 @@ describe 'pagerv2_commands', ->
         it 'returns details on the incident', ->
           expect(hubotResponse())
           .to.eql 'PT4KHLK (resolved) The server is on fire.'
+
+  # ------------------------------------------------------------------------------------------------
+  describe '".pd ack"', ->
+    context 'when everything goes right,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = {
+          users: {
+            momo: {
+              id: 'momo',
+              name: 'momo',
+              email: 'momo@example.com',
+              pdid: 'PEYSGVF'
+            }
+          }
+        }
+        nock('https://api.pagerduty.com')
+        .get('/incidents')
+        .reply(200, require('./fixtures/incident_list-ok.json'))
+        .put('/incidents')
+        .reply(200, require('./fixtures/incident_manage-ok.json'))
+
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pd ack', ->
+        it 'returns details on the incident', ->
+          expect(hubotResponse())
+          .to.eql 'Incident PT4KHLK acknowledged.'

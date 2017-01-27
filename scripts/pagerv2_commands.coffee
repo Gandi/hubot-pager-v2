@@ -168,7 +168,10 @@ module.exports = (robot) ->
     robot.respond /pd ack(?: all)?\s*$/, (res) ->
       pagerv2.updateIncidents(res.envelope.user)
       .then (data) ->
-        res.reply "Incidents #{data.incidents.join(', ')} acknowledged."
+        plural = ''
+        if data.incidents.length > 1
+          plural = 's'
+        res.send "Incident#{plural} #{data.incidents.map( (e) -> e.id).join(', ')} acknowledged."
       .catch (e) ->
         res.send e
       res.finish()

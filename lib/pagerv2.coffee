@@ -254,7 +254,7 @@ class Pagerv2
     .then (email) =>
       @from = email
       if incidents.length > 0
-        new Promise (res, err) =>
+        new Promise (res, err) ->
           incidents
       else
         @listIncidents(which)
