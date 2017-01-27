@@ -271,10 +271,20 @@ class Pagerv2
             type: 'incident_reference',
             status: status
           }
-
-        @request('PUT', '/incidents', payload)
+        @request('PUT', '/incidents', payload, @from)
       else
         "There is no #{which} incidents at the moment."
+
+  snoozeIncidents: (user, incidents, duration = 120) ->
+    @getUserEmail(user)
+    .then (email) =>
+      incidents = incidents.split /, ?/
+      incidentsDone = Promise.map incidents, (inc) =>
+        payload = {
+          duration: duration
+        }
+        @request('POST', "/incidents/#{inc}/snooze", payload, email)
+      Promise.all incidentsDone
 
 
 

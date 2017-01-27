@@ -220,11 +220,17 @@ module.exports = (robot) ->
       res.send 'Not yet implemented'
       res.finish()
 
-  # TODO
   #   hubot pd snooze <#,#,#> [for] [<duration>] [min] - acknowledges incident <number>
-    robot.respond /pd snooze ([\d, ]+)(?: (?:for )(\d+)(?: min(?:utes)?)?)?\s*$/, (res) ->
+    robot.respond /pd snooze (.+)(?: (?:for )(\d+)(?: min(?:utes)?)?)?\s*$/, (res) ->
       [ _, incidents, duration ] = res.match
-      res.send 'Not yet implemented'
+      pagerv2.snoozeIncidents(res.envelope.user, incidents, duration)
+      .then (data) ->
+        plural = ''
+        if data.length > 1
+          plural = 's'
+        res.send "Incident#{plural} #{data.map( (e) -> e.incident.id).join(', ')} snoozed."
+      .catch (e) ->
+        res.send e
       res.finish()
 
   # TODO

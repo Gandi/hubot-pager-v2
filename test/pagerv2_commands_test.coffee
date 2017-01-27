@@ -462,3 +462,30 @@ describe 'pagerv2_commands', ->
         it 'returns details on the incident', ->
           expect(hubotResponse())
           .to.eql 'Incident PT4KHLK resolved.'
+
+  # ------------------------------------------------------------------------------------------------
+  describe '".pd snooze PT4KHLK"', ->
+    context 'when everything goes right,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = {
+          users: {
+            momo: {
+              id: 'momo',
+              name: 'momo',
+              email: 'momo@example.com',
+              pdid: 'PEYSGVF'
+            }
+          }
+        }
+        nock('https://api.pagerduty.com')
+        .post('/incidents/PT4KHLK/snooze')
+        .reply(200, require('./fixtures/incident_snooze-ok.json'))
+
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pd snooze PT4KHLK', ->
+        it 'returns details on the incident', ->
+          expect(hubotResponse())
+          .to.eql 'Incident PT4KHLK snoozed.'
