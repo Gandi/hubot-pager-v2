@@ -431,7 +431,7 @@ describe 'pagerv2_commands', ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
 
-      say 'pd ack', ->
+      say 'pd res', ->
         it 'returns details on the incident', ->
           expect(hubotResponse())
-          .to.eql 'Incident PT4KHLK acknowledged.'
+          .to.eql 'Incident PT4KHLK resolved.'
