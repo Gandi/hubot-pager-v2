@@ -239,35 +239,36 @@ class Pagerv2
   getIncident: (incident) ->
     @request('GET', "/incidents/#{incident}")
 
-  listIncidents: (statuses = 'triggered,acknowledged') ->
-    query = {
-      date_range: 'all',
-      time_zone: 'UTC'
-    }
-    if statuses?
-      query.statuses = statuses.split(/,/)
-    @request('GET', '/incidents', query)
+  listIncidents: (incidents = '', statuses = 'triggered,acknowledged') ->
+    if incidents isnt ''
+      new Promise (res, err) ->
+        res {
+          incidents: incidents.split(/, ?/).map (inc) ->
+            { id: inc }
+          }
+    else
+      query = {
+        date_range: 'all',
+        time_zone: 'UTC'
+      }
+      if statuses?
+        query.statuses = statuses.split /,/
+      @request('GET', '/incidents', query)
 
   updateIncidents: (user, incidents = '', which = 'triggered', status = 'acknowledged') ->
     @getUserEmail(user)
     .bind({ from: null })
     .then (email) =>
       @from = email
-      if incidents isnt ''
-        new Promise (res, err) ->
-          res incidents.split /, ?/
-      else
-        @listIncidents(which)
-        .then (data) ->
-          (inc.id for inc in data.incidents)
-    .then (incidents) =>
-      if incidents.length > 0
+      @listIncidents incidents, which
+    .then (data) =>
+      if data.incidents.length > 0
         payload = {
           incidents: []
         }
-        for inc in incidents
+        for inc in data.incidents
           payload.incidents.push {
-            id: inc,
+            id: inc.id,
             type: 'incident_reference',
             status: status
           }
@@ -275,16 +276,22 @@ class Pagerv2
       else
         "There is no #{which} incidents at the moment."
 
-  snoozeIncidents: (user, incidents, duration = 120) ->
+  snoozeIncidents: (user, incidents = '', duration = 120) ->
     @getUserEmail(user)
+    .bind({ from: null })
     .then (email) =>
-      incidents = incidents.split /, ?/
-      incidentsDone = Promise.map incidents, (inc) =>
-        payload = {
-          duration: duration
-        }
-        @request('POST', "/incidents/#{inc}/snooze", payload, email)
-      Promise.all incidentsDone
+      @from = email
+      @listIncidents incidents
+    .then (data) =>
+      if data.incidents.length > 0
+        incidentsDone = Promise.map data.incidents, (inc) =>
+          payload = {
+            duration: duration
+          }
+          @request('POST', "/incidents/#{inc.id}/snooze", payload, @from)
+        Promise.all incidentsDone
+      else
+        "There is no #{which} incidents at the moment."
 
 
 
