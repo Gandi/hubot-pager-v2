@@ -276,6 +276,38 @@ class Pagerv2
       else
         "There is no #{which} incidents at the moment."
 
+  assignIncidents: (user, who, incidents = '') ->
+    @getUserEmail(user)
+    .bind({ from: null })
+    .bind({ assignees: null })
+    .then (email) =>
+      @from = email
+      assigneesDone = Promise.map who.split(/, ?/), (assignee) =>
+        @getUser(user, assignee)
+      Promise.all assigneesDone
+    .then (assignees) =>
+      @assignees = assignees
+      @listIncidents incidents, which
+    .then (data) =>
+      if data.incidents.length > 0
+        payload = {
+          incidents: []
+        }
+        for inc in data.incidents
+          payload.incidents.push {
+            id: inc.id,
+            type: 'incident_reference',
+            assignments: []
+          }
+          for a in @assignees
+            payload.incidents.push {
+              id: a,
+              type: 'user_reference'
+            }
+        @request('PUT', '/incidents', payload, @from)
+      else
+        "There is no #{which} incidents at the moment."
+
   snoozeIncidents: (user, incidents = '', duration = 120) ->
     @getUserEmail(user)
     .bind({ from: null })
