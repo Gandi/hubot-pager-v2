@@ -274,7 +274,7 @@ module.exports = (robot) ->
       res.finish()
 
   #   hubot pd note <#,#,#> <note> - create a note for incidents <#,#,#>
-    robot.respond /pd note ([\d, ]+) ([^\s].*)$/, (res) ->
+    robot.respond /pd note ([^\s]+) (.*)$/, (res) ->
       [ _, incident, note ] = res.match
       pagerv2.addNote(res.envelope.user, incident, note)
       .then (data) ->

@@ -450,3 +450,19 @@ describe 'pagerv2_commands', ->
           it 'returns details on the incident', ->
             expect(hubotResponse())
             .to.eql 'Incident PT4KHLK snoozed.'
+
+    # ----------------------------------------------------------------------------------------------
+    describe '".pd note PT4KHLK some note"', ->
+      context 'when everything goes right,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .post('/incidents/PT4KHLK/notes')
+          .reply(200, require('./fixtures/note_create-ok.json'))
+
+        afterEach ->
+          nock.cleanAll()
+
+        say 'pd note PT4KHLK some note', ->
+          it 'returns details on the incident', ->
+            expect(hubotResponse())
+            .to.eql 'Note added to PT4KHLK: some note.'

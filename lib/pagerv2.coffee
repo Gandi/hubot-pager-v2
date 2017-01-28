@@ -333,7 +333,7 @@ class Pagerv2
           content: note
         }
       }
-      @request('POST', "/incidents/#{incident}/note", payload, @from)
+      @request('POST', "/incidents/#{incident}/notes", payload, @from)
 
 
 
