@@ -94,7 +94,7 @@ class Pagerv2
               else
                 err "Sorry, I cannot find #{email}"
 
-  getUserEmail: (user) ->
+  getUserEmail: (from, user) ->
     return new Promise (res, err) =>
       unless user.id?
         user.id = user.name
@@ -256,7 +256,7 @@ class Pagerv2
       @request('GET', '/incidents', query)
 
   updateIncidents: (user, incidents = '', which = 'triggered', status = 'acknowledged') ->
-    @getUserEmail(user)
+    @getUserEmail(user, user)
     .bind({ from: null })
     .then (email) =>
       @from = email
@@ -277,17 +277,17 @@ class Pagerv2
         "There is no #{which} incidents at the moment."
 
   assignIncidents: (user, who, incidents = '') ->
-    @getUserEmail(user)
+    @getUserEmail(user, user)
     .bind({ from: null })
     .bind({ assignees: null })
     .then (email) =>
       @from = email
       assigneesDone = Promise.map who.split(/, ?/), (assignee) =>
-        @getUser(user, assignee)
+        @getUser(user, { name: assignee })
       Promise.all assigneesDone
     .then (assignees) =>
       @assignees = assignees
-      @listIncidents incidents, which
+      @listIncidents incidents
     .then (data) =>
       if data.incidents.length > 0
         payload = {
@@ -309,7 +309,7 @@ class Pagerv2
         "There is no #{which} incidents at the moment."
 
   snoozeIncidents: (user, incidents = '', duration = 120) ->
-    @getUserEmail(user)
+    @getUserEmail(user, user)
     .bind({ from: null })
     .then (email) =>
       @from = email

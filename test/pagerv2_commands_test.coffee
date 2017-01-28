@@ -464,6 +464,62 @@ describe 'pagerv2_commands', ->
           .to.eql 'Incident PT4KHLK resolved.'
 
   # ------------------------------------------------------------------------------------------------
+  describe '".pd assign all to me"', ->
+    context 'when everything goes right,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = {
+          users: {
+            momo: {
+              id: 'momo',
+              name: 'momo',
+              email: 'momo@example.com',
+              pdid: 'PEYSGVF'
+            }
+          }
+        }
+        nock('https://api.pagerduty.com')
+        .get('/incidents')
+        .reply(200, require('./fixtures/incident_list-ok.json'))
+        .put('/incidents')
+        .reply(200, require('./fixtures/incident_manage-ok.json'))
+
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pd assign all to me', ->
+        it 'returns details on the incident', ->
+          expect(hubotResponse())
+          .to.eql 'Incident PT4KHLK assigned to momo.'
+
+  # ------------------------------------------------------------------------------------------------
+  describe '".pd assign PT4KHLK to me"', ->
+    context 'when everything goes right,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = {
+          users: {
+            momo: {
+              id: 'momo',
+              name: 'momo',
+              email: 'momo@example.com',
+              pdid: 'PEYSGVF'
+            }
+          }
+        }
+        nock('https://api.pagerduty.com')
+        .put('/incidents')
+        .reply(200, require('./fixtures/incident_manage-ok.json'))
+
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pd assign PT4KHLK to me', ->
+        it 'returns details on the incident', ->
+          expect(hubotResponse())
+          .to.eql 'Incident PT4KHLK assigned to momo.'
+
+  # ------------------------------------------------------------------------------------------------
   describe '".pd snooze all"', ->
     context 'when everything goes right,', ->
       beforeEach ->

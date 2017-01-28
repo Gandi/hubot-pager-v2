@@ -213,6 +213,40 @@ module.exports = (robot) ->
         res.send e
       res.finish()
 
+  #   hubot pd assign [all] to me       - assigns all open incidents to caller
+  #   hubot pd assign [all] to <user>   - assigns all open incidents to user
+    robot.respond /pd assign(?: all) to (me|[^ ]+)\s*$/, (res) ->
+      [ _, who ] = res.match
+      if who is 'me'
+        who = res.envelope.user.name
+      pagerv2.assignIncidents(res.envelope.user, who)
+      .then (data) ->
+        plural = ''
+        if data.length > 1
+          plural = 's'
+        res.send "Incident#{plural} #{data.incidents.map( (e) -> e.id).join(', ')} " +
+                 "assigned to #{who}."
+      .catch (e) ->
+        res.send e
+      res.finish()
+
+  #   hubot pd assign <#,#,#> to me     - assigns incidents <#,#,#> to caller
+  #   hubot pd assign <#,#,#> to <user> - assigns incidents <#,#,#> to user
+    robot.respond /pd assign (.+) to (me|[^ ]+)\s*$/, (res) ->
+      [ _, incidents, who ] = res.match
+      if who is 'me'
+        who = res.envelope.user.name
+      pagerv2.assignIncidents(res.envelope.user, who, incidents)
+      .then (data) ->
+        plural = ''
+        if data.length > 1
+          plural = 's'
+        res.send "Incident#{plural} #{data.incidents.map( (e) -> e.id).join(', ')} " +
+                 "assigned to #{who}."
+      .catch (e) ->
+        res.send e
+      res.finish()
+
   #   hubot pd snooze [all] [for] [<duration>] [min]  - acknowledges any unack incidents
     robot.respond /pd snooze(?: all)?(?: (?:for )(\d+)(?: min(?:utes)?)?)?\s*$/, (res) ->
       [ _, duration ] = res.match
@@ -237,22 +271,6 @@ module.exports = (robot) ->
         res.send "Incident#{plural} #{data.map( (e) -> e.incident.id).join(', ')} snoozed."
       .catch (e) ->
         res.send e
-      res.finish()
-
-  # TODO
-  #   hubot pd assign [all] to me       - assigns all open incidents to caller
-  #   hubot pd assign [all] to <user>   - assigns all open incidents to user
-    robot.respond /pd assign(?: all) to (me|[^ ]+)\s*$/, (res) ->
-      [ _, who ] = res.match
-      res.send 'Not yet implemented'
-      res.finish()
-
-  # TODO
-  #   hubot pd assign <#,#,#> to me     - assigns incidents <#,#,#> to caller
-  #   hubot pd assign <#,#,#> to <user> - assigns incidents <#,#,#> to user
-    robot.respond /pd assign ([\d, ]+) to (me|[^ ]+)\s*$/, (res) ->
-      [ _, incidents, who ] = res.match
-      res.send 'Not yet implemented'
       res.finish()
 
   # TODO
