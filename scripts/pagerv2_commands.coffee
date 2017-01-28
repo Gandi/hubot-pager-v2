@@ -273,11 +273,14 @@ module.exports = (robot) ->
         res.send e
       res.finish()
 
-  # TODO
   #   hubot pd note <#,#,#> <note> - create a note for incidents <#,#,#>
     robot.respond /pd note ([\d, ]+) ([^\s].*)$/, (res) ->
-      [ _, incidents, note ] = res.match
-      res.send 'Not yet implemented'
+      [ _, incident, note ] = res.match
+      pagerv2.addNote(res.envelope.user, incident, note)
+      .then (data) ->
+        res.send "Note added to #{incident}: #{note}."
+      .catch (e) ->
+        res.send e
       res.finish()
 
   # TODO

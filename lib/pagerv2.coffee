@@ -325,6 +325,16 @@ class Pagerv2
       else
         "There is no #{which} incidents at the moment."
 
+  addNote: (user, incident, note) ->
+    @getUserEmail(user, user)
+    .then (email) =>
+      payload = {
+        note: {
+          content: note
+        }
+      }
+      @request('POST', "/incidents/#{incident}/note", payload, @from)
+
 
 
 module.exports = Pagerv2
