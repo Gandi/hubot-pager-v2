@@ -55,16 +55,6 @@ describe 'pagerv2_commands', ->
       name: 'user_with_email',
       email_address: 'user@example.com'
     }
-    # room.robot.brain.data.pagerv2 = {
-    #   users: {
-    #     momo: {
-    #       id: 'momo',
-    #       name: 'momo',
-    #       email: 'momo@example.com',
-    #       pdid: 'AAAAA42'
-    #     }
-    #   }
-    # }
 
     room.receive = (userName, message) ->
       new Promise (resolve) =>
@@ -233,344 +223,230 @@ describe 'pagerv2_commands', ->
           expect(hubotResponse())
           .to.eql 'Regina Phalange is on call until Tuesday 22:00 (utc).'
 
-  # ------------------------------------------------------------------------------------------------
-  describe '".pd 120000"', ->
-    context 'when everything goes right,', ->
-      say 'pd 120000', ->
-        it 'warns that this duration does not make any sense', ->
-          expect(hubotResponse())
-          .to.eql 'Sorry you cannot set an override of more than 1 day.'
-
-  describe '".pd 120"', ->
-    context 'when everything goes right,', ->
-      beforeEach ->
-        room.robot.brain.data.pagerv2 = {
-          users: {
-            momo: {
-              id: 'momo',
-              name: 'momo',
-              email: 'momo@example.com',
-              pdid: 'AAAAA42'
-            }
+  # ================================================================================================
+  context 'caller is known', ->
+    beforeEach ->
+      room.robot.brain.data.pagerv2 = {
+        users: {
+          momo: {
+            id: 'momo',
+            name: 'momo',
+            email: 'momo@example.com',
+            pdid: 'PEYSGVF'
           }
         }
-        nock('https://api.pagerduty.com')
-        .get('/schedules/42')
-        .reply(200, require('./fixtures/schedule_get-ok.json'))
-        .post('/schedules/42/overrides')
-        .reply(200, require('./fixtures/override_create-ok.json'))
-      afterEach ->
-        room.robot.brain.data.pagerv2 = { }
-        nock.cleanAll()
-
-      say 'pd 120', ->
-        it 'says override is done', ->
-          expect(hubotResponse())
-          .to.eql 'Rejoice Aurelio Rice! momo is now on call.'
-
-  # ------------------------------------------------------------------------------------------------
-  describe '".pd not me"', ->
-    context 'when everything goes right,', ->
-      beforeEach ->
-        room.robot.brain.data.pagerv2 = {
-          users: {
-            momo: {
-              id: 'momo',
-              name: 'momo',
-              email: 'momo@example.com',
-              pdid: 'PEYSGVF'
-            }
-          }
-        }
-        nock('https://api.pagerduty.com')
-        .get('/schedules/42/overrides')
-        .reply(200, require('./fixtures/override_get-ok.json'))
-        .delete('/schedules/42/overrides/PQ47DCP')
-        .reply(200, require('./fixtures/override_get-ok.json'))
+      }
 
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
-        nock.cleanAll()
 
-      say 'pd not me', ->
-        it 'returns name of who is on call', ->
-          expect(hubotResponse())
-          .to.eql 'Ok, momo! Aurelio Rice override is cancelled.'
+    # ----------------------------------------------------------------------------------------------
+    describe '".pd 120000"', ->
+      context 'when everything goes right,', ->
+        say 'pd 120000', ->
+          it 'warns that this duration does not make any sense', ->
+            expect(hubotResponse())
+            .to.eql 'Sorry you cannot set an override of more than 1 day.'
 
-  # ------------------------------------------------------------------------------------------------
-  describe '".pd incident 1234"', ->
-    context 'when everything goes right,', ->
-      beforeEach ->
-        room.robot.brain.data.pagerv2 = {
-          users: {
-            momo: {
-              id: 'momo',
-              name: 'momo',
-              email: 'momo@example.com',
-              pdid: 'PEYSGVF'
-            }
-          }
-        }
-        nock('https://api.pagerduty.com')
-        .get('/incidents/1234')
-        .reply(200, require('./fixtures/incident_get-ok.json'))
+    describe '".pd 120"', ->
+      context 'when everything goes right,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/schedules/42')
+          .reply(200, require('./fixtures/schedule_get-ok.json'))
+          .post('/schedules/42/overrides')
+          .reply(200, require('./fixtures/override_create-ok.json'))
 
-      afterEach ->
-        room.robot.brain.data.pagerv2 = { }
-        nock.cleanAll()
+        afterEach ->
+          nock.cleanAll()
 
-      say 'pd incident 1234', ->
-        it 'returns details on the incident', ->
-          expect(hubotResponse())
-          .to.eql 'PT4KHLK (resolved) The server is on fire.'
+        say 'pd 120', ->
+          it 'says override is done', ->
+            expect(hubotResponse())
+            .to.eql 'Rejoice Aurelio Rice! momo is now on call.'
 
-  # ------------------------------------------------------------------------------------------------
-  describe '".pd sup"', ->
-    context 'when everything goes right,', ->
-      beforeEach ->
-        room.robot.brain.data.pagerv2 = {
-          users: {
-            momo: {
-              id: 'momo',
-              name: 'momo',
-              email: 'momo@example.com',
-              pdid: 'PEYSGVF'
-            }
-          }
-        }
-        nock('https://api.pagerduty.com')
-        .get('/incidents')
-        .reply(200, require('./fixtures/incident_list-ok.json'))
+    # ----------------------------------------------------------------------------------------------
+    describe '".pd not me"', ->
+      context 'when everything goes right,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/schedules/42/overrides')
+          .reply(200, require('./fixtures/override_get-ok.json'))
+          .delete('/schedules/42/overrides/PQ47DCP')
+          .reply(200, require('./fixtures/override_get-ok.json'))
 
-      afterEach ->
-        room.robot.brain.data.pagerv2 = { }
-        nock.cleanAll()
+        afterEach ->
+          nock.cleanAll()
 
-      say 'pd sup', ->
-        it 'returns details on the incident', ->
-          expect(hubotResponse())
-          .to.eql 'PT4KHLK (resolved) The server is on fire.'
+        say 'pd not me', ->
+          it 'returns name of who is on call', ->
+            expect(hubotResponse())
+            .to.eql 'Ok, momo! Aurelio Rice override is cancelled.'
 
-  # ------------------------------------------------------------------------------------------------
-  describe '".pd ack"', ->
-    context 'when everything goes right,', ->
-      beforeEach ->
-        room.robot.brain.data.pagerv2 = {
-          users: {
-            momo: {
-              id: 'momo',
-              name: 'momo',
-              email: 'momo@example.com',
-              pdid: 'PEYSGVF'
-            }
-          }
-        }
-        nock('https://api.pagerduty.com')
-        .get('/incidents')
-        .reply(200, require('./fixtures/incident_list-ok.json'))
-        .put('/incidents')
-        .reply(200, require('./fixtures/incident_manage-ok.json'))
+    # ----------------------------------------------------------------------------------------------
+    describe '".pd incident 1234"', ->
+      context 'when everything goes right,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/incidents/1234')
+          .reply(200, require('./fixtures/incident_get-ok.json'))
 
-      afterEach ->
-        room.robot.brain.data.pagerv2 = { }
-        nock.cleanAll()
+        afterEach ->
+          nock.cleanAll()
 
-      say 'pd ack', ->
-        it 'returns details on the incident', ->
-          expect(hubotResponse())
-          .to.eql 'Incident PT4KHLK acknowledged.'
+        say 'pd incident 1234', ->
+          it 'returns details on the incident', ->
+            expect(hubotResponse())
+            .to.eql 'PT4KHLK (resolved) The server is on fire.'
 
-  # ------------------------------------------------------------------------------------------------
-  describe '".pd ack PT4KHLK"', ->
-    context 'when everything goes right,', ->
-      beforeEach ->
-        room.robot.brain.data.pagerv2 = {
-          users: {
-            momo: {
-              id: 'momo',
-              name: 'momo',
-              email: 'momo@example.com',
-              pdid: 'PEYSGVF'
-            }
-          }
-        }
-        nock('https://api.pagerduty.com')
-        .put('/incidents')
-        .reply(200, require('./fixtures/incident_manage-ok.json'))
+    # ----------------------------------------------------------------------------------------------
+    describe '".pd sup"', ->
+      context 'when everything goes right,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/incidents')
+          .reply(200, require('./fixtures/incident_list-ok.json'))
 
-      afterEach ->
-        room.robot.brain.data.pagerv2 = { }
-        nock.cleanAll()
+        afterEach ->
+          nock.cleanAll()
 
-      say 'pd ack PT4KHLK', ->
-        it 'returns details on the incident', ->
-          expect(hubotResponse())
-          .to.eql 'Incident PT4KHLK acknowledged.'
+        say 'pd sup', ->
+          it 'returns details on the incident', ->
+            expect(hubotResponse())
+            .to.eql 'PT4KHLK (resolved) The server is on fire.'
 
-  # ------------------------------------------------------------------------------------------------
-  describe '".pd res"', ->
-    context 'when everything goes right,', ->
-      beforeEach ->
-        room.robot.brain.data.pagerv2 = {
-          users: {
-            momo: {
-              id: 'momo',
-              name: 'momo',
-              email: 'momo@example.com',
-              pdid: 'PEYSGVF'
-            }
-          }
-        }
-        nock('https://api.pagerduty.com')
-        .get('/incidents')
-        .reply(200, require('./fixtures/incident_list-ok.json'))
-        .put('/incidents')
-        .reply(200, require('./fixtures/incident_manage-ok.json'))
+    # ----------------------------------------------------------------------------------------------
+    describe '".pd ack"', ->
+      context 'when everything goes right,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/incidents')
+          .reply(200, require('./fixtures/incident_list-ok.json'))
+          .put('/incidents')
+          .reply(200, require('./fixtures/incident_manage-ok.json'))
 
-      afterEach ->
-        room.robot.brain.data.pagerv2 = { }
-        nock.cleanAll()
+        afterEach ->
+          nock.cleanAll()
 
-      say 'pd res', ->
-        it 'returns details on the incident', ->
-          expect(hubotResponse())
-          .to.eql 'Incident PT4KHLK resolved.'
+        say 'pd ack', ->
+          it 'returns details on the incident', ->
+            expect(hubotResponse())
+            .to.eql 'Incident PT4KHLK acknowledged.'
 
-  # ------------------------------------------------------------------------------------------------
-  describe '".pd res PT4KHLK"', ->
-    context 'when everything goes right,', ->
-      beforeEach ->
-        room.robot.brain.data.pagerv2 = {
-          users: {
-            momo: {
-              id: 'momo',
-              name: 'momo',
-              email: 'momo@example.com',
-              pdid: 'PEYSGVF'
-            }
-          }
-        }
-        nock('https://api.pagerduty.com')
-        .put('/incidents')
-        .reply(200, require('./fixtures/incident_manage-ok.json'))
+    # ----------------------------------------------------------------------------------------------
+    describe '".pd ack PT4KHLK"', ->
+      context 'when everything goes right,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .put('/incidents')
+          .reply(200, require('./fixtures/incident_manage-ok.json'))
 
-      afterEach ->
-        room.robot.brain.data.pagerv2 = { }
-        nock.cleanAll()
+        afterEach ->
+          nock.cleanAll()
 
-      say 'pd res PT4KHLK', ->
-        it 'returns details on the incident', ->
-          expect(hubotResponse())
-          .to.eql 'Incident PT4KHLK resolved.'
+        say 'pd ack PT4KHLK', ->
+          it 'returns details on the incident', ->
+            expect(hubotResponse())
+            .to.eql 'Incident PT4KHLK acknowledged.'
 
-  # ------------------------------------------------------------------------------------------------
-  describe '".pd assign all to me"', ->
-    context 'when everything goes right,', ->
-      beforeEach ->
-        room.robot.brain.data.pagerv2 = {
-          users: {
-            momo: {
-              id: 'momo',
-              name: 'momo',
-              email: 'momo@example.com',
-              pdid: 'PEYSGVF'
-            }
-          }
-        }
-        nock('https://api.pagerduty.com')
-        .get('/incidents')
-        .reply(200, require('./fixtures/incident_list-ok.json'))
-        .put('/incidents')
-        .reply(200, require('./fixtures/incident_manage-ok.json'))
+    # ----------------------------------------------------------------------------------------------
+    describe '".pd res"', ->
+      context 'when everything goes right,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/incidents')
+          .reply(200, require('./fixtures/incident_list-ok.json'))
+          .put('/incidents')
+          .reply(200, require('./fixtures/incident_manage-ok.json'))
 
-      afterEach ->
-        room.robot.brain.data.pagerv2 = { }
-        nock.cleanAll()
+        afterEach ->
+          nock.cleanAll()
 
-      say 'pd assign all to me', ->
-        it 'returns details on the incident', ->
-          expect(hubotResponse())
-          .to.eql 'Incident PT4KHLK assigned to momo.'
+        say 'pd res', ->
+          it 'returns details on the incident', ->
+            expect(hubotResponse())
+            .to.eql 'Incident PT4KHLK resolved.'
 
-  # ------------------------------------------------------------------------------------------------
-  describe '".pd assign PT4KHLK to me"', ->
-    context 'when everything goes right,', ->
-      beforeEach ->
-        room.robot.brain.data.pagerv2 = {
-          users: {
-            momo: {
-              id: 'momo',
-              name: 'momo',
-              email: 'momo@example.com',
-              pdid: 'PEYSGVF'
-            }
-          }
-        }
-        nock('https://api.pagerduty.com')
-        .put('/incidents')
-        .reply(200, require('./fixtures/incident_manage-ok.json'))
+    # ----------------------------------------------------------------------------------------------
+    describe '".pd res PT4KHLK"', ->
+      context 'when everything goes right,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .put('/incidents')
+          .reply(200, require('./fixtures/incident_manage-ok.json'))
 
-      afterEach ->
-        room.robot.brain.data.pagerv2 = { }
-        nock.cleanAll()
+        afterEach ->
+          nock.cleanAll()
 
-      say 'pd assign PT4KHLK to me', ->
-        it 'returns details on the incident', ->
-          expect(hubotResponse())
-          .to.eql 'Incident PT4KHLK assigned to momo.'
+        say 'pd res PT4KHLK', ->
+          it 'returns details on the incident', ->
+            expect(hubotResponse())
+            .to.eql 'Incident PT4KHLK resolved.'
 
-  # ------------------------------------------------------------------------------------------------
-  describe '".pd snooze all"', ->
-    context 'when everything goes right,', ->
-      beforeEach ->
-        room.robot.brain.data.pagerv2 = {
-          users: {
-            momo: {
-              id: 'momo',
-              name: 'momo',
-              email: 'momo@example.com',
-              pdid: 'PEYSGVF'
-            }
-          }
-        }
-        nock('https://api.pagerduty.com')
-        .get('/incidents')
-        .reply(200, require('./fixtures/incident_list-ok.json'))
-        .post('/incidents/PT4KHLK/snooze')
-        .reply(200, require('./fixtures/incident_snooze-ok.json'))
+    # ----------------------------------------------------------------------------------------------
+    describe '".pd assign all to me"', ->
+      context 'when everything goes right,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/incidents')
+          .reply(200, require('./fixtures/incident_list-ok.json'))
+          .put('/incidents')
+          .reply(200, require('./fixtures/incident_manage-ok.json'))
 
-      afterEach ->
-        room.robot.brain.data.pagerv2 = { }
-        nock.cleanAll()
+        afterEach ->
+          nock.cleanAll()
 
-      say 'pd snooze all', ->
-        it 'returns details on the incident', ->
-          expect(hubotResponse())
-          .to.eql 'Incident PT4KHLK snoozed.'
+        say 'pd assign all to me', ->
+          it 'returns details on the incident', ->
+            expect(hubotResponse())
+            .to.eql 'Incident PT4KHLK assigned to momo.'
 
-  # ------------------------------------------------------------------------------------------------
-  describe '".pd snooze PT4KHLK"', ->
-    context 'when everything goes right,', ->
-      beforeEach ->
-        room.robot.brain.data.pagerv2 = {
-          users: {
-            momo: {
-              id: 'momo',
-              name: 'momo',
-              email: 'momo@example.com',
-              pdid: 'PEYSGVF'
-            }
-          }
-        }
-        nock('https://api.pagerduty.com')
-        .post('/incidents/PT4KHLK/snooze')
-        .reply(200, require('./fixtures/incident_snooze-ok.json'))
+    # ----------------------------------------------------------------------------------------------
+    describe '".pd assign PT4KHLK to me"', ->
+      context 'when everything goes right,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .put('/incidents')
+          .reply(200, require('./fixtures/incident_manage-ok.json'))
 
-      afterEach ->
-        room.robot.brain.data.pagerv2 = { }
-        nock.cleanAll()
+        afterEach ->
+          nock.cleanAll()
 
-      say 'pd snooze PT4KHLK', ->
-        it 'returns details on the incident', ->
-          expect(hubotResponse())
-          .to.eql 'Incident PT4KHLK snoozed.'
+        say 'pd assign PT4KHLK to me', ->
+          it 'returns details on the incident', ->
+            expect(hubotResponse())
+            .to.eql 'Incident PT4KHLK assigned to momo.'
+
+    # ----------------------------------------------------------------------------------------------
+    describe '".pd snooze all"', ->
+      context 'when everything goes right,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/incidents')
+          .reply(200, require('./fixtures/incident_list-ok.json'))
+          .post('/incidents/PT4KHLK/snooze')
+          .reply(200, require('./fixtures/incident_snooze-ok.json'))
+
+        afterEach ->
+          nock.cleanAll()
+
+        say 'pd snooze all', ->
+          it 'returns details on the incident', ->
+            expect(hubotResponse())
+            .to.eql 'Incident PT4KHLK snoozed.'
+
+    # ----------------------------------------------------------------------------------------------
+    describe '".pd snooze PT4KHLK"', ->
+      context 'when everything goes right,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .post('/incidents/PT4KHLK/snooze')
+          .reply(200, require('./fixtures/incident_snooze-ok.json'))
+
+        afterEach ->
+          nock.cleanAll()
+
+        say 'pd snooze PT4KHLK', ->
+          it 'returns details on the incident', ->
+            expect(hubotResponse())
+            .to.eql 'Incident PT4KHLK snoozed.'
