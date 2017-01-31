@@ -335,6 +335,9 @@ class Pagerv2
       }
       @request('POST', "/incidents/#{incident}/notes", payload, @from)
 
+  listNotes: (incident) ->
+    @request('GET', "/incidents/#{incident}/notes")
+
 
 
 module.exports = Pagerv2
