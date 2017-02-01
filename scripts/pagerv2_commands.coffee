@@ -108,7 +108,7 @@ module.exports = (robot) ->
       res.finish()
 
   #   hubot pd oncall - returns who is on call
-    robot.respond /(?:pd )?oncall\s*$/, (res) ->
+    robot.respond /(?:pd )?(?:who(?: is|'s) )?on ?call\s*$/, (res) ->
       pagerv2.getSchedule()
       .then (data) ->
         nowDate = moment().utc()
@@ -120,6 +120,31 @@ module.exports = (robot) ->
         res.send "#{data.user.summary} is on call until #{endDate} (utc)."
       .catch (e) ->
         res.send e
+      res.finish()
+
+  # TODO
+  #   hubot pd [who is] next [oncall] - tells who is next on call
+    robot.respond /(?:pd )?(?:who(?: is|'s) )?(next on ?call|on ?call next)\s*$/, (res) ->
+      pagerv2.getSchedule()
+      .then (data) ->
+        fromtime = moment(data.end).utc().add(1, 'minute').format()
+        pagerv2.getSchedule(fromtime)
+      .then (data) ->
+        nowDate = moment().utc()
+        endDate = moment(data.end).utc()
+        if nowDate.isSame(endDate, 'day')
+          endDate = endDate.format('HH:mm')
+        else
+          endDate = endDate.format('dddd HH:mm')
+        res.send "#{data.user.summary} will be next on call until #{endDate} (utc)."
+      .catch (e) ->
+        res.send e
+      res.finish()
+
+  # TODO
+  #   hubot pd escalation          - tells who is involved in the escalation process
+    robot.respond /pd escalation\s+$/, (res) ->
+      res.send 'Not yet implemented'
       res.finish()
 
   #   hubot pd me now            - creates an override until the end of current oncall
@@ -292,24 +317,6 @@ module.exports = (robot) ->
           res.send "#{incident} - #{note.content}"
       .catch (e) ->
         res.send e
-      res.finish()
-
-  # TODO
-  #   hubot pd [who is] oncall     - tells who is currently on call
-    robot.respond /pd (?:who(?: is|'s) )?(?:on ?call)\s+$/, (res) ->
-      res.send 'Not yet implemented'
-      res.finish()
-
-  # TODO
-  #   hubot pd [who is] next [oncall] - tells who is next on call
-    robot.respond /pd (?:who(?: is|'s) )?next(?: on ?call)?\s+$/, (res) ->
-      res.send 'Not yet implemented'
-      res.finish()
-
-  # TODO
-  #   hubot pd escalation          - tells who is involved in the escalation process
-    robot.respond /pd escalation\s+$/, (res) ->
-      res.send 'Not yet implemented'
       res.finish()
 
   # TODO

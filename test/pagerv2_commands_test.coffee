@@ -223,6 +223,25 @@ describe 'pagerv2_commands', ->
           expect(hubotResponse())
           .to.eql 'Regina Phalange is on call until Tuesday 22:00 (utc).'
 
+  # ------------------------------------------------------------------------------------------------
+  describe '".pd next oncall"', ->
+    context 'when everything goes right,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = { users: { } }
+        nock('https://api.pagerduty.com')
+        .get('/schedules/42')
+        .reply(200, require('./fixtures/schedule_get-ok.json'))
+        .get('/schedules/42')
+        .reply 200, require('./fixtures/schedule_get_next-ok.json')
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pd next oncall', ->
+        it 'returns name of who is on call', ->
+          expect(hubotResponse())
+          .to.eql 'Joe Next will be next on call until Wednesday 01:00 (utc).'
+
   # ================================================================================================
   context 'caller is known', ->
     beforeEach ->
