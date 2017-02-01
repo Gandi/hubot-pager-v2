@@ -311,7 +311,7 @@ describe 'pagerv2_commands', ->
           nock.cleanAll()
 
         say 'pd sup', ->
-          it 'returns details on the incident', ->
+          it 'returns list of incidents', ->
             expect(hubotResponse())
             .to.eql 'PT4KHLK (resolved) The server is on fire.'
 
@@ -329,7 +329,7 @@ describe 'pagerv2_commands', ->
           nock.cleanAll()
 
         say 'pd ack', ->
-          it 'returns details on the incident', ->
+          it 'says incident was acknowledged', ->
             expect(hubotResponse())
             .to.eql 'Incident PT4KHLK acknowledged.'
 
@@ -345,7 +345,7 @@ describe 'pagerv2_commands', ->
           nock.cleanAll()
 
         say 'pd ack PT4KHLK', ->
-          it 'returns details on the incident', ->
+          it 'says incident was acknowledged', ->
             expect(hubotResponse())
             .to.eql 'Incident PT4KHLK acknowledged.'
 
@@ -363,7 +363,7 @@ describe 'pagerv2_commands', ->
           nock.cleanAll()
 
         say 'pd res', ->
-          it 'returns details on the incident', ->
+          it 'says incident was resolved', ->
             expect(hubotResponse())
             .to.eql 'Incident PT4KHLK resolved.'
 
@@ -379,7 +379,7 @@ describe 'pagerv2_commands', ->
           nock.cleanAll()
 
         say 'pd res PT4KHLK', ->
-          it 'returns details on the incident', ->
+          it 'says incident was resolved', ->
             expect(hubotResponse())
             .to.eql 'Incident PT4KHLK resolved.'
 
@@ -397,7 +397,7 @@ describe 'pagerv2_commands', ->
           nock.cleanAll()
 
         say 'pd assign all to me', ->
-          it 'returns details on the incident', ->
+          it 'says incident was assigned', ->
             expect(hubotResponse())
             .to.eql 'Incident PT4KHLK assigned to momo.'
 
@@ -413,7 +413,7 @@ describe 'pagerv2_commands', ->
           nock.cleanAll()
 
         say 'pd assign PT4KHLK to me', ->
-          it 'returns details on the incident', ->
+          it 'says incident was assigned', ->
             expect(hubotResponse())
             .to.eql 'Incident PT4KHLK assigned to momo.'
 
@@ -431,7 +431,7 @@ describe 'pagerv2_commands', ->
           nock.cleanAll()
 
         say 'pd snooze all', ->
-          it 'returns details on the incident', ->
+          it 'says all incidents have been snoozed', ->
             expect(hubotResponse())
             .to.eql 'Incident PT4KHLK snoozed.'
 
@@ -447,7 +447,7 @@ describe 'pagerv2_commands', ->
           nock.cleanAll()
 
         say 'pd snooze PT4KHLK', ->
-          it 'returns details on the incident', ->
+          it 'says incident have been snoozed', ->
             expect(hubotResponse())
             .to.eql 'Incident PT4KHLK snoozed.'
 
@@ -463,6 +463,22 @@ describe 'pagerv2_commands', ->
           nock.cleanAll()
 
         say 'pd note PT4KHLK some note', ->
-          it 'returns details on the incident', ->
+          it 'says note has been added', ->
             expect(hubotResponse())
             .to.eql 'Note added to PT4KHLK: some note.'
+
+    # ----------------------------------------------------------------------------------------------
+    describe '".pd notes PT4KHLK"', ->
+      context 'when everything goes right,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/incidents/PT4KHLK/notes')
+          .reply(200, require('./fixtures/notes_list-ok.json'))
+
+        afterEach ->
+          nock.cleanAll()
+
+        say 'pd notes PT4KHLK', ->
+          it 'returns notes for the incident', ->
+            expect(hubotResponse())
+            .to.eql 'PT4KHLK - Firefighters are on the scene.'

@@ -284,11 +284,12 @@ module.exports = (robot) ->
       res.finish()
 
   #   hubot pd notes <#>           - read notes for incident <#>
-    robot.respond /pd notes (.+)\s+$/, (res) ->
+    robot.respond /pd notes ([^\s]+)\s*$/, (res) ->
       [ _, incident ] = res.match
       pagerv2.listNotes(incident)
       .then (data) ->
-        res.send "Note added to #{incident}: #{note}."
+        for note in data.notes
+          res.send "#{incident} - #{note.content}"
       .catch (e) ->
         res.send e
       res.finish()
