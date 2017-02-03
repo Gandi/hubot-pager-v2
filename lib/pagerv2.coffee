@@ -338,6 +338,9 @@ class Pagerv2
   listNotes: (incident) ->
     @request('GET', "/incidents/#{incident}/notes")
 
+  listMaintenances: ->
+    @request('GET', '/maintenance windows')
+
 
 
 module.exports = Pagerv2

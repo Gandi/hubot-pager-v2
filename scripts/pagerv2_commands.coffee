@@ -322,7 +322,13 @@ module.exports = (robot) ->
   # TODO
   #   hubot pd maintenances           - lists currently active maintenances
     robot.respond /pd maintenances?\s+$/, (res) ->
-      res.send 'Not yet implemented'
+      pagerv2.listMaintenances()
+      .then (data) ->
+        for maintenance in data.maintenance_windows
+          end = moment(maintenance.end_time).format('HH:MM')
+          res.send "#{maintenance.id} - #{maintenance.summary} (until #{end})"
+      .catch (e) ->
+        res.send e
       res.finish()
 
   # TODO
