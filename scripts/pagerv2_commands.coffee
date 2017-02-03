@@ -319,14 +319,13 @@ module.exports = (robot) ->
         res.send e
       res.finish()
 
-  # TODO
   #   hubot pd maintenances           - lists currently active maintenances
-    robot.respond /pd maintenances?\s+$/, (res) ->
+    robot.respond /pd maintenances?\s*$/, (res) ->
       pagerv2.listMaintenances()
       .then (data) ->
         for maintenance in data.maintenance_windows
-          end = moment(maintenance.end_time).format('HH:MM')
-          res.send "#{maintenance.id} - #{maintenance.summary} (until #{end})"
+          end = moment(maintenance.end_time).utc().format('HH:mm')
+          res.send "#{maintenance.id} - #{maintenance.summary} (until #{end} UTC)"
       .catch (e) ->
         res.send e
       res.finish()
@@ -334,7 +333,7 @@ module.exports = (robot) ->
   # TODO
   #   hubot pd stfu|down [for] <duration> [because <reason>] - creates a maintenance
     robot.respond (
-      /pd (?:stfu|down)(?: for)?\s*([0-9]+)?(?: min(?:utes)?)?(?: because (.+))?\s+$/
+      /pd (?:stfu|down)(?: for)?\s*([0-9]+)?(?: min(?:utes)?)?(?: because (.+))?\s*$/
     ), (res) ->
       [ _, duration ] = res.match
       res.send 'Not yet implemented'
@@ -342,14 +341,14 @@ module.exports = (robot) ->
 
   # TODO
   #   hubot pd up|end|back <maintenance> - ends <maintenance>
-    robot.respond /pd (?:up|back|end) ([A-Z0-9]+)\s+$/, (res) ->
+    robot.respond /pd (?:up|back|end) ([A-Z0-9]+)\s*$/, (res) ->
       [ _, maintenance ] = res.match
       res.send 'Not yet implemented'
       res.finish()
 
   # TODO
   #   hubot pd schedules [<search>]   - lists schedules (optionaly filtered by <search>)
-    robot.respond /pd sched(?:ules?)?(?: ([A-Z0-9]+))?\s+$/, (res) ->
+    robot.respond /pd sched(?:ules?)?(?: ([A-Z0-9]+))?\s*$/, (res) ->
       [ _, filter ] = res.match
       res.send 'Not yet implemented'
       res.finish()

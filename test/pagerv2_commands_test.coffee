@@ -501,3 +501,19 @@ describe 'pagerv2_commands', ->
           it 'returns notes for the incident', ->
             expect(hubotResponse())
             .to.eql 'PT4KHLK - Firefighters are on the scene.'
+
+    # ----------------------------------------------------------------------------------------------
+    describe '".pd maintenances"', ->
+      context 'when everything goes right,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/maintenance windows')
+          .reply(200, require('./fixtures/maintenance_list-ok.json'))
+
+        afterEach ->
+          nock.cleanAll()
+
+        say 'pd maintenances', ->
+          it 'returns ongoing maintenances', ->
+            expect(hubotResponse())
+            .to.eql 'PW98YIO - Immanentizing the eschaton (until 03:00 UTC)'

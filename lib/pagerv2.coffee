@@ -339,7 +339,10 @@ class Pagerv2
     @request('GET', "/incidents/#{incident}/notes")
 
   listMaintenances: ->
-    @request('GET', '/maintenance windows')
+    query = {
+      filter: 'ongoing'
+    }
+    @request('GET', '/maintenance windows', query)
 
 
 
