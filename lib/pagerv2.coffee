@@ -7,6 +7,7 @@
 #  PAGERV2_API_KEY
 #  PAGERV2_SCHEDULE_ID  # the schedule used for oncall and overrides
 #  PAGERV2_OVERRIDERS   # list of user_id that can be targets of overrides
+#  PAGERV2_SERVICES     # list of service ids that are watched
 #
 # Author:
 #   mose
@@ -22,6 +23,11 @@ class Pagerv2
     @robot.brain.data.pagerv2 ?= {
       users: { }
     }
+    @pagerServices = { }
+    if process.env.PAGERV2_SERVICES?
+      for service in process.env.PAGERV2_SERVICES.split(',')
+        [code, label] = service.split ':'
+        pagerServices[code] = label
     @logger = @robot.logger
     @logger.debug 'Pagerv2 Loaded'
 
