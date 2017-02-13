@@ -47,7 +47,7 @@ class Pagerv2
         body = querystring.stringify(query)
         options = {
           hostname: 'api.pagerduty.com'
-          post: 443
+          port: 443
           method: method
           path: endpoint
           headers: {
