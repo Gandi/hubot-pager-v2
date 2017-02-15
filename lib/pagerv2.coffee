@@ -27,7 +27,7 @@ class Pagerv2
     if process.env.PAGERV2_SERVICES?
       for service in process.env.PAGERV2_SERVICES.split(',')
         [code, label] = service.split ':'
-        pagerServices[code] = label
+        @pagerServices[code] = label
     @logger = @robot.logger
     @logger.debug 'Pagerv2 Loaded'
 
