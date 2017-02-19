@@ -12,10 +12,6 @@
 #   hubot pd me as <email>       - declare what email should be use to find caller pagerduty id
 #   hubot pd <user> as <email>   - declare what email should be use to find <user> pagerduty id
 #
-#   hubot pd me <duration>       - creates an override for <duration> minutes
-#   hubot pd me now              - creates an override until the end of current oncall
-#   hubot pd not me              - cancels an override if any
-#
 #   hubot pd noc <duration>      - creates an override for <duration> minutes with the noc account
 #   hubot pd noc now             - creates a noc  override until the end of current oncall
 #   hubot pd not noc             - cancels a noc override if any
@@ -49,6 +45,10 @@
 #   hubot pd up|end|back <maintenance> - ends <maintenance>
 #
 #   hubot pd schedules [<search>]   - lists schedules (optionaly filtered by <search>)
+#
+#   hubot pd me <duration>       - creates an override for <duration> minutes
+#   hubot pd me now              - creates an override until the end of current oncall
+#   hubot pd not me              - cancels an override if any
 #
 # Author:
 #   mose
@@ -84,7 +84,7 @@ module.exports = (robot) ->
       res.finish()
 
   #   hubot pd me as <email> - declare what email should be use to find user pagerduty id
-    robot.respond /pd me as ([^\s@]+@[^\s]+)\s*$/, (res) ->
+    robot.respond /pd me as ([^\s@]+@[^\s]+)\s*$/, 'pd_me_as', (res) ->
       [ _, email ] = res.match
       pagerv2.setUser(res.envelope.user, email)
       .then (data) ->
@@ -94,7 +94,7 @@ module.exports = (robot) ->
       res.finish()
 
   #   hubot pd <user> as <email> - declare what email should be use to find <user> pagerduty id
-    robot.respond /pd ([^\s]+) as ([^\s@]+@[^\s]+)\s*$/, (res) ->
+    robot.respond /pd ([^\s]+) as ([^\s@]+@[^\s]+)\s*$/, 'pd_user_as', (res) ->
       who = null
       pagerv2.getPermission(res.envelope.user, 'pdadmin')
       .then ->
@@ -108,7 +108,7 @@ module.exports = (robot) ->
       res.finish()
 
   #   hubot pd oncall - returns who is on call
-    robot.respond /(?:pd )?(?:who(?: is|'s) )?on ?call\s*$/, (res) ->
+    robot.respond /(?:pd )?(?:who(?: is|'s) )?on ?call\s*$/, 'pd_oncall', (res) ->
       pagerv2.getSchedule()
       .then (data) ->
         nowDate = moment().utc()
@@ -124,7 +124,9 @@ module.exports = (robot) ->
 
   # TODO
   #   hubot pd [who is] next [oncall] - tells who is next on call
-    robot.respond /(?:pd )?(?:who(?: is|'s) )?(next on ?call|on ?call next)\s*$/, (res) ->
+    robot.respond (
+      /(?:pd )?(?:who(?: is|'s) )?(next on ?call|on ?call next)\s*$/
+    ), 'pd_next_oncall', (res) ->
       pagerv2.getSchedule()
       .then (data) ->
         fromtime = moment(data.end).utc().add(1, 'minute').format()
@@ -143,33 +145,12 @@ module.exports = (robot) ->
 
   # TODO
   #   hubot pd escalation          - tells who is involved in the escalation process
-    robot.respond /pd escalation\s+$/, (res) ->
+    robot.respond /pd escalation\s+$/, 'pd_escalation', (res) ->
       res.send 'Not yet implemented'
       res.finish()
 
-  #   hubot pd me now            - creates an override until the end of current oncall
-    robot.respond /pd (?:([^ ]+) )?now\s*$/, (res) ->
-      [ _, who ] = res.match
-      pagerv2.setOverride(res.envelope.user, who, false)
-      .then (data) ->
-        res.send "Rejoice #{data.user.summary}! #{data.over.name} is now on call."
-      .catch (e) ->
-        res.send e
-      res.finish()
-
-  #   hubot pd not me            - cancels an override if any
-    robot.respond /pd not ([^ ]+)\s*$/, (res) ->
-      [ _, who ] = res.match
-      pagerv2.dropOverride(res.envelope.user, who)
-      .then (data) ->
-        res.send "Ok, #{res.envelope.user.name}! " +
-                 "#{data.overrides[0].user.summary} override is cancelled."
-      .catch (e) ->
-        res.send e
-      res.finish()
-
   #   hubot pd incident <number> - gives more information about incident number <number>
-    robot.respond /pd (?:inc |incident )(\d+|[A-Z0-9]{7})\s*$/, (res) ->
+    robot.respond /pd (?:inc |incident )(\d+|[A-Z0-9]{7})\s*$/, 'pd_incident', (res) ->
       [ _, incident ] = res.match
       pagerv2.getIncident(incident)
       .then (data) ->
@@ -179,7 +160,7 @@ module.exports = (robot) ->
       res.finish()
 
   #   hubot pd sup|inc|incidents - lists currently unresolved incidents
-    robot.respond /pd (?:sup|inc(?:idents))\s*$/, (res) ->
+    robot.respond /pd (?:sup|inc(?:idents))\s*$/, 'pd_incidents', (res) ->
       pagerv2.listIncidents()
       .then (data) ->
         for inc in data.incidents
@@ -189,7 +170,7 @@ module.exports = (robot) ->
       res.finish()
 
   #   hubot pd ack               - acknowledges any unack incidents
-    robot.respond /pd ack(?: all)?\s*$/, (res) ->
+    robot.respond /pd ack(?: all)?\s*$/, 'pd_ack_all', (res) ->
       pagerv2.updateIncidents(res.envelope.user)
       .then (data) ->
         plural = ''
@@ -201,7 +182,7 @@ module.exports = (robot) ->
       res.finish()
 
   #   hubot pd ack <#>           - acknowledges incident <number>
-    robot.respond /pd ack (.+)\s*$/, (res) ->
+    robot.respond /pd ack (.+)\s*$/, 'pd_ack_one', (res) ->
       [ _, incidents ] = res.match
       pagerv2.updateIncidents(res.envelope.user, incidents)
       .then (data) ->
@@ -214,7 +195,7 @@ module.exports = (robot) ->
       res.finish()
 
   #   hubot pd res|resolve       - acknowledges any unack incidents
-    robot.respond /pd res(?:olve)?(?: all)?\s*$/, (res) ->
+    robot.respond /pd res(?:olve)?(?: all)?\s*$/, 'pd_res_all', (res) ->
       pagerv2.updateIncidents(res.envelope.user, '', 'acknowledged', 'resolved')
       .then (data) ->
         plural = ''
@@ -226,7 +207,7 @@ module.exports = (robot) ->
       res.finish()
 
   #   hubot pd res|resolve <#>   - acknowledges incident <number>
-    robot.respond /pd res(?:olve)? (.+)\s*$/, (res) ->
+    robot.respond /pd res(?:olve)? (.+)\s*$/, 'pd_res_one', (res) ->
       [ _, incidents ] = res.match
       pagerv2.updateIncidents(res.envelope.user, incidents, 'acknowledged', 'resolved')
       .then (data) ->
@@ -240,7 +221,7 @@ module.exports = (robot) ->
 
   #   hubot pd assign [all] to me       - assigns all open incidents to caller
   #   hubot pd assign [all] to <user>   - assigns all open incidents to user
-    robot.respond /pd assign(?: all) to (me|[^ ]+)\s*$/, (res) ->
+    robot.respond /pd assign(?: all) to (me|[^ ]+)\s*$/, 'pd_assign_all', (res) ->
       [ _, who ] = res.match
       if who is 'me'
         who = res.envelope.user.name
@@ -257,7 +238,7 @@ module.exports = (robot) ->
 
   #   hubot pd assign <#,#,#> to me     - assigns incidents <#,#,#> to caller
   #   hubot pd assign <#,#,#> to <user> - assigns incidents <#,#,#> to user
-    robot.respond /pd assign (.+) to (me|[^ ]+)\s*$/, (res) ->
+    robot.respond /pd assign (.+) to (me|[^ ]+)\s*$/, 'pd_assign_one', (res) ->
       [ _, incidents, who ] = res.match
       if who is 'me'
         who = res.envelope.user.name
@@ -273,7 +254,9 @@ module.exports = (robot) ->
       res.finish()
 
   #   hubot pd snooze [all] [for] [<duration>] [min]  - acknowledges any unack incidents
-    robot.respond /pd snooze(?: all)?(?: (?:for )(\d+)(?: min(?:utes)?)?)?\s*$/, (res) ->
+    robot.respond (
+      /pd snooze(?: all)?(?: (?:for )(\d+)(?: min(?:utes)?)?)?\s*$/
+    ), 'pd_snooze_all', (res) ->
       [ _, duration ] = res.match
       pagerv2.snoozeIncidents(res.envelope.user, '', duration)
       .then (data) ->
@@ -286,7 +269,9 @@ module.exports = (robot) ->
       res.finish()
 
   #   hubot pd snooze <#,#,#> [for] [<duration>] [min] - acknowledges incident <number>
-    robot.respond /pd snooze (.+)(?: (?:for )(\d+)(?: min(?:utes)?)?)?\s*$/, (res) ->
+    robot.respond (
+      /pd snooze (.+)(?: (?:for )(\d+)(?: min(?:utes)?)?)?\s*$/
+    ), 'pd_snooze_one', (res) ->
       [ _, incidents, duration ] = res.match
       pagerv2.snoozeIncidents(res.envelope.user, incidents, duration)
       .then (data) ->
@@ -299,7 +284,7 @@ module.exports = (robot) ->
       res.finish()
 
   #   hubot pd note <#,#,#> <note> - create a note for incidents <#,#,#>
-    robot.respond /pd note ([^\s]+) (.*)$/, (res) ->
+    robot.respond /pd note ([^\s]+) (.*)$/, 'pd_note', (res) ->
       [ _, incident, note ] = res.match
       pagerv2.addNote(res.envelope.user, incident, note)
       .then (data) ->
@@ -309,7 +294,7 @@ module.exports = (robot) ->
       res.finish()
 
   #   hubot pd notes <#>           - read notes for incident <#>
-    robot.respond /pd notes ([^\s]+)\s*$/, (res) ->
+    robot.respond /pd notes ([^\s]+)\s*$/, 'pd_notes', (res) ->
       [ _, incident ] = res.match
       pagerv2.listNotes(incident)
       .then (data) ->
@@ -320,7 +305,7 @@ module.exports = (robot) ->
       res.finish()
 
   #   hubot pd maintenances           - lists currently active maintenances
-    robot.respond /pd maintenances?\s*$/, (res) ->
+    robot.respond /pd maintenances?\s*$/, 'pd_maintenances', (res) ->
       pagerv2.listMaintenances()
       .then (data) ->
         for maintenance in data.maintenance_windows
@@ -334,27 +319,48 @@ module.exports = (robot) ->
   #   hubot pd stfu|down [for] <duration> [because <reason>] - creates a maintenance
     robot.respond (
       /pd (?:stfu|down)(?: for)?\s*([0-9]+)?(?: min(?:utes)?)?(?: because (.+))?\s*$/
-    ), (res) ->
+    ), 'pd_set_maintenance', (res) ->
       [ _, duration ] = res.match
       res.send 'Not yet implemented'
       res.finish()
 
   # TODO
   #   hubot pd up|end|back <maintenance> - ends <maintenance>
-    robot.respond /pd (?:up|back|end) ([A-Z0-9]+)\s*$/, (res) ->
+    robot.respond /pd (?:up|back|end) ([A-Z0-9]+)\s*$/, 'pd_end_maintenance', (res) ->
       [ _, maintenance ] = res.match
       res.send 'Not yet implemented'
       res.finish()
 
   # TODO
   #   hubot pd schedules [<search>]   - lists schedules (optionaly filtered by <search>)
-    robot.respond /pd sched(?:ules?)?(?: ([A-Z0-9]+))?\s*$/, (res) ->
+    robot.respond /pd sched(?:ules?)?(?: ([A-Z0-9]+))?\s*$/, 'pd_schedules', (res) ->
       [ _, filter ] = res.match
       res.send 'Not yet implemented'
       res.finish()
 
+  #   hubot pd me now            - creates an override until the end of current oncall
+    robot.respond /pd (?:([^ ]+) )?now\s*$/, 'pd_override_now', (res) ->
+      [ _, who ] = res.match
+      pagerv2.setOverride(res.envelope.user, who, false)
+      .then (data) ->
+        res.send "Rejoice #{data.user.summary}! #{data.over.name} is now on call."
+      .catch (e) ->
+        res.send e
+      res.finish()
+
+  #   hubot pd not me            - cancels an override if any
+    robot.respond /pd not ([^ ]+)\s*$/, 'pd_cancel_override', (res) ->
+      [ _, who ] = res.match
+      pagerv2.dropOverride(res.envelope.user, who)
+      .then (data) ->
+        res.send "Ok, #{res.envelope.user.name}! " +
+                 "#{data.overrides[0].user.summary} override is cancelled."
+      .catch (e) ->
+        res.send e
+      res.finish()
+
   #   hubot pd me <duration>     - creates an override for <duration> minutes
-    robot.respond /pd (?:([^ ]+) )?(?:for )?(\d+)(?: min(?:utes)?)?\s*$/, (res) ->
+    robot.respond /pd (?:([^ ]+) )?(?:for )?(\d+)(?: min(?:utes)?)?\s*$/, 'pd_override', (res) ->
       [ _, who, duration ] = res.match
       pagerv2.setOverride(res.envelope.user, who, duration)
       .then (data) ->
