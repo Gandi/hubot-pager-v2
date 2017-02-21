@@ -315,13 +315,17 @@ module.exports = (robot) ->
         res.send e
       res.finish()
 
-  # TODO
   #   hubot pd stfu|down [for] <duration> [because <reason>] - creates a maintenance
     robot.respond (
       /pd (?:stfu|down)(?: for)?\s*([0-9]+)?(?: min(?:utes)?)?(?: because (.+))?\s*$/
     ), 'pd_set_maintenance', (res) ->
-      [ _, duration ] = res.match
-      res.send 'Not yet implemented'
+      [ _, duration, description ] = res.match
+      pagerv2.addMaintenance(res.envelope.user, duration, description)
+      .then (data) ->
+        res.send "Maintenance created for all services for #{duration} minutes " +
+                 "(id #{data.maintenance_window.id})."
+      .catch (e) ->
+        res.send e
       res.finish()
 
   # TODO

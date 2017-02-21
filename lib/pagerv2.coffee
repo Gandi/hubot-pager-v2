@@ -339,7 +339,7 @@ class Pagerv2
           content: note
         }
       }
-      @request('POST', "/incidents/#{incident}/notes", payload, @from)
+      @request('POST', "/incidents/#{incident}/notes", payload, email)
 
   listNotes: (incident) ->
     @request('GET', "/incidents/#{incident}/notes")
@@ -349,6 +349,26 @@ class Pagerv2
       filter: 'ongoing'
     }
     @request('GET', '/maintenance windows', query)
+
+  addMaintenance: (duration, description) ->
+    @getUserEmail(user, user)
+    .then (email) =>
+
+      payload = {
+        maintenance_window: {
+          type: 'maintenance_window',
+          start_time: moment().format(),
+          end_time: moment().add(duration, 'minutes').format(),
+          description: description or 'Maintenance in progress.',
+          services: [ ]
+        }
+      }
+      for service in @pagerServices
+        payload.maintenance_window.services.push {
+          id: service,
+          type: 'service_reference'
+        }
+      @request('POST', '/maintenance windows', payload, email)
 
 
 
