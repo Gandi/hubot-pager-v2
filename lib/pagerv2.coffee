@@ -350,10 +350,9 @@ class Pagerv2
     }
     @request('GET', '/maintenance windows', query)
 
-  addMaintenance: (duration, description) ->
+  addMaintenance: (user, duration, description) ->
     @getUserEmail(user, user)
     .then (email) =>
-
       payload = {
         maintenance_window: {
           type: 'maintenance_window',

@@ -1,0 +1,38 @@
+{
+  "maintenance_window": {
+    "id": "PW98YIO",
+    "type": "maintenance_window",
+    "summary": "Immanentizing the eschaton",
+    "self": "https://api.pagerduty.com/maintenance_windows/PW98YIO",
+    "html_url": "https://subdomain.pagerduty.com/maintenance_windows#/show/PW98YIO",
+    "sequence_number": 1,
+    "start_time": "2015-11-09T20:00:00-05:00",
+    "end_time": "2015-11-09T22:00:00-05:00",
+    "description": "Immanentizing the eschaton",
+    "services": [
+      {
+        "id": "PIJ90N7",
+        "type": "generic_email_reference",
+        "summary": "My Mail Service",
+        "self": "https://api.pagerduty.com/services/PIJ90N7",
+        "html_url": "https://subdomain.pagerduty.com/services/PIJ90N7"
+      }
+    ],
+    "teams": [
+      {
+        "id": "PQ9K7I8",
+        "type": "team_reference",
+        "summary": "Engineering",
+        "self": "https://api.pagerduty.com/teams/PQ9K7I8",
+        "html_url": "https://subdomain.pagerduty.com/teams/PQ9K7I8"
+      }
+    ],
+    "created_by": {
+      "id": "PXPGF42",
+      "type": "user_reference",
+      "summary": "Earline Greenholt",
+      "self": "https://api.pagerduty.com/users/PXPGF42",
+      "html_url": "https://subdomain.pagerduty.com/users/PXPGF42"
+    }
+  }
+}

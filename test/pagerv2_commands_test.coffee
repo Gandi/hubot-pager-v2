@@ -517,3 +517,19 @@ describe 'pagerv2_commands', ->
           it 'returns ongoing maintenances', ->
             expect(hubotResponse())
             .to.eql 'PW98YIO - Immanentizing the eschaton (until 03:00 UTC)'
+
+    # ----------------------------------------------------------------------------------------------
+    describe '".pd stfu"', ->
+      context 'when everything goes right,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .post('/maintenance windows')
+          .reply(200, require('./fixtures/maintenance_create-ok.json'))
+
+        afterEach ->
+          nock.cleanAll()
+
+        say 'pd stfu', ->
+          it 'returns ongoing maintenances', ->
+            expect(hubotResponse())
+            .to.eql 'Maintenance created for all services until 11:00 (id PW98YIO).'
