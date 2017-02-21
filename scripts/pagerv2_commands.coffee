@@ -122,7 +122,6 @@ module.exports = (robot) ->
         res.send e
       res.finish()
 
-  # TODO
   #   hubot pd [who is] next [oncall] - tells who is next on call
     robot.respond (
       /(?:pd )?(?:who(?: is|'s) )?(next on ?call|on ?call next)\s*$/
