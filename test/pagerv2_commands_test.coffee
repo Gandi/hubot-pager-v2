@@ -532,4 +532,4 @@ describe 'pagerv2_commands', ->
         say 'pd stfu', ->
           it 'returns ongoing maintenances', ->
             expect(hubotResponse())
-            .to.eql 'Maintenance created for all services until 11:00 (id PW98YIO).'
+            .to.eql 'Maintenance created for all services until 03:00 UTC (id PW98YIO).'

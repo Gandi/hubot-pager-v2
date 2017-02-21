@@ -321,8 +321,8 @@ module.exports = (robot) ->
       [ _, duration, description ] = res.match
       pagerv2.addMaintenance(res.envelope.user, duration, description)
       .then (data) ->
-        end_time = moment(data.maintenance_window.end_time).format('HH:mm')
-        res.send "Maintenance created for all services until #{end_time} " +
+        end_time = moment(data.maintenance_window.end_time).utc().format('HH:mm')
+        res.send "Maintenance created for all services until #{end_time} UTC " +
                  "(id #{data.maintenance_window.id})."
       .catch (e) ->
         res.send e
