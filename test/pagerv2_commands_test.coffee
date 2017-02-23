@@ -533,3 +533,19 @@ describe 'pagerv2_commands', ->
           it 'returns ongoing maintenances', ->
             expect(hubotResponse())
             .to.eql 'Maintenance created for all services until 03:00 UTC (id PW98YIO).'
+
+    # ----------------------------------------------------------------------------------------------
+    describe '".pd end PW98YIO"', ->
+      context 'when everything goes right,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .delete('/maintenance windows/PW98YIO')
+          .reply(200, { })
+
+        afterEach ->
+          nock.cleanAll()
+
+        say 'pd end PW98YIO', ->
+          it 'responds that the maintenance is now cancelled', ->
+            expect(hubotResponse())
+            .to.eql 'Maintenance ended.'

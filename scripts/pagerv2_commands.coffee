@@ -328,11 +328,14 @@ module.exports = (robot) ->
         res.send e
       res.finish()
 
-  # TODO
   #   hubot pd up|end|back <maintenance> - ends <maintenance>
     robot.respond /pd (?:up|back|end) ([A-Z0-9]+)\s*$/, 'pd_end_maintenance', (res) ->
       [ _, maintenance ] = res.match
-      res.send 'Not yet implemented'
+      pagerv2.endMaintenance(res.envelope.user, maintenance)
+      .then (data) ->
+        res.send 'Maintenance ended.'
+      .catch (e) ->
+        res.send e
       res.finish()
 
   # TODO

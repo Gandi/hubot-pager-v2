@@ -369,6 +369,9 @@ class Pagerv2
         }
       @request('POST', '/maintenance windows', payload, email)
 
+  endMaintenance: (user, id) ->
+    @request('DELETE', "/maintenance windows/#{id}", { })
+
 
 
 module.exports = Pagerv2
