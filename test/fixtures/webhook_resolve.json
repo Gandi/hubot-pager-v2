@@ -1,0 +1,52 @@
+{
+  "messages": [{
+    "type": "incident.resolve",
+    "data": {
+      "incident": {
+        "id": "PRORDTY",
+        "incident_number": 2126,
+        "created_on": "2016-02-22T21:02:55Z",
+        "status": "resolved",
+        "pending_actions": [],
+        "html_url": "https://webdemo.pagerduty.com/incidents/PRORDTY",
+        "incident_key": "17a02d0d370d4add8e53132199614121",
+        "service": {
+          "id": "PDS1SN6",
+          "name": "Production XDB Cluster",
+          "html_url": "https://webdemo.pagerduty.com/services/PDS1SN6",
+          "deleted_at": null,
+          "description": "Primary production datastore."
+        },
+        "escalation_policy": {
+          "id": "P55N6KH",
+          "name": "Database Executive",
+          "deleted_at": null
+        },
+        "assigned_to_user": null,
+        "trigger_summary_data": {
+          "subject": "CPU Load High on xdb_production_echo"
+        },
+        "trigger_details_html_url": "https://webdemo.pagerduty.com/incidents/PRORDTY/log_entries/Q2AIXW2ZIMCI4P",
+        "trigger_type": "web_trigger",
+        "last_status_change_on": "2016-02-22T21:38:30Z",
+        "last_status_change_by": {
+          "id": "PFBSJ2Z",
+          "name": "Wiley Jacobson",
+          "email": "wiley.jacobson@example.com",
+          "html_url": "https://webdemo.pagerduty.com/users/PFBSJ2Z"
+        },
+        "number_of_escalations": 4,
+        "resolved_by_user": {
+          "id": "PFBSJ2Z",
+          "name": "Wiley Jacobson",
+          "email": "wiley.jacobson@example.com",
+          "html_url": "https://webdemo.pagerduty.com/users/PFBSJ2Z"
+        },
+        "assigned_to": [],
+        "urgency": "high"
+      }
+    },
+    "id": "9dd14c90-d9ac-11e5-9ad4-22000a1798ef",
+    "created_on": "2016-02-22T21:38:30Z"
+  }]
+}
