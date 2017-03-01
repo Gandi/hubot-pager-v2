@@ -5,9 +5,10 @@
 #
 # Configuration:
 #  PAGERV2_API_KEY
-#  PAGERV2_SCHEDULE_ID  # the schedule used for oncall and overrides
-#  PAGERV2_OVERRIDERS   # list of user_id that can be targets of overrides
-#  PAGERV2_SERVICES     # list of service ids that are watched
+#  PAGERV2_SCHEDULE_ID       # the schedule used for oncall and overrides
+#  PAGERV2_OVERRIDERS        # list of user_id that can be targets of overrides
+#  PAGERV2_SERVICES          # list of service ids that are watched
+#  PAGERV2_DEFAULT_RESOLVER  # name of the default user for resolution (ex. nagios)
 #
 # Author:
 #   mose
@@ -16,6 +17,7 @@ https = require 'https'
 moment = require 'moment'
 Promise = require 'bluebird'
 querystring = require 'querystring'
+
 
 class Pagerv2
 
@@ -371,6 +373,46 @@ class Pagerv2
 
   endMaintenance: (user, id) ->
     @request('DELETE', "/maintenance windows/#{id}", { })
+
+  coloring: ->
+
+    irc: (text, color) ->
+      colors = require('irc-colors')
+      if colors[color]
+        colors[color](text)
+      else
+        text
+
+    slack: (text, color) ->
+      "*#{text}*"
+
+    generic: (text, color) ->
+      text
+
+  parseWebhook: (adapter, messages) ->
+    new Promise (res, err) ->
+      colors = {
+        trigger: 'red',
+        unacknowledge: 'red',
+        acknowledge: 'yellow',
+        resolve: 'green',
+        assign: 'blue',
+        escalate: 'blue'
+      }
+      res messages.map (message) ->
+        if not @coloring[adapter]?
+          adapter = 'generic'
+        origin = @coloring[adapter]("[#{pagerServices[message.data.incident.service.id]}]")
+        level = message.type.substring(message.type.indexOf('.') + 1)
+        description = message.data.incident.trigger_summary_data.subject
+        who = if message.data.incident.assigned_to_user?
+          message.data.incident.assigned_to_user.name
+        else if message.data.incident.resolved_by_user?
+          message.data.incident.resolved_by_user.name
+        else
+          process.env.PAGERV2_DEFAULT_RESOLVER or 'nagios'
+
+        "#{origin} #{description} - #{level} (#{who})"
 
 
 

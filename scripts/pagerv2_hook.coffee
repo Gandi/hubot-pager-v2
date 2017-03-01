@@ -29,11 +29,21 @@ module.exports = (robot) ->
     }
     robot.pagerv2 ?= new Pagerv2 robot, process.env
     pagerv2 = robot.pagerv2
-    # console.log robot.pagerv2.data
 
     # Webhook listener
     if pagerEndpoint and pagerAnnounceRoom
       robot.router.post pagerEndpoint, (req, res) ->
-        robot.logger.debug req.body
-        pagerv2.parseWebhook(req.body, pagerRoom, res)
+        if req.body? and req.body.messages? and req.body.messages[0].type?
+          robot.logger.debug req.body
+          if /^incident.*$/.test(req.body.messages[0].type)
+            pagerv2.parseWebhook(req.body.messages)
+            .then (messages) ->
+              for message in messages
+                robot.messageRoom pagerRoom, message
+          else
+            robot.logger.warning '[pagerv2] Invalid hook payload ' +
+                                 "type #{req.body.messages[0].type} from #{req.ip}"
+        else
+            robot.logger.warning "[pagerv2] Invalid hook payload from #{req.ip}"
+
         res.end()
