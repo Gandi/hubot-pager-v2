@@ -36,7 +36,7 @@ module.exports = (robot) ->
         if req.body? and req.body.messages? and req.body.messages[0].type?
           robot.logger.debug req.body
           if /^incident.*$/.test(req.body.messages[0].type)
-            pagerv2.parseWebhook(req.body.messages)
+            pagerv2.parseWebhook(robot.adapter.name, req.body.messages)
             .then (messages) ->
               for message in messages
                 robot.messageRoom pagerRoom, message
