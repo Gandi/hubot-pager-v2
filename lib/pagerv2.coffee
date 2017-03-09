@@ -247,7 +247,12 @@ class Pagerv2
   getIncident: (incident) ->
     @request('GET', "/incidents/#{incident}")
 
-  listIncidents: (incidents = '', statuses = 'triggered,acknowledged') ->
+  listIncidents: (
+    incidents = '',
+    statuses = 'triggered,acknowledged',
+    date_since = null,
+    date_until = null
+  ) ->
     if incidents isnt ''
       new Promise (res, err) ->
         res {
@@ -256,9 +261,15 @@ class Pagerv2
           }
     else
       query = {
-        date_range: 'all',
         time_zone: 'UTC'
-      }
+      }      
+      if date_since?
+        unless date_until?
+          date_until = moment()
+        query['date_since'] = moment(date_since).format()
+        query['date_until'] = moment(date_until).format()
+      else
+        query['date_range'] = 'all'
       if statuses?
         query.statuses = statuses.split /,/
       @request('GET', '/incidents', query)
