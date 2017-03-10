@@ -69,9 +69,9 @@ class Pagerv2
               err "#{json_data.error.code} #{json_data.error.message}"
             else
               res json_data
-        req.end()
         req.on 'error', (error) ->
           err "#{error.code} #{error.message}"
+        req.end()
       else
         err 'PAGERV2_API_KEY is not set in your environment.'
 
@@ -158,6 +158,7 @@ class Pagerv2
     }
     @request('GET', "/schedules/#{schedule_id}", query)
     .then (body) ->
+#      console.log body.schedule
       body.schedule.final_schedule.rendered_schedule_entries[0]
 
   getOverride: (schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->

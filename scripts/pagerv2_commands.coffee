@@ -109,6 +109,7 @@ module.exports = (robot) ->
     robot.respond /(?:pd )?(?:who(?: is|'s) )?on ?call\s*$/, 'pd_oncall', (res) ->
       pagerv2.getSchedule()
       .then (data) ->
+        # console.log data
         nowDate = moment().utc()
         endDate = moment(data.end).utc()
         if nowDate.isSame(endDate, 'day')
