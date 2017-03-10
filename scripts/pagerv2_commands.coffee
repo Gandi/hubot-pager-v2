@@ -59,8 +59,6 @@ path = require 'path'
 
 module.exports = (robot) ->
 
-  robot.brain.on 'loaded', ->
-
     robot.brain.data.pagerv2 ?= {
       users: { }
     }

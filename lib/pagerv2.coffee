@@ -64,7 +64,11 @@ class Pagerv2
           response.on 'data', (chunk) ->
             data += chunk
           response.on 'end', ->
-            res JSON.parse(data)
+            json_data = JSON.parse(data)
+            if json_data.error?
+              err "#{json_data.error.code} #{json_data.error.message}"
+            else
+              res json_data
         req.end()
         req.on 'error', (error) ->
           err "#{error.code} #{error.message}"
@@ -150,8 +154,7 @@ class Pagerv2
     query = {
       since: fromtime or moment().format(),
       until: totime or moment().add(1, 'minutes').format(),
-      time_zone: 'UTC',
-      overflow: 'true'
+      time_zone: 'UTC'
     }
     @request('GET', "/schedules/#{schedule_id}", query)
     .then (body) ->
