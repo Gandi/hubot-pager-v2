@@ -107,9 +107,8 @@ module.exports = (robot) ->
 
   #   hubot pd oncall - returns who is on call
     robot.respond /(?:pd )?(?:who(?: is|'s) )?on ?call\s*$/, 'pd_oncall', (res) ->
-      pagerv2.getSchedule()
+      pagerv2.getOncall()
       .then (data) ->
-        # console.log data
         nowDate = moment().utc()
         endDate = moment(data.end).utc()
         if nowDate.isSame(endDate, 'day')
@@ -125,18 +124,23 @@ module.exports = (robot) ->
     robot.respond (
       /(?:pd )?(?:who(?: is|'s) )?(next on ?call|on ?call next)\s*$/
     ), 'pd_next_oncall', (res) ->
-      pagerv2.getSchedule()
+      pagerv2.getOncall()
       .then (data) ->
         fromtime = moment(data.end).utc().add(1, 'minute').format()
-        pagerv2.getSchedule(fromtime)
+        pagerv2.getOncall(fromtime)
       .then (data) ->
         nowDate = moment().utc()
+        startDate = moment(data.start).utc()
+        if nowDate.isSame(startDate, 'day')
+          startDate = 'at ' + startDate.format('HH:mm')
+        else
+          startDate = 'on ' + startDate.format('dddd HH:mm')
         endDate = moment(data.end).utc()
         if nowDate.isSame(endDate, 'day')
           endDate = endDate.format('HH:mm')
         else
           endDate = endDate.format('dddd HH:mm')
-        res.send "#{data.user.summary} will be next on call until #{endDate} (utc)."
+        res.send "#{data.user.summary} will be next on call #{startDate} until #{endDate} (utc)."
       .catch (e) ->
         res.send e
       res.finish()

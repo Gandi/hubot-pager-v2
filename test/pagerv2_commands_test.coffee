@@ -108,7 +108,7 @@ describe 'pagerv2_commands', ->
           }
         }
         nock('https://api.pagerduty.com')
-        .get('/users')
+        .get('/users?query=momo%40example.com')
         .reply 200, require('./fixtures/users_list-match.json')
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
@@ -148,7 +148,7 @@ describe 'pagerv2_commands', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-        .get('/users')
+        .get('/users?query=toto%40example.com')
         .reply 200, require('./fixtures/users_list-nomatch.json')
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
@@ -163,7 +163,7 @@ describe 'pagerv2_commands', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-        .get('/users')
+        .get('/users?query=toto%40example.com')
         .reply 200, require('./fixtures/users_list-match.json')
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
@@ -180,7 +180,7 @@ describe 'pagerv2_commands', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-        .get('/users')
+        .get('/users?query=toto%40example.com')
         .reply 200, require('./fixtures/users_list-nomatch.json')
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
@@ -195,7 +195,7 @@ describe 'pagerv2_commands', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-        .get('/users')
+        .get('/users?query=toto%40example.com')
         .reply 200, require('./fixtures/users_list-match.json')
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
@@ -212,8 +212,8 @@ describe 'pagerv2_commands', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-        .get('/schedules/42')
-        .reply 200, require('./fixtures/schedule_get-ok.json')
+        .get('/oncalls?time_zone=UTC&schedule_ids%5B%5D=42&earliest=true')
+        .reply 200, require('./fixtures/oncall_list-ok.json')
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
@@ -221,7 +221,7 @@ describe 'pagerv2_commands', ->
       say 'pd oncall', ->
         it 'returns name of who is on call', ->
           expect(hubotResponse())
-          .to.eql 'Regina Phalange is on call until Tuesday 22:00 (utc).'
+          .to.eql 'Tim Wright is on call until Saturday 20:28 (utc).'
 
   # ------------------------------------------------------------------------------------------------
   describe '".pd next oncall"', ->
@@ -229,10 +229,13 @@ describe 'pagerv2_commands', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-        .get('/schedules/42')
-        .reply(200, require('./fixtures/schedule_get-ok.json'))
-        .get('/schedules/42')
-        .reply 200, require('./fixtures/schedule_get_next-ok.json')
+        .get('/oncalls?time_zone=UTC&schedule_ids%5B%5D=42&earliest=true')
+        .reply(200, require('./fixtures/oncall_list-ok.json'))
+        .filteringPath( (path) ->
+          path.replace /(since|until)=[^&]*/g, '$1=x'
+        )
+        .get('/oncalls?time_zone=UTC&schedule_ids%5B%5D=42&earliest=true&since=x&until=x')
+        .reply 200, require('./fixtures/oncall_list_next-ok.json')
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
@@ -240,7 +243,7 @@ describe 'pagerv2_commands', ->
       say 'pd next oncall', ->
         it 'returns name of who is on call', ->
           expect(hubotResponse())
-          .to.eql 'Joe Next will be next on call until Wednesday 01:00 (utc).'
+          .to.eql 'Bea Blala will be next on call on Saturday 20:28 until Saturday 23:28 (utc).'
 
   # ================================================================================================
   context 'caller is known', ->

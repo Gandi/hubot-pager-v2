@@ -47,30 +47,34 @@ class Pagerv2
       if process.env.PAGERV2_API_KEY?
         auth = "Token token=#{process.env.PAGERV2_API_KEY}"
         body = querystring.stringify(query)
+        if method is 'GET'
+          endpoint += "?#{body}"
         options = {
           hostname: 'api.pagerduty.com'
           port: 443
           method: method
           path: endpoint
           headers: {
-            Authorization: auth
+            Authorization: "#{auth}",
             Accept: 'application/vnd.pagerduty+json;version=2'
           }
         }
         if from?
           options.headers.From = from
         req = https.request options, (response) ->
-          data = ''
+          data = []
           response.on 'data', (chunk) ->
-            data += chunk
+            data.push chunk
           response.on 'end', ->
-            json_data = JSON.parse(data)
+            json_data = JSON.parse(data.join(''))
             if json_data.error?
               err "#{json_data.error.code} #{json_data.error.message}"
             else
               res json_data
         req.on 'error', (error) ->
           err "#{error.code} #{error.message}"
+        if method is 'PUT' or method is 'POST'
+          req.write body
         req.end()
       else
         err 'PAGERV2_API_KEY is not set in your environment.'
@@ -152,13 +156,13 @@ class Pagerv2
 
   getSchedule: (fromtime = false, totime = false, schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
     query = {
-      since: fromtime or moment().format(),
-      until: totime or moment().add(1, 'minutes').format(),
+      since: fromtime or moment().utc().format(),
+      until: totime or moment().utc().add(1, 'minutes').format(),
       time_zone: 'UTC'
     }
     @request('GET', "/schedules/#{schedule_id}", query)
     .then (body) ->
-#      console.log body.schedule
+      # console.log body.schedule
       body.schedule.final_schedule.rendered_schedule_entries[0]
 
   getOverride: (schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
@@ -172,6 +176,18 @@ class Pagerv2
     .then (body) ->
       body.overrides
 
+  getOncall: (fromtime = null, schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
+    query = {
+      time_zone: 'UTC',
+      'schedule_ids[]': schedule_id,
+      earliest: 'true'
+    }
+    if fromtime?
+      query['since'] = moment(fromtime).utc().add(1, 'minutes').format()
+      query['until'] = moment(fromtime).utc().add(2, 'minutes').format()
+    @request('GET', "/oncalls", query)
+    .then (body) ->
+      body.oncalls[0]
 
   setOverride: (from, who, duration) ->
     return new Promise (res, err) =>
