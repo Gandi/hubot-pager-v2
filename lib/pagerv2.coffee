@@ -291,7 +291,7 @@ class Pagerv2
       else
         query['date_range'] = 'all'
       if statuses?
-        query.statuses = statuses.split /,/
+        query['statuses[]'] = statuses.split /,/
       @request('GET', '/incidents', query)
 
   updateIncidents: (user, incidents = '', which = 'triggered', status = 'acknowledged') ->

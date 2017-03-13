@@ -325,11 +325,12 @@ describe 'pagerv2_commands', ->
             .to.eql 'PT4KHLK (resolved) The server is on fire.'
 
     # ----------------------------------------------------------------------------------------------
-    describe.only '".pd sup"', ->
+    describe '".pd sup"', ->
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .get('/incidents')
+          .get('/incidents?time_zone=UTC&date_range=all' + 
+               '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
           .reply(200, require('./fixtures/incident_list-ok.json'))
 
         afterEach ->
@@ -345,7 +346,7 @@ describe 'pagerv2_commands', ->
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .get('/incidents')
+          .get('/incidents?time_zone=UTC&date_range=all&statuses%5B%5D=triggered')
           .reply(200, require('./fixtures/incident_list-ok.json'))
           .put('/incidents')
           .reply(200, require('./fixtures/incident_manage-ok.json'))
@@ -379,7 +380,7 @@ describe 'pagerv2_commands', ->
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .get('/incidents')
+          .get('/incidents?time_zone=UTC&date_range=all&statuses%5B%5D=acknowledged')
           .reply(200, require('./fixtures/incident_list-ok.json'))
           .put('/incidents')
           .reply(200, require('./fixtures/incident_manage-ok.json'))
@@ -413,7 +414,8 @@ describe 'pagerv2_commands', ->
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .get('/incidents')
+          .get('/incidents?time_zone=UTC&date_range=all' + 
+               '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
           .reply(200, require('./fixtures/incident_list-ok.json'))
           .put('/incidents')
           .reply(200, require('./fixtures/incident_manage-ok.json'))
@@ -447,7 +449,8 @@ describe 'pagerv2_commands', ->
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .get('/incidents')
+          .get('/incidents?time_zone=UTC&date_range=all' + 
+               '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
           .reply(200, require('./fixtures/incident_list-ok.json'))
           .post('/incidents/PT4KHLK/snooze')
           .reply(200, require('./fixtures/incident_snooze-ok.json'))
@@ -513,7 +516,7 @@ describe 'pagerv2_commands', ->
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .get('/maintenance windows')
+          .get('/maintenance windows?filter=ongoing')
           .reply(200, require('./fixtures/maintenance_list-ok.json'))
 
         afterEach ->
