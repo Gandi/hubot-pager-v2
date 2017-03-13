@@ -1,7 +1,8 @@
 path = require 'path'
 
 features = [
-  'commands'
+  'commands',
+  'hook'
 ]
 
 module.exports = (robot) ->

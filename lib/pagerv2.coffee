@@ -405,8 +405,7 @@ class Pagerv2
   endMaintenance: (user, id) ->
     @request('DELETE', "/maintenance windows/#{id}", { })
 
-  coloring: ->
-
+  coloring: {
     irc: (text, color) ->
       colors = require('irc-colors')
       if colors[color]
@@ -419,9 +418,10 @@ class Pagerv2
 
     generic: (text, color) ->
       text
+  }
 
   parseWebhook: (adapter, messages) ->
-    new Promise (res, err) ->
+    new Promise (res, err) =>
       colors = {
         trigger: 'red',
         unacknowledge: 'red',
@@ -430,10 +430,12 @@ class Pagerv2
         assign: 'blue',
         escalate: 'blue'
       }
-      res messages.map (message) ->
-        if not @coloring[adapter]?
-          adapter = 'generic'
-        origin = @coloring[adapter]("[#{pagerServices[message.data.incident.service.id]}]")
+      res messages.map (message) =>
+        if @coloring[adapter]?
+          colorer = @coloring[adapter]
+        else
+          colorer = @coloring.generic
+        origin = colorer("[#{@pagerServices[message.data.incident.service.id]}]")
         level = message.type.substring(message.type.indexOf('.') + 1)
         description = message.data.incident.trigger_summary_data.subject
         who = if message.data.incident.assigned_to_user?
