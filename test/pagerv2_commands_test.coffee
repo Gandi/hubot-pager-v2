@@ -270,7 +270,7 @@ describe 'pagerv2_commands', ->
             expect(hubotResponse())
             .to.eql 'Sorry you cannot set an override of more than 1 day.'
 
-    describe '".pd 120"', ->
+    describe.only '".pd 120"', ->
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
