@@ -270,12 +270,12 @@ describe 'pagerv2_commands', ->
             expect(hubotResponse())
             .to.eql 'Sorry you cannot set an override of more than 1 day.'
 
-    describe.only '".pd 120"', ->
+    describe '".pd 120"', ->
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .get('/schedules/42')
-          .reply(200, require('./fixtures/schedule_get-ok.json'))
+          .get('/oncalls?time_zone=UTC&schedule_ids%5B%5D=42&earliest=true')
+          .reply(200, require('./fixtures/oncall_list-ok.json'))
           .post('/schedules/42/overrides')
           .reply(200, require('./fixtures/override_create-ok.json'))
 
@@ -292,7 +292,10 @@ describe 'pagerv2_commands', ->
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .get('/schedules/42/overrides')
+          .filteringPath( (path) ->
+            path.replace /(since|until)=[^&]*/g, '$1=x'
+          )
+          .get('/schedules/42/overrides?since=x&until=x&editable=true&overflow=true')
           .reply(200, require('./fixtures/override_get-ok.json'))
           .delete('/schedules/42/overrides/PQ47DCP')
           .reply(200, require('./fixtures/override_get-ok.json'))

@@ -351,7 +351,7 @@ module.exports = (robot) ->
   #   hubot pd me now            - creates an override until the end of current oncall
     robot.respond /pd (?:([^ ]+) )?now\s*$/, 'pd_override_now', (res) ->
       [ _, who ] = res.match
-      pagerv2.setOverride(res.envelope.user, who, false)
+      pagerv2.setOverride(res.envelope.user, who)
       .then (data) ->
         res.send "Rejoice #{data.user.summary}! #{data.over.name} is now on call."
       .catch (e) ->

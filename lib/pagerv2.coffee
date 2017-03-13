@@ -47,7 +47,7 @@ class Pagerv2
       if process.env.PAGERV2_API_KEY?
         auth = "Token token=#{process.env.PAGERV2_API_KEY}"
         body = querystring.stringify(query)
-        if method is 'GET'
+        if method is 'GET' and body isnt ''
           endpoint += "?#{body}"
         options = {
           hostname: 'api.pagerduty.com'
@@ -189,12 +189,11 @@ class Pagerv2
     .then (body) ->
       body.oncalls[0]
 
-  setOverride: (from, who, duration) ->
+  setOverride: (from, who, duration = null) ->
     return new Promise (res, err) =>
-      if duration > 1440
+      if duration? and duration > 1440
         err 'Sorry you cannot set an override of more than 1 day.'
       else
-        duration = parseInt duration
         schedule_id = process.env.PAGERV2_SCHEDULE_ID
         overriders = process.env.PAGERV2_OVERRIDERS?.split(',')
         if not who? or who is 'me'
@@ -210,7 +209,7 @@ class Pagerv2
           .bind({ id: null })
           .then (id) =>
             @id = id
-            @getSchedule()
+            @getOncall()
           .then (data) =>
             query  = {
               'start': moment().format(),
@@ -220,6 +219,7 @@ class Pagerv2
               }
             }
             if duration?
+              duration = parseInt duration
               query.end = moment().add(duration, 'minutes').format()
             else
               query.end = moment(data.end)
