@@ -325,7 +325,7 @@ describe 'pagerv2_commands', ->
             .to.eql 'PT4KHLK (resolved) The server is on fire.'
 
     # ----------------------------------------------------------------------------------------------
-    describe '".pd sup"', ->
+    describe.only '".pd sup"', ->
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
