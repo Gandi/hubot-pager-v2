@@ -329,7 +329,7 @@ describe 'pagerv2_commands', ->
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .get('/incidents?time_zone=UTC&date_range=all' + 
+          .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' + 
                '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
           .reply(200, require('./fixtures/incident_list-ok.json'))
 
@@ -346,7 +346,8 @@ describe 'pagerv2_commands', ->
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .get('/incidents?time_zone=UTC&date_range=all&statuses%5B%5D=triggered')
+          .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
+               '&statuses%5B%5D=triggered')
           .reply(200, require('./fixtures/incident_list-ok.json'))
           .put('/incidents')
           .reply(200, require('./fixtures/incident_manage-ok.json'))
@@ -380,7 +381,8 @@ describe 'pagerv2_commands', ->
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .get('/incidents?time_zone=UTC&date_range=all&statuses%5B%5D=acknowledged')
+          .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all&' +
+               'statuses%5B%5D=acknowledged')
           .reply(200, require('./fixtures/incident_list-ok.json'))
           .put('/incidents')
           .reply(200, require('./fixtures/incident_manage-ok.json'))
@@ -414,7 +416,7 @@ describe 'pagerv2_commands', ->
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .get('/incidents?time_zone=UTC&date_range=all' + 
+          .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' + 
                '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
           .reply(200, require('./fixtures/incident_list-ok.json'))
           .put('/incidents')
@@ -449,7 +451,7 @@ describe 'pagerv2_commands', ->
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .get('/incidents?time_zone=UTC&date_range=all' + 
+          .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' + 
                '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
           .reply(200, require('./fixtures/incident_list-ok.json'))
           .post('/incidents/PT4KHLK/snooze')
