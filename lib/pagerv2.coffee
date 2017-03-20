@@ -282,6 +282,9 @@ class Pagerv2
     else
       query = {
         time_zone: 'UTC'
+        include: [
+          'first_trigger_log_entry'
+        ]
       }      
       if date_since?
         unless date_until?
