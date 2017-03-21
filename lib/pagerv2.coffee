@@ -185,7 +185,7 @@ class Pagerv2
     if fromtime?
       query['since'] = moment(fromtime).utc().add(1, 'minutes').format()
       query['until'] = moment(fromtime).utc().add(2, 'minutes').format()
-    @request('GET', "/oncalls", query)
+    @request('GET', '/oncalls', query)
     .then (body) ->
       body.oncalls[0]
 
@@ -283,7 +283,7 @@ class Pagerv2
       query = {
         time_zone: 'UTC',
         'include[]': 'first_trigger_log_entry'
-      }      
+      }
       if date_since?
         unless date_until?
           date_until = moment()
@@ -445,7 +445,6 @@ class Pagerv2
           message.data.incident.resolved_by_user.name
         else
           process.env.PAGERV2_DEFAULT_RESOLVER or 'nagios'
-
         "#{origin} #{description} - #{level} (#{who})"
 
 
