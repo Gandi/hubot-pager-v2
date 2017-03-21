@@ -7,6 +7,7 @@ Hubot = require '../node_modules/hubot'
 path   = require 'path'
 nock   = require 'nock'
 sinon  = require 'sinon'
+moment = require 'moment'
 expect = require('chai').use(require('sinon-chai')).expect
 
 room = null
@@ -208,6 +209,21 @@ describe 'pagerv2_commands', ->
 
   # ------------------------------------------------------------------------------------------------
   describe '".pd oncall"', ->
+    context 'when something goes wrong,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = { users: { } }
+        nock('https://api.pagerduty.com')
+        .get('/oncalls?time_zone=UTC&schedule_ids%5B%5D=42&earliest=true')
+        .reply 503, { error: { code: 503, message: "it's all broken!" } }
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pd oncall', ->
+        it 'returns name of who is on call', ->
+          expect(hubotResponse())
+          .to.eql "503 it's all broken!"
+
     context 'when everything goes right,', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
@@ -222,6 +238,25 @@ describe 'pagerv2_commands', ->
         it 'returns name of who is on call', ->
           expect(hubotResponse())
           .to.eql 'Tim Wright is on call until Saturday 20:28 (utc).'
+
+    context 'when it is same day,', ->
+      beforeEach ->
+        payload = require('./fixtures/oncall_list-ok.json')
+        @end_time = moment().utc().add(5, 'minutes')
+        payload.oncalls[0].start = moment().utc().subtract(5, 'minutes').format()
+        payload.oncalls[0].end = @end_time.format()
+        room.robot.brain.data.pagerv2 = { users: { } }
+        nock('https://api.pagerduty.com')
+        .get('/oncalls?time_zone=UTC&schedule_ids%5B%5D=42&earliest=true')
+        .reply 200, payload
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pd oncall', ->
+        it 'returns name of who is on call', ->
+          expect(hubotResponse())
+          .to.eql "Tim Wright is on call until #{@end_time.format('HH:mm')} (utc)."
 
   # ------------------------------------------------------------------------------------------------
   describe '".pd next oncall"', ->
