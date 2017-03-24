@@ -38,6 +38,8 @@ describe 'phabs_feeds module', ->
     process.env.PAGERV2_ENDPOINT = '/test_hook'
     process.env.PORT = 8089
     room = helper.createRoom()
+    room.robot.adapterName = 'console'
+
     room.robot.brain.userForId 'user', {
       name: 'user'
     }
@@ -166,6 +168,7 @@ describe 'phabs_feeds module', ->
   context 'test the http responses', ->
     beforeEach ->
       room.robot.logger = sinon.spy()
+      room.robot.logger.debug = sinon.spy()
       room.robot.logger.warning = sinon.spy()
 
     context 'with invalid payload', ->
@@ -188,3 +191,26 @@ describe 'phabs_feeds module', ->
       it 'responds with status 422', ->
         expect(room.robot.logger.warning).calledWith '[pagerv2] Invalid hook payload from 127.0.0.1'
         expect(@response.statusCode).to.equal 422
+
+    context 'with valid payload', ->
+      beforeEach (done) ->
+        do nock.enableNetConnect
+        options = {
+          host: 'localhost',
+          port: process.env.PORT,
+          path: process.env.PAGERV2_ENDPOINT,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+        @msg = require('./fixtures/webhook_resolve.json')
+        @msg.messages[0].type = 'incident.plouf'
+        data = JSON.stringify(@msg)
+        req = http.request options, (@response) => done()
+        req.write(data)
+        req.end()
+
+      it 'responds with status 422', ->
+        expect(room.robot.logger.debug).calledWith @msg
+        expect(@response.statusCode).to.equal 200
