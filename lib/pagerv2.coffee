@@ -431,27 +431,24 @@ class Pagerv2
         assign: 'blue',
         escalate: 'blue'
       }
-      try
-        res messages.map (message) =>
-          level = message.type.substring(message.type.indexOf('.') + 1)
-          if @coloring[adapter]?
-            colorer = @coloring[adapter]
-          else
-            colorer = @coloring.generic
-          origin = colorer(
-            "[#{@pagerServices[message.data.incident.service.id]}]",
-            colors[level]
-          )
-          description = message.data.incident.trigger_summary_data.subject
-          who = if message.type is 'incident.resolve' and message.data.incident.resolved_by_user?
-                  message.data.incident.resolved_by_user.name
-                else if message.data.incident.assigned_to_user?
-                  message.data.incident.assigned_to_user.name
-                else
-                  process.env.PAGERV2_DEFAULT_RESOLVER or 'nagios'
-          "#{origin} #{description} - #{level} (#{who})"
-      catch e
-        err e
+      res messages.map (message) =>
+        level = message.type.substring(message.type.indexOf('.') + 1)
+        if @coloring[adapter]?
+          colorer = @coloring[adapter]
+        else
+          colorer = @coloring.generic
+        origin = colorer(
+          "[#{@pagerServices[message.data.incident.service.id]}]",
+          colors[level]
+        )
+        description = message.data.incident.trigger_summary_data.subject
+        who = if message.type is 'incident.resolve' and message.data.incident.resolved_by_user?
+                message.data.incident.resolved_by_user.name
+              else if message.data.incident.assigned_to_user?
+                message.data.incident.assigned_to_user.name
+              else
+                process.env.PAGERV2_DEFAULT_RESOLVER or 'nagios'
+        "#{origin} #{description} - #{level} (#{who})"
 
 
 

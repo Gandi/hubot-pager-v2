@@ -193,6 +193,28 @@ describe 'phabs_feeds module', ->
           .calledWith '[pagerv2] Invalid hook payload from 127.0.0.1'
         expect(@response.statusCode).to.equal 422
 
+    context 'with invalid payload, but containing a messages object', ->
+      beforeEach (done) ->
+        do nock.enableNetConnect
+        options = {
+          host: 'localhost',
+          port: process.env.PORT,
+          path: process.env.PAGERV2_ENDPOINT,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+        data = JSON.stringify({ messages: 'hahaha' })
+        req = http.request options, (@response) => done()
+        req.write(data)
+        req.end()
+
+      it 'responds with status 422', ->
+        expect(room.robot.logger.warning)
+          .calledWith '[pagerv2] Invalid hook payload from 127.0.0.1'
+        expect(@response.statusCode).to.equal 422
+
     context 'with invalid type', ->
       beforeEach (done) ->
         do nock.enableNetConnect
