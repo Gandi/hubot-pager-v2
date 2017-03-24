@@ -432,12 +432,15 @@ class Pagerv2
         escalate: 'blue'
       }
       res messages.map (message) =>
+        level = message.type.substring(message.type.indexOf('.') + 1)
         if @coloring[adapter]?
           colorer = @coloring[adapter]
         else
           colorer = @coloring.generic
-        origin = colorer("[#{@pagerServices[message.data.incident.service.id]}]")
-        level = message.type.substring(message.type.indexOf('.') + 1)
+        origin = colorer(
+            "[#{@pagerServices[message.data.incident.service.id]}]",
+            colors[level]
+          )
         description = message.data.incident.trigger_summary_data.subject
         who = if message.type is 'incident.resolve' and message.data.incident.resolved_by_user?
                 message.data.incident.resolved_by_user.name

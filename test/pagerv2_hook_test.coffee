@@ -116,3 +116,32 @@ describe 'phabs_feeds module', ->
         require('./fixtures/webhook_resolve.json').messages
       ).then (announce) ->
         expect(announce).to.eql expected
+
+# -------------------------------------------------------------------------------------------------
+  context 'it is a resolve message with a slack adapter', ->
+
+    it 'should react', ->
+      expected = [
+        '*[undefined]* CPU Load High on xdb_production_echo - resolve (Wiley Jacobson)'
+      ]
+      pagerv2 = new Pagerv2 room.robot
+      pagerv2.parseWebhook(
+        'slack',
+        require('./fixtures/webhook_resolve.json').messages
+      ).then (announce) ->
+        expect(announce).to.eql expected
+
+# -------------------------------------------------------------------------------------------------
+  context 'it is a resolve message with an irc adapter', ->
+
+    it 'should react', ->
+      expected = [
+        '\u000303\u0002\u0002[undefined]\u0003 CPU Load High on xdb_production_echo - ' +
+        'resolve (Wiley Jacobson)'
+      ]
+      pagerv2 = new Pagerv2 room.robot
+      pagerv2.parseWebhook(
+        'irc',
+        require('./fixtures/webhook_resolve.json').messages
+      ).then (announce) ->
+        expect(announce).to.eql expected
