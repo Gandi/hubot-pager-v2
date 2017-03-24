@@ -363,7 +363,7 @@ class Pagerv2
           @request('POST', "/incidents/#{inc.id}/snooze", payload, @from)
         Promise.all incidentsDone
       else
-        throw { message: "There is no #{which} incidents at the moment." }
+        throw { message: 'There is no open incidents at the moment.' }
 
   addNote: (user, incident, note) ->
     @getUserEmail(user, user)

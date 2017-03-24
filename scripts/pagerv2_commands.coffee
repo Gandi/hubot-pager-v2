@@ -178,7 +178,7 @@ module.exports = (robot) ->
         plural = 's'
       res.send "Incident#{plural} #{data.incidents.map( (e) -> e.id).join(', ')} acknowledged."
     .catch (e) ->
-      res.send e
+      res.send e.message or e
     res.finish()
 
 #   hubot pd ack <#>           - acknowledges incident <number>
@@ -191,7 +191,7 @@ module.exports = (robot) ->
         plural = 's'
       res.send "Incident#{plural} #{data.incidents.map( (e) -> e.id).join(', ')} acknowledged."
     .catch (e) ->
-      res.send e
+      res.send e.message or e
     res.finish()
 
 #   hubot pd res|resolve       - acknowledges any unack incidents

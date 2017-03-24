@@ -395,6 +395,21 @@ describe 'pagerv2_commands', ->
             expect(hubotResponse())
             .to.eql 'Incident PT4KHLK acknowledged.'
 
+      context 'when there are no incidents,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all&' +
+               'statuses%5B%5D=triggered')
+          .reply(200, require('./fixtures/incident_list-empty.json'))
+
+        afterEach ->
+          nock.cleanAll()
+
+        say 'pd ack', ->
+          it 'says there is no incidents', ->
+            expect(hubotResponse())
+            .to.eql 'There is no triggered incidents at the moment.'
+
     # ----------------------------------------------------------------------------------------------
     describe '".pd ack PT4KHLK"', ->
       context 'when everything goes right,', ->
@@ -441,7 +456,7 @@ describe 'pagerv2_commands', ->
           nock.cleanAll()
 
         say 'pd res', ->
-          it 'says incident was resolved', ->
+          it 'says there is no incidents', ->
             expect(hubotResponse())
             .to.eql 'There is no acknowledged incidents at the moment.'
 
@@ -529,6 +544,21 @@ describe 'pagerv2_commands', ->
           it 'says all incidents have been snoozed', ->
             expect(hubotResponse())
             .to.eql 'Incident PT4KHLK snoozed.'
+
+      context 'when there are no incidents,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
+               '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
+          .reply(200, require('./fixtures/incident_list-empty.json'))
+
+        afterEach ->
+          nock.cleanAll()
+
+        say 'pd snooze all', ->
+          it 'says there are no incidents', ->
+            expect(hubotResponse())
+            .to.eql 'There is no open incidents at the moment.'
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd snooze PT4KHLK"', ->
