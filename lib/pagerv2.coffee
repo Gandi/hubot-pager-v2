@@ -314,7 +314,7 @@ class Pagerv2
           }
         @request('PUT', '/incidents', payload, @from)
       else
-        "There is no #{which} incidents at the moment."
+        throw { message: "There is no #{which} incidents at the moment." }
 
   assignIncidents: (user, who, incidents = '') ->
     @getUserEmail(user, user)
@@ -346,7 +346,7 @@ class Pagerv2
             }
         @request('PUT', '/incidents', payload, @from)
       else
-        "There is no #{which} incidents at the moment."
+        throw { message: 'There is no incidents at the moment.' }
 
   snoozeIncidents: (user, incidents = '', duration = 120) ->
     @getUserEmail(user, user)

@@ -465,6 +465,21 @@ describe 'pagerv2_commands', ->
             expect(hubotResponse())
             .to.eql 'Incident PT4KHLK assigned to momo.'
 
+      context 'when there are no incidents,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
+               '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
+          .reply(200, require('./fixtures/incident_list-empty.json'))
+
+        afterEach ->
+          nock.cleanAll()
+
+        say 'pd assign all to me', ->
+          it 'says there are no incidents', ->
+            expect(hubotResponse())
+            .to.eql 'There is no incidents at the moment.'
+
     # ----------------------------------------------------------------------------------------------
     describe '".pd assign PT4KHLK to me"', ->
       context 'when everything goes right,', ->

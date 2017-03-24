@@ -233,7 +233,7 @@ module.exports = (robot) ->
       res.send "Incident#{plural} #{data.incidents.map( (e) -> e.id).join(', ')} " +
                "assigned to #{who}."
     .catch (e) ->
-      res.send e
+      res.send e.message or e
     res.finish()
 
 #   hubot pd assign <#,#,#> to me     - assigns incidents <#,#,#> to caller
@@ -250,7 +250,10 @@ module.exports = (robot) ->
       res.send "Incident#{plural} #{data.incidents.map( (e) -> e.id).join(', ')} " +
                "assigned to #{who}."
     .catch (e) ->
-      res.send e
+      if e.message?
+        res.send e.message
+      else
+        res.send e
     res.finish()
 
 #   hubot pd snooze [all] [for] [<duration>] [min]  - acknowledges any unack incidents
