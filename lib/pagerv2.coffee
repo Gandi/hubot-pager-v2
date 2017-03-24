@@ -439,8 +439,7 @@ class Pagerv2
         origin = colorer("[#{@pagerServices[message.data.incident.service.id]}]")
         level = message.type.substring(message.type.indexOf('.') + 1)
         description = message.data.incident.trigger_summary_data.subject
-        who = if message.type is 'incident.resolve' and 
-                 message.data.incident.resolved_by_user?
+        who = if message.type is 'incident.resolve' and message.data.incident.resolved_by_user?
                 message.data.incident.resolved_by_user.name
               else if message.data.incident.assigned_to_user?
                 message.data.incident.assigned_to_user.name

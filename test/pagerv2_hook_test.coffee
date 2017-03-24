@@ -71,6 +71,39 @@ describe 'phabs_feeds module', ->
         expect(announce).to.eql expected
 
 # -------------------------------------------------------------------------------------------------
+  context 'it is a trigger message without assigned user', ->
+    context 'and a default resolver is set', ->
+      beforeEach ->
+        process.env.PAGERV2_DEFAULT_RESOLVER = 'monit system'
+      afterEach ->
+        delete process.env.PAGERV2_DEFAULT_RESOLVER
+
+      it 'should react', ->
+        expected = [
+          '[undefined] CPU Load High on xdb_production_echo - trigger (monit system)'
+        ]
+        pagerv2 = new Pagerv2 room.robot
+        pagerv2.parseWebhook(
+          'console',
+          require('./fixtures/webhook_trigger_unassigned.json').messages
+        ).then (announce) ->
+          expect(announce).to.eql expected
+
+# -------------------------------------------------------------------------------------------------
+  context 'it is a trigger message without assigned user', ->
+    context 'and no default resolver is set', ->
+      it 'should react', ->
+        expected = [
+          '[undefined] CPU Load High on xdb_production_echo - trigger (nagios)'
+        ]
+        pagerv2 = new Pagerv2 room.robot
+        pagerv2.parseWebhook(
+          'console',
+          require('./fixtures/webhook_trigger_unassigned.json').messages
+        ).then (announce) ->
+          expect(announce).to.eql expected
+
+# -------------------------------------------------------------------------------------------------
   context 'it is a resolve message', ->
 
     it 'should react', ->
