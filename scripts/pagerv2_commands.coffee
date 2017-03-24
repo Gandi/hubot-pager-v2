@@ -203,7 +203,7 @@ module.exports = (robot) ->
         plural = 's'
       res.send "Incident#{plural} #{data.incidents.map( (e) -> e.id).join(', ')} resolved."
     .catch (e) ->
-      res.send e
+      res.send e.message or e
     res.finish()
 
 #   hubot pd res|resolve <#>   - acknowledges incident <number>
@@ -216,7 +216,7 @@ module.exports = (robot) ->
         plural = 's'
       res.send "Incident#{plural} #{data.incidents.map( (e) -> e.id).join(', ')} resolved."
     .catch (e) ->
-      res.send e
+      res.send e.message or e
     res.finish()
 
 #   hubot pd assign [all] to me       - assigns all open incidents to caller

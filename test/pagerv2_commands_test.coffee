@@ -430,6 +430,21 @@ describe 'pagerv2_commands', ->
             expect(hubotResponse())
             .to.eql 'Incident PT4KHLK resolved.'
 
+      context 'when there are no incidents,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all&' +
+               'statuses%5B%5D=acknowledged')
+          .reply(200, require('./fixtures/incident_list-empty.json'))
+
+        afterEach ->
+          nock.cleanAll()
+
+        say 'pd res', ->
+          it 'says incident was resolved', ->
+            expect(hubotResponse())
+            .to.eql 'There is no acknowledged incidents at the moment.'
+
     # ----------------------------------------------------------------------------------------------
     describe '".pd res PT4KHLK"', ->
       context 'when everything goes right,', ->
