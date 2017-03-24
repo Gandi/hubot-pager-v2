@@ -53,18 +53,33 @@ describe 'phabs_feeds module', ->
     delete process.env.PAGERV2_API_KEY
     delete process.env.PAGERV2_SCHEDULE_ID
     delete process.env.PAGERV2_ANNOUNCE_ROOM
+    room.destroy()
 
-  # ---------------------------------------------------------------------------------
-  context 'it is a proper message', ->
+
+# -------------------------------------------------------------------------------------------------
+  context 'it is a trigger message', ->
 
     it 'should react', ->
       expected = [
         '[undefined] CPU Load High on xdb_production_echo - trigger (Laura Haley)'
       ]
       pagerv2 = new Pagerv2 room.robot
-      msg = require('./fixtures/webhook_trigger.json')
       pagerv2.parseWebhook(
         'console',
         require('./fixtures/webhook_trigger.json').messages
+      ).then (announce) ->
+        expect(announce).to.eql expected
+
+# -------------------------------------------------------------------------------------------------
+  context 'it is a resolve message', ->
+
+    it 'should react', ->
+      expected = [
+        '[undefined] CPU Load High on xdb_production_echo - resolve (Wiley Jacobson)'
+      ]
+      pagerv2 = new Pagerv2 room.robot
+      pagerv2.parseWebhook(
+        'console',
+        require('./fixtures/webhook_resolve.json').messages
       ).then (announce) ->
         expect(announce).to.eql expected
