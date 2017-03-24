@@ -13,8 +13,6 @@
 #   mose
 
 Pagerv2 = require '../lib/pagerv2'
-moment = require 'moment'
-path = require 'path'
 
 module.exports = (robot) ->
 
