@@ -189,7 +189,33 @@ describe 'phabs_feeds module', ->
         req.end()
 
       it 'responds with status 422', ->
-        expect(room.robot.logger.warning).calledWith '[pagerv2] Invalid hook payload from 127.0.0.1'
+        expect(room.robot.logger.warning)
+          .calledWith '[pagerv2] Invalid hook payload from 127.0.0.1'
+        expect(@response.statusCode).to.equal 422
+
+    context 'with invalid type', ->
+      beforeEach (done) ->
+        do nock.enableNetConnect
+        options = {
+          host: 'localhost',
+          port: process.env.PORT,
+          path: process.env.PAGERV2_ENDPOINT,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+        @msg = require('./fixtures/webhook_resolve.json')
+        @msg.messages[0].type = 'plouf'
+        data = JSON.stringify(@msg)
+        req = http.request options, (@response) => done()
+        req.write(data)
+        req.end()
+
+      it 'responds with status 422', ->
+        expect(room.robot.logger.debug).calledWith @msg
+        expect(room.robot.logger.warning)
+          .calledWith '[pagerv2] Invalid hook payload type plouf from 127.0.0.1'
         expect(@response.statusCode).to.equal 422
 
     context 'with valid payload', ->
