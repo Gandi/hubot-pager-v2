@@ -36,8 +36,6 @@ module.exports = (robot) ->
           .then (messages) ->
             for message in messages
               robot.messageRoom pagerAnnounceRoom, message
-          .catch (e) ->
-            robot.logger.warning e
           res.status(200).end()
         else
           robot.logger.warning '[pagerv2] Invalid hook payload ' +
