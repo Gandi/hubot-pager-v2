@@ -432,7 +432,7 @@ class Pagerv2
         escalate: 'blue'
       }
       try
-        res messages.map (message) ->
+        res messages.map (message) =>
           level = message.type.substring(message.type.indexOf('.') + 1)
           if @coloring[adapter]?
             colorer = @coloring[adapter]

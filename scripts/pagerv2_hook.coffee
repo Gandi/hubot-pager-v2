@@ -30,7 +30,7 @@ module.exports = (robot) ->
   # Webhook listener
   # console.log robot.adapterName
   if pagerAnnounceRoom?
-    robot.router.post pagerEndpoint, (req, res) =>
+    robot.router.post pagerEndpoint, (req, res) ->
 
       if req.body? and req.body.messages? and req.body.messages[0].type?
         robot.logger.debug req.body
