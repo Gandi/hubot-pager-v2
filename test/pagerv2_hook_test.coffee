@@ -35,6 +35,7 @@ describe 'phabs_feeds module', ->
     process.env.PAGERV2_API_KEY = 'xxx'
     process.env.PAGERV2_SCHEDULE_ID = '42'
     process.env.PAGERV2_ANNOUNCE_ROOM = '#dev'
+    process.env.PAGERV2_ENDPOINT = '/test_hook'
     process.env.PORT = 8089
     room = helper.createRoom()
     room.robot.brain.userForId 'user', {
@@ -53,8 +54,9 @@ describe 'phabs_feeds module', ->
     delete process.env.PAGERV2_API_KEY
     delete process.env.PAGERV2_SCHEDULE_ID
     delete process.env.PAGERV2_ANNOUNCE_ROOM
+    delete process.env.PAGERV2_ENDPOINT
+    delete process.env.PORT
     room.destroy()
-
 
 # -------------------------------------------------------------------------------------------------
   context 'it is a trigger message', ->
@@ -159,3 +161,30 @@ describe 'phabs_feeds module', ->
       pagerv2.parseWebhook('irc', msg)
       .then (announce) ->
         expect(announce).to.eql expected
+
+# -------------------------------------------------------------------------------------------------
+  context 'test the http responses', ->
+    beforeEach ->
+      room.robot.logger = sinon.spy()
+      room.robot.logger.warning = sinon.spy()
+
+    context 'with invalid payload', ->
+      beforeEach (done) ->
+        do nock.enableNetConnect
+        options = {
+          host: 'localhost',
+          port: process.env.PORT,
+          path: process.env.PAGERV2_ENDPOINT,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+        data = querystring.stringify({ })
+        req = http.request options, (@response) => done()
+        req.write(data)
+        req.end()
+
+      it 'responds with status 422', ->
+        expect(room.robot.logger.warning).calledWith '[pagerv2] Invalid hook payload from 127.0.0.1'
+        expect(@response.statusCode).to.equal 422

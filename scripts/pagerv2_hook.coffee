@@ -29,7 +29,7 @@ module.exports = (robot) ->
 
   # Webhook listener
   # console.log robot.adapterName
-  if pagerEndpoint and pagerAnnounceRoom
+  if pagerAnnounceRoom?
     robot.router.post pagerEndpoint, (req, res) ->
       if req.body? and req.body.messages? and req.body.messages[0].type?
         robot.logger.debug req.body
@@ -38,10 +38,11 @@ module.exports = (robot) ->
           .then (messages) ->
             for message in messages
               robot.messageRoom pagerAnnounceRoom, message
+          res.status(200).end()
         else
           robot.logger.warning '[pagerv2] Invalid hook payload ' +
                                "type #{req.body.messages[0].type} from #{req.ip}"
+          res.status(200).end()
       else
         robot.logger.warning "[pagerv2] Invalid hook payload from #{req.ip}"
-
-      res.end()
+        res.status(422).end()
