@@ -145,3 +145,17 @@ describe 'phabs_feeds module', ->
         require('./fixtures/webhook_resolve.json').messages
       ).then (announce) ->
         expect(announce).to.eql expected
+
+# -------------------------------------------------------------------------------------------------
+  context 'it is a resolve message with an irc adapter but unknown type', ->
+
+    it 'should react', ->
+      expected = [
+        '[undefined] CPU Load High on xdb_production_echo - plouf (nagios)'
+      ]
+      pagerv2 = new Pagerv2 room.robot
+      msg = require('./fixtures/webhook_resolve.json').messages
+      msg[0].type = 'incident.plouf'
+      pagerv2.parseWebhook('irc', msg)
+      .then (announce) ->
+        expect(announce).to.eql expected

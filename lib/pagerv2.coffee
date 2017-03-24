@@ -438,9 +438,9 @@ class Pagerv2
         else
           colorer = @coloring.generic
         origin = colorer(
-            "[#{@pagerServices[message.data.incident.service.id]}]",
-            colors[level]
-          )
+          "[#{@pagerServices[message.data.incident.service.id]}]",
+          colors[level]
+        )
         description = message.data.incident.trigger_summary_data.subject
         who = if message.type is 'incident.resolve' and message.data.incident.resolved_by_user?
                 message.data.incident.resolved_by_user.name
