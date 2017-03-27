@@ -280,6 +280,40 @@ describe 'pagerv2_commands', ->
           expect(hubotResponse())
           .to.eql 'Bea Blala will be next on call on Saturday 20:28 until Saturday 23:28 (utc).'
 
+    context 'when it is same day,', ->
+      beforeEach ->
+        payload1 = require('./fixtures/oncall_list-ok.json')
+        payload1.oncalls[0].start = moment().utc().subtract(5, 'minutes').format()
+        payload1.oncalls[0].end = moment().utc().add(5, 'minutes')
+
+        payload2 = require('./fixtures/oncall_list_next-ok.json')
+        @start_time = moment().utc().add(5, 'minutes')
+        @end_time   = moment().utc().add(10, 'minutes')
+        payload2.oncalls[0].start = @start_time.format()
+        payload2.oncalls[0].end = @end_time.format()
+
+        room.robot.brain.data.pagerv2 = { users: { } }
+        nock('https://api.pagerduty.com')
+        .get('/oncalls?time_zone=UTC&schedule_ids%5B%5D=42&earliest=true')
+        .reply(200, payload1)
+        .get(
+          '/oncalls?time_zone=UTC&schedule_ids%5B%5D=42&earliest=true' +
+          '&since=' + encodeURIComponent(moment(@start_time).utc().add(2, 'minute').format()) +
+          '&until=' + encodeURIComponent(moment(@start_time).utc().add(3, 'minute').format())
+        )
+        .reply(200, payload2)
+
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pd next oncall', ->
+        it 'returns name of who is on call', ->
+          expect(hubotResponse())
+          .to.eql "Bea Blala will be next on call at #{@start_time.format('HH:mm')} " +
+                  "until #{@end_time.format('HH:mm')} (utc)."
+
+
   # ================================================================================================
   context 'caller is known', ->
     beforeEach ->
