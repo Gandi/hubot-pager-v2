@@ -362,7 +362,6 @@ describe 'pagerv2_commands', ->
           .reply(200, require('./fixtures/oncall_list-ok.json'))
           .post('/schedules/42/overrides')
           .reply(200, require('./fixtures/override_create-ok.json'))
-
         afterEach ->
           nock.cleanAll()
 
@@ -383,7 +382,6 @@ describe 'pagerv2_commands', ->
           .reply(200, require('./fixtures/override_get-ok.json'))
           .delete('/schedules/42/overrides/PQ47DCP')
           .reply(200, require('./fixtures/override_get-ok.json'))
-
         afterEach ->
           nock.cleanAll()
 
@@ -391,6 +389,37 @@ describe 'pagerv2_commands', ->
           it 'returns name of who is on call', ->
             expect(hubotResponse())
             .to.eql 'Ok, momo! Aurelio Rice override is cancelled.'
+
+    # ----------------------------------------------------------------------------------------------
+    describe '".pd me now"', ->
+      context 'when something goes wrong,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/oncalls?time_zone=UTC&schedule_ids%5B%5D=42&earliest=true')
+          .reply 503, { error: { code: 503, message: "it's all broken!" } }
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        say 'pd me now', ->
+          it 'returns the error message', ->
+            expect(hubotResponse())
+            .to.eql "503 it's all broken!"
+
+      context 'when everything goes right,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/oncalls?time_zone=UTC&schedule_ids%5B%5D=42&earliest=true')
+          .reply(200, require('./fixtures/oncall_list-ok.json'))
+          .post('/schedules/42/overrides')
+          .reply(200, require('./fixtures/override_create-ok.json'))
+        afterEach ->
+          nock.cleanAll()
+
+        say 'pd me now', ->
+          it 'returns name of who is on call', ->
+            expect(hubotResponse())
+            .to.eql 'Rejoice Aurelio Rice! momo is now on call.'
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd incident 1234"', ->
@@ -414,7 +443,6 @@ describe 'pagerv2_commands', ->
           nock('https://api.pagerduty.com')
           .get('/incidents/1234')
           .reply(200, require('./fixtures/incident_get-ok.json'))
-
         afterEach ->
           nock.cleanAll()
 
@@ -447,7 +475,6 @@ describe 'pagerv2_commands', ->
           .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
                '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
           .reply(200, require('./fixtures/incident_list-ok.json'))
-
         afterEach ->
           nock.cleanAll()
 
@@ -481,7 +508,6 @@ describe 'pagerv2_commands', ->
           .reply(200, require('./fixtures/incident_list-ok.json'))
           .put('/incidents')
           .reply(200, require('./fixtures/incident_manage-ok.json'))
-
         afterEach ->
           nock.cleanAll()
 
@@ -496,7 +522,6 @@ describe 'pagerv2_commands', ->
           .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all&' +
                'statuses%5B%5D=triggered')
           .reply(200, require('./fixtures/incident_list-empty.json'))
-
         afterEach ->
           nock.cleanAll()
 
@@ -526,7 +551,6 @@ describe 'pagerv2_commands', ->
           nock('https://api.pagerduty.com')
           .put('/incidents')
           .reply(200, require('./fixtures/incident_manage-ok.json'))
-
         afterEach ->
           nock.cleanAll()
 
@@ -575,7 +599,6 @@ describe 'pagerv2_commands', ->
           .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all&' +
                'statuses%5B%5D=acknowledged')
           .reply(200, require('./fixtures/incident_list-empty.json'))
-
         afterEach ->
           nock.cleanAll()
 
@@ -605,7 +628,6 @@ describe 'pagerv2_commands', ->
           nock('https://api.pagerduty.com')
           .put('/incidents')
           .reply(200, require('./fixtures/incident_manage-ok.json'))
-
         afterEach ->
           nock.cleanAll()
 
@@ -654,7 +676,6 @@ describe 'pagerv2_commands', ->
           .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
                '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
           .reply(200, require('./fixtures/incident_list-empty.json'))
-
         afterEach ->
           nock.cleanAll()
 
@@ -684,7 +705,6 @@ describe 'pagerv2_commands', ->
           nock('https://api.pagerduty.com')
           .put('/incidents')
           .reply(200, require('./fixtures/incident_manage-ok.json'))
-
         afterEach ->
           nock.cleanAll()
 
@@ -733,7 +753,6 @@ describe 'pagerv2_commands', ->
           .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
                '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
           .reply(200, require('./fixtures/incident_list-empty.json'))
-
         afterEach ->
           nock.cleanAll()
 
@@ -763,7 +782,6 @@ describe 'pagerv2_commands', ->
           nock('https://api.pagerduty.com')
           .post('/incidents/PT4KHLK/snooze')
           .reply(200, require('./fixtures/incident_snooze-ok.json'))
-
         afterEach ->
           nock.cleanAll()
 
@@ -793,7 +811,6 @@ describe 'pagerv2_commands', ->
           nock('https://api.pagerduty.com')
           .post('/incidents/PT4KHLK/notes')
           .reply(200, require('./fixtures/note_create-ok.json'))
-
         afterEach ->
           nock.cleanAll()
 
@@ -823,7 +840,6 @@ describe 'pagerv2_commands', ->
           nock('https://api.pagerduty.com')
           .get('/incidents/PT4KHLK/notes')
           .reply(200, require('./fixtures/notes_list-ok.json'))
-
         afterEach ->
           nock.cleanAll()
 
@@ -853,7 +869,6 @@ describe 'pagerv2_commands', ->
           nock('https://api.pagerduty.com')
           .get('/maintenance windows?filter=ongoing')
           .reply(200, require('./fixtures/maintenance_list-ok.json'))
-
         afterEach ->
           nock.cleanAll()
 
@@ -883,7 +898,6 @@ describe 'pagerv2_commands', ->
           nock('https://api.pagerduty.com')
           .post('/maintenance windows')
           .reply(200, require('./fixtures/maintenance_create-ok.json'))
-
         afterEach ->
           nock.cleanAll()
 
@@ -913,7 +927,6 @@ describe 'pagerv2_commands', ->
           nock('https://api.pagerduty.com')
           .delete('/maintenance windows/PW98YIO')
           .reply(200, { })
-
         afterEach ->
           nock.cleanAll()
 
