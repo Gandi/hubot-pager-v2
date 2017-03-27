@@ -394,6 +394,21 @@ describe 'pagerv2_commands', ->
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd incident 1234"', ->
+      context 'when something goes wrong,', ->
+        beforeEach ->
+          room.robot.brain.data.pagerv2 = { users: { } }
+          nock('https://api.pagerduty.com')
+          .get('/incidents/1234')
+          .reply 503, { error: { code: 503, message: "it's all broken!" } }
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        say 'pd incident 1234', ->
+          it 'returns the error message', ->
+            expect(hubotResponse())
+            .to.eql "503 it's all broken!"
+
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -410,6 +425,22 @@ describe 'pagerv2_commands', ->
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd sup"', ->
+      context 'when something goes wrong,', ->
+        beforeEach ->
+          room.robot.brain.data.pagerv2 = { users: { } }
+          nock('https://api.pagerduty.com')
+          .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
+               '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
+          .reply 503, { error: { code: 503, message: "it's all broken!" } }
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        say 'pd sup', ->
+          it 'returns the error message', ->
+            expect(hubotResponse())
+            .to.eql "503 it's all broken!"
+
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -427,6 +458,21 @@ describe 'pagerv2_commands', ->
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd ack"', ->
+      context 'when something goes wrong,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
+               '&statuses%5B%5D=triggered')
+          .reply 503, { error: { code: 503, message: "it's all broken!" } }
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        say 'pd ack', ->
+          it 'returns the error message', ->
+            expect(hubotResponse())
+            .to.eql "503 it's all broken!"
+
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -461,6 +507,20 @@ describe 'pagerv2_commands', ->
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd ack PT4KHLK"', ->
+      context 'when something goes wrong,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .put('/incidents')
+          .reply 503, { error: { code: 503, message: "it's all broken!" } }
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        say 'pd ack PT4KHLK', ->
+          it 'returns the error message', ->
+            expect(hubotResponse())
+            .to.eql "503 it's all broken!"
+
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -477,6 +537,21 @@ describe 'pagerv2_commands', ->
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd res"', ->
+      context 'when something goes wrong,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all&' +
+               'statuses%5B%5D=acknowledged')
+          .reply 503, { error: { code: 503, message: "it's all broken!" } }
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        say 'pd res', ->
+          it 'returns the error message', ->
+            expect(hubotResponse())
+            .to.eql "503 it's all broken!"
+
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -511,6 +586,20 @@ describe 'pagerv2_commands', ->
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd res PT4KHLK"', ->
+      context 'when something goes wrong,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .put('/incidents')
+          .reply 503, { error: { code: 503, message: "it's all broken!" } }
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        say 'pd res PT4KHLK', ->
+          it 'returns the error message', ->
+            expect(hubotResponse())
+            .to.eql "503 it's all broken!"
+
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -527,6 +616,21 @@ describe 'pagerv2_commands', ->
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd assign all to me"', ->
+      context 'when something goes wrong,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
+               '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
+          .reply 503, { error: { code: 503, message: "it's all broken!" } }
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        say 'pd assign all to me', ->
+          it 'returns the error message', ->
+            expect(hubotResponse())
+            .to.eql "503 it's all broken!"
+
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -561,6 +665,20 @@ describe 'pagerv2_commands', ->
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd assign PT4KHLK to me"', ->
+      context 'when something goes wrong,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .put('/incidents')
+          .reply 503, { error: { code: 503, message: "it's all broken!" } }
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        say 'pd assign PT4KHLK to me', ->
+          it 'returns the error message', ->
+            expect(hubotResponse())
+            .to.eql "503 it's all broken!"
+
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -577,6 +695,21 @@ describe 'pagerv2_commands', ->
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd snooze all"', ->
+      context 'when something goes wrong,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
+               '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
+          .reply 503, { error: { code: 503, message: "it's all broken!" } }
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        say 'pd snooze all', ->
+          it 'returns the error message', ->
+            expect(hubotResponse())
+            .to.eql "503 it's all broken!"
+
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -611,6 +744,20 @@ describe 'pagerv2_commands', ->
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd snooze PT4KHLK"', ->
+      context 'when something goes wrong,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .post('/incidents/PT4KHLK/snooze')
+          .reply 503, { error: { code: 503, message: "it's all broken!" } }
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        say 'pd snooze PT4KHLK', ->
+          it 'returns the error message', ->
+            expect(hubotResponse())
+            .to.eql "503 it's all broken!"
+
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -627,6 +774,20 @@ describe 'pagerv2_commands', ->
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd note PT4KHLK some note"', ->
+      context 'when something goes wrong,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .post('/incidents/PT4KHLK/notes')
+          .reply 503, { error: { code: 503, message: "it's all broken!" } }
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        say 'pd note PT4KHLK some note', ->
+          it 'returns the error message', ->
+            expect(hubotResponse())
+            .to.eql "503 it's all broken!"
+
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -643,6 +804,20 @@ describe 'pagerv2_commands', ->
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd notes PT4KHLK"', ->
+      context 'when something goes wrong,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/incidents/PT4KHLK/notes')
+          .reply 503, { error: { code: 503, message: "it's all broken!" } }
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        say 'pd notes PT4KHLK', ->
+          it 'returns the error message', ->
+            expect(hubotResponse())
+            .to.eql "503 it's all broken!"
+
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -659,6 +834,20 @@ describe 'pagerv2_commands', ->
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd maintenances"', ->
+      context 'when something goes wrong,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/maintenance windows?filter=ongoing')
+          .reply 503, { error: { code: 503, message: "it's all broken!" } }
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        say 'pd maintenances', ->
+          it 'returns the error message', ->
+            expect(hubotResponse())
+            .to.eql "503 it's all broken!"
+
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -675,6 +864,20 @@ describe 'pagerv2_commands', ->
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd stfu"', ->
+      context 'when something goes wrong,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .post('/maintenance windows')
+          .reply 503, { error: { code: 503, message: "it's all broken!" } }
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        say 'pd stfu', ->
+          it 'returns the error message', ->
+            expect(hubotResponse())
+            .to.eql "503 it's all broken!"
+
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -691,6 +894,20 @@ describe 'pagerv2_commands', ->
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd end PW98YIO"', ->
+      context 'when something goes wrong,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .delete('/maintenance windows/PW98YIO')
+          .reply 503, { error: { code: 503, message: "it's all broken!" } }
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        say 'pd end PW98YIO', ->
+          it 'returns the error message', ->
+            expect(hubotResponse())
+            .to.eql "503 it's all broken!"
+
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
