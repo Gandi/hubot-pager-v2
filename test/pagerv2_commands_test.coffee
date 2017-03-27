@@ -220,7 +220,7 @@ describe 'pagerv2_commands', ->
         nock.cleanAll()
 
       say 'pd oncall', ->
-        it 'returns name of who is on call', ->
+        it 'returns the error message', ->
           expect(hubotResponse())
           .to.eql "503 it's all broken!"
 
@@ -260,6 +260,21 @@ describe 'pagerv2_commands', ->
 
   # ------------------------------------------------------------------------------------------------
   describe '".pd next oncall"', ->
+    context 'when something goes wrong,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = { users: { } }
+        nock('https://api.pagerduty.com')
+        .get('/oncalls?time_zone=UTC&schedule_ids%5B%5D=42&earliest=true')
+        .reply 503, { error: { code: 503, message: "it's all broken!" } }
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pd next oncall', ->
+        it 'returns the error message', ->
+          expect(hubotResponse())
+          .to.eql "503 it's all broken!"
+
     context 'when everything goes right,', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
