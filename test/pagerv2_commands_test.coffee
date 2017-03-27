@@ -520,20 +520,37 @@ describe 'pagerv2_commands', ->
             .to.eql "503 it's all broken!"
 
       context 'when everything goes right,', ->
-        beforeEach ->
-          nock('https://api.pagerduty.com')
-          .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
-               '&statuses%5B%5D=triggered')
-          .reply(200, require('./fixtures/incident_list-ok.json'))
-          .put('/incidents')
-          .reply(200, require('./fixtures/incident_manage-ok.json'))
-        afterEach ->
-          nock.cleanAll()
+        context 'with only one incident', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
+                 '&statuses%5B%5D=triggered')
+            .reply(200, require('./fixtures/incident_list-ok.json'))
+            .put('/incidents')
+            .reply(200, require('./fixtures/incident_manage-ok.json'))
+          afterEach ->
+            nock.cleanAll()
 
-        say 'pd ack', ->
-          it 'says incident was acknowledged', ->
-            expect(hubotResponse())
-            .to.eql 'Incident PT4KHLK acknowledged.'
+          say 'pd ack', ->
+            it 'says incident was acknowledged', ->
+              expect(hubotResponse())
+              .to.eql 'Incident PT4KHLK acknowledged.'
+
+        context 'with multiple incidents', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
+                 '&statuses%5B%5D=triggered')
+            .reply(200, require('./fixtures/incident_list_multi-ok.json'))
+            .put('/incidents')
+            .reply(200, require('./fixtures/incident_manage_multi-ok.json'))
+          afterEach ->
+            nock.cleanAll()
+
+          say 'pd ack', ->
+            it 'says incident was acknowledged', ->
+              expect(hubotResponse())
+              .to.eql 'Incidents PT4KHLK, 1234567 acknowledged.'
 
       context 'when there are no incidents,', ->
         beforeEach ->
@@ -566,17 +583,41 @@ describe 'pagerv2_commands', ->
             .to.eql "503 it's all broken!"
 
       context 'when everything goes right,', ->
-        beforeEach ->
-          nock('https://api.pagerduty.com')
-          .put('/incidents')
-          .reply(200, require('./fixtures/incident_manage-ok.json'))
-        afterEach ->
-          nock.cleanAll()
+        context 'with only one incident', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .put('/incidents')
+            .reply(200, require('./fixtures/incident_manage-ok.json'))
+          afterEach ->
+            nock.cleanAll()
 
-        say 'pd ack PT4KHLK', ->
-          it 'says incident was acknowledged', ->
-            expect(hubotResponse())
-            .to.eql 'Incident PT4KHLK acknowledged.'
+          say 'pd ack PT4KHLK', ->
+            it 'says incident was acknowledged', ->
+              expect(hubotResponse())
+              .to.eql 'Incident PT4KHLK acknowledged.'
+
+        context 'with only one incident', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .put('/incidents')
+            .reply(200, require('./fixtures/incident_manage_multi-ok.json'))
+          afterEach ->
+            nock.cleanAll()
+
+          say 'pd ack PT4KHLK,1234567', ->
+            it 'says incidents were acknowledged', ->
+              expect(hubotResponse())
+              .to.eql 'Incidents PT4KHLK, 1234567 acknowledged.'
+
+          say 'pd ack PT4KHLK, 1234567', ->
+            it 'says incidents were acknowledged', ->
+              expect(hubotResponse())
+              .to.eql 'Incidents PT4KHLK, 1234567 acknowledged.'
+
+          say 'pd ack PT4KHLK 1234567', ->
+            it 'says incidents were acknowledged', ->
+              expect(hubotResponse())
+              .to.eql 'Incidents PT4KHLK, 1234567 acknowledged.'
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd res"', ->
@@ -596,21 +637,39 @@ describe 'pagerv2_commands', ->
             .to.eql "503 it's all broken!"
 
       context 'when everything goes right,', ->
-        beforeEach ->
-          nock('https://api.pagerduty.com')
-          .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all&' +
-               'statuses%5B%5D=acknowledged')
-          .reply(200, require('./fixtures/incident_list-ok.json'))
-          .put('/incidents')
-          .reply(200, require('./fixtures/incident_manage-ok.json'))
+        context 'with only one incident', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all&' +
+                 'statuses%5B%5D=acknowledged')
+            .reply(200, require('./fixtures/incident_list-ok.json'))
+            .put('/incidents')
+            .reply(200, require('./fixtures/incident_manage-ok.json'))
 
-        afterEach ->
-          nock.cleanAll()
+          afterEach ->
+            nock.cleanAll()
 
-        say 'pd res', ->
-          it 'says incident was resolved', ->
-            expect(hubotResponse())
-            .to.eql 'Incident PT4KHLK resolved.'
+          say 'pd res', ->
+            it 'says incident was resolved', ->
+              expect(hubotResponse())
+              .to.eql 'Incident PT4KHLK resolved.'
+
+        context 'with many incidents', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all&' +
+                 'statuses%5B%5D=acknowledged')
+            .reply(200, require('./fixtures/incident_list_multi-ok.json'))
+            .put('/incidents')
+            .reply(200, require('./fixtures/incident_manage_multi-ok.json'))
+
+          afterEach ->
+            nock.cleanAll()
+
+          say 'pd res', ->
+            it 'says incident was resolved', ->
+              expect(hubotResponse())
+              .to.eql 'Incidents PT4KHLK, 1234567 resolved.'
 
       context 'when there are no incidents,', ->
         beforeEach ->
@@ -643,17 +702,41 @@ describe 'pagerv2_commands', ->
             .to.eql "503 it's all broken!"
 
       context 'when everything goes right,', ->
-        beforeEach ->
-          nock('https://api.pagerduty.com')
-          .put('/incidents')
-          .reply(200, require('./fixtures/incident_manage-ok.json'))
-        afterEach ->
-          nock.cleanAll()
+        context 'with only one incident', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .put('/incidents')
+            .reply(200, require('./fixtures/incident_manage-ok.json'))
+          afterEach ->
+            nock.cleanAll()
 
-        say 'pd res PT4KHLK', ->
-          it 'says incident was resolved', ->
-            expect(hubotResponse())
-            .to.eql 'Incident PT4KHLK resolved.'
+          say 'pd res PT4KHLK', ->
+            it 'says incident was resolved', ->
+              expect(hubotResponse())
+              .to.eql 'Incident PT4KHLK resolved.'
+
+        context 'with many incidents', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .put('/incidents')
+            .reply(200, require('./fixtures/incident_manage_multi-ok.json'))
+          afterEach ->
+            nock.cleanAll()
+
+          say 'pd res PT4KHLK,1234567', ->
+            it 'says incidents wer resolved', ->
+              expect(hubotResponse())
+              .to.eql 'Incidents PT4KHLK, 1234567 resolved.'
+
+          say 'pd res PT4KHLK 1234567', ->
+            it 'says incidents wer resolved', ->
+              expect(hubotResponse())
+              .to.eql 'Incidents PT4KHLK, 1234567 resolved.'
+
+          say 'pd res PT4KHLK, 1234567', ->
+            it 'says incidents wer resolved', ->
+              expect(hubotResponse())
+              .to.eql 'Incidents PT4KHLK, 1234567 resolved.'
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd assign all to me"', ->

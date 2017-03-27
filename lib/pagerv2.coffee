@@ -278,7 +278,7 @@ class Pagerv2
     if incidents isnt ''
       new Promise (res, err) ->
         res {
-          incidents: incidents.split(/, ?/).map (inc) ->
+          incidents: incidents.split(/[, ]+/).map (inc) ->
             { id: inc }
           }
     else
