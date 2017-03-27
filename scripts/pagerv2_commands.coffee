@@ -343,7 +343,11 @@ module.exports = (robot) ->
 #   hubot pd schedules [<search>]   - lists schedules (optionaly filtered by <search>)
   robot.respond /pd sched(?:ules?)?(?: ([A-Z0-9]+))?\s*$/, 'pd_schedules', (res) ->
     [ _, filter ] = res.match
-    res.send 'Not yet implemented'
+    pagerv2.getSchedule(filter)
+    .then (data) ->
+      res.send ''
+    .catch (e) ->
+      res.send e
     res.finish()
 
 #   hubot pd me now            - creates an override until the end of current oncall

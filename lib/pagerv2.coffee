@@ -154,7 +154,12 @@ class Pagerv2
         "Sorry, I can't figure #{user.name} email address. " +
         'Can you ask them to `.pd me as <email>`?'
 
-  getSchedule: (fromtime = false, totime = false, schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
+  getSchedule: (
+    filter = false,
+    fromtime = false,
+    totime = false, 
+    schedule_id = process.env.PAGERV2_SCHEDULE_ID
+  ) ->
     query = {
       since: fromtime or moment().utc().format(),
       until: totime or moment().utc().add(1, 'minutes').format(),
