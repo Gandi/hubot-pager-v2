@@ -756,21 +756,39 @@ describe 'pagerv2_commands', ->
             .to.eql "503 it's all broken!"
 
       context 'when everything goes right,', ->
-        beforeEach ->
-          nock('https://api.pagerduty.com')
-          .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
-               '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
-          .reply(200, require('./fixtures/incident_list-ok.json'))
-          .put('/incidents')
-          .reply(200, require('./fixtures/incident_manage-ok.json'))
+        context 'with only one incident', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
+                 '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
+            .reply(200, require('./fixtures/incident_list-ok.json'))
+            .put('/incidents')
+            .reply(200, require('./fixtures/incident_manage-ok.json'))
 
-        afterEach ->
-          nock.cleanAll()
+          afterEach ->
+            nock.cleanAll()
 
-        say 'pd assign all to me', ->
-          it 'says incident was assigned', ->
-            expect(hubotResponse())
-            .to.eql 'Incident PT4KHLK assigned to momo.'
+          say 'pd assign all to me', ->
+            it 'says incident was assigned', ->
+              expect(hubotResponse())
+              .to.eql 'Incident PT4KHLK assigned to momo.'
+
+        context 'with many incidents', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
+                 '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
+            .reply(200, require('./fixtures/incident_list-ok.json'))
+            .put('/incidents')
+            .reply(200, require('./fixtures/incident_manage_multi-ok.json'))
+
+          afterEach ->
+            nock.cleanAll()
+
+          say 'pd assign all to me', ->
+            it 'says incident was assigned', ->
+              expect(hubotResponse())
+              .to.eql 'Incidents PT4KHLK, 1234567 assigned to momo.'
 
       context 'when there are no incidents,', ->
         beforeEach ->
@@ -803,17 +821,41 @@ describe 'pagerv2_commands', ->
             .to.eql "503 it's all broken!"
 
       context 'when everything goes right,', ->
-        beforeEach ->
-          nock('https://api.pagerduty.com')
-          .put('/incidents')
-          .reply(200, require('./fixtures/incident_manage-ok.json'))
-        afterEach ->
-          nock.cleanAll()
+        context 'with only one incident', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .put('/incidents')
+            .reply(200, require('./fixtures/incident_manage-ok.json'))
+          afterEach ->
+            nock.cleanAll()
 
-        say 'pd assign PT4KHLK to me', ->
-          it 'says incident was assigned', ->
-            expect(hubotResponse())
-            .to.eql 'Incident PT4KHLK assigned to momo.'
+          say 'pd assign PT4KHLK to me', ->
+            it 'says incident was assigned', ->
+              expect(hubotResponse())
+              .to.eql 'Incident PT4KHLK assigned to momo.'
+
+        context 'with many incidents', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .put('/incidents')
+            .reply(200, require('./fixtures/incident_manage_multi-ok.json'))
+          afterEach ->
+            nock.cleanAll()
+
+          say 'pd assign PT4KHLK,1234567 to me', ->
+            it 'says incident was assigned', ->
+              expect(hubotResponse())
+              .to.eql 'Incidents PT4KHLK, 1234567 assigned to momo.'
+
+          say 'pd assign PT4KHLK 1234567 to me', ->
+            it 'says incident was assigned', ->
+              expect(hubotResponse())
+              .to.eql 'Incidents PT4KHLK, 1234567 assigned to momo.'
+
+          say 'pd assign PT4KHLK, 1234567 to me', ->
+            it 'says incident was assigned', ->
+              expect(hubotResponse())
+              .to.eql 'Incidents PT4KHLK, 1234567 assigned to momo.'
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd snooze all"', ->
@@ -833,21 +875,41 @@ describe 'pagerv2_commands', ->
             .to.eql "503 it's all broken!"
 
       context 'when everything goes right,', ->
-        beforeEach ->
-          nock('https://api.pagerduty.com')
-          .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
-               '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
-          .reply(200, require('./fixtures/incident_list-ok.json'))
-          .post('/incidents/PT4KHLK/snooze')
-          .reply(200, require('./fixtures/incident_snooze-ok.json'))
+        context 'with only one incident', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
+                 '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
+            .reply(200, require('./fixtures/incident_list-ok.json'))
+            .post('/incidents/PT4KHLK/snooze')
+            .reply(200, require('./fixtures/incident_snooze-ok.json'))
 
-        afterEach ->
-          nock.cleanAll()
+          afterEach ->
+            nock.cleanAll()
 
-        say 'pd snooze all', ->
-          it 'says all incidents have been snoozed', ->
-            expect(hubotResponse())
-            .to.eql 'Incident PT4KHLK snoozed.'
+          say 'pd snooze all', ->
+            it 'says all incidents have been snoozed', ->
+              expect(hubotResponse())
+              .to.eql 'Incident PT4KHLK snoozed.'
+
+        context 'with many incidents', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
+                 '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
+            .reply(200, require('./fixtures/incident_list_multi-ok.json'))
+            .post('/incidents/PT4KHLK/snooze')
+            .reply(200, require('./fixtures/incident_snooze-ok.json'))
+            .post('/incidents/1234567/snooze')
+            .reply(200, require('./fixtures/incident_snooze_alt-ok.json'))
+
+          afterEach ->
+            nock.cleanAll()
+
+          say 'pd snooze all', ->
+            it 'says all incidents have been snoozed', ->
+              expect(hubotResponse())
+              .to.eql 'Incidents PT4KHLK, 1234567 snoozed.'
 
       context 'when there are no incidents,', ->
         beforeEach ->
@@ -880,17 +942,43 @@ describe 'pagerv2_commands', ->
             .to.eql "503 it's all broken!"
 
       context 'when everything goes right,', ->
-        beforeEach ->
-          nock('https://api.pagerduty.com')
-          .post('/incidents/PT4KHLK/snooze')
-          .reply(200, require('./fixtures/incident_snooze-ok.json'))
-        afterEach ->
-          nock.cleanAll()
+        context 'with only one incident', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .post('/incidents/PT4KHLK/snooze')
+            .reply(200, require('./fixtures/incident_snooze-ok.json'))
+          afterEach ->
+            nock.cleanAll()
 
-        say 'pd snooze PT4KHLK', ->
-          it 'says incident have been snoozed', ->
-            expect(hubotResponse())
-            .to.eql 'Incident PT4KHLK snoozed.'
+          say 'pd snooze PT4KHLK', ->
+            it 'says incident have been snoozed', ->
+              expect(hubotResponse())
+              .to.eql 'Incident PT4KHLK snoozed.'
+
+        context 'with many incidents', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .post('/incidents/PT4KHLK/snooze')
+            .reply(200, require('./fixtures/incident_snooze-ok.json'))
+            .post('/incidents/1234567/snooze')
+            .reply(200, require('./fixtures/incident_snooze_alt-ok.json'))
+          afterEach ->
+            nock.cleanAll()
+
+          say 'pd snooze PT4KHLK 1234567', ->
+            it 'says incident have been snoozed', ->
+              expect(hubotResponse())
+              .to.eql 'Incidents PT4KHLK, 1234567 snoozed.'
+
+          say 'pd snooze PT4KHLK,1234567', ->
+            it 'says incident have been snoozed', ->
+              expect(hubotResponse())
+              .to.eql 'Incidents PT4KHLK, 1234567 snoozed.'
+
+          say 'pd snooze PT4KHLK, 1234567', ->
+            it 'says incident have been snoozed', ->
+              expect(hubotResponse())
+              .to.eql 'Incidents PT4KHLK, 1234567 snoozed.'
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd note PT4KHLK some note"', ->

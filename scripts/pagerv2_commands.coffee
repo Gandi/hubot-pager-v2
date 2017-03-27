@@ -228,7 +228,7 @@ module.exports = (robot) ->
     pagerv2.assignIncidents(res.envelope.user, who)
     .then (data) ->
       plural = ''
-      if data.length > 1
+      if data.incidents.length > 1
         plural = 's'
       res.send "Incident#{plural} #{data.incidents.map( (e) -> e.id).join(', ')} " +
                "assigned to #{who}."
@@ -245,7 +245,7 @@ module.exports = (robot) ->
     pagerv2.assignIncidents(res.envelope.user, who, incidents)
     .then (data) ->
       plural = ''
-      if data.length > 1
+      if data.incidents.length > 1
         plural = 's'
       res.send "Incident#{plural} #{data.incidents.map( (e) -> e.id).join(', ')} " +
                "assigned to #{who}."
