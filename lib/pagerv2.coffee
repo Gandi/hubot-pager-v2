@@ -261,6 +261,8 @@ class Pagerv2
             @request('DELETE', "/schedules/#{schedule_id}/overrides/#{todo}")
             .then (data) ->
               res data
+            .catch (e) ->
+              err e
           else
             res null
 
