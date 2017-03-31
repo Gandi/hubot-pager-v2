@@ -94,24 +94,19 @@ class Pagerv2
           name: user.name,
           id: user.id
         }
-        if user.pdid?
-          @data.users[user.id].pdid = user.pdid
-          res @data.users[user.id].pdid
+        email = @data.users[user.id].email or user.email_address
+        unless email
+          err @_ask_for_email(from, user)
         else
-          email = @data.users[user.id].email or
-                  user.email_address
-          unless email
-            err @_ask_for_email(from, user)
-          else
-            user = @data.users[user.id]
-            query = { 'query': email }
-            @request('GET', '/users', query)
-            .then (body) =>
-              if body.users[0]?
-                @robot.brain.data.pagerv2.users[user.id].pdid = body.users[0].id
-                res body.users[0].id
-              else
-                err "Sorry, I cannot find #{email}"
+          user = @data.users[user.id]
+          query = { 'query': email }
+          @request('GET', '/users', query)
+          .then (body) =>
+            if body.users[0]?
+              @robot.brain.data.pagerv2.users[user.id].pdid = body.users[0].id
+              res body.users[0].id
+            else
+              err "Sorry, I cannot find #{email}"
 
   getUserEmail: (from, user) ->
     return new Promise (res, err) =>
