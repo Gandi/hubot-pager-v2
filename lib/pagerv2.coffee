@@ -37,7 +37,10 @@ class Pagerv2
     return new Promise (res, err) =>
       isAuthorized = @robot.auth?.hasRole(user, [group, 'pdadmin']) or
                      @robot.auth?.isAdmin(user)
-      if @robot.auth? and not isAuthorized
+      if process.env.PAGERV2_NEED_GROUP_AUTH? and
+         process.env.PAGERV2_NEED_GROUP_AUTH isnt '0' and
+         @robot.auth? and
+         not(isAuthorized)
         err "You don't have permission to do that."
       else
         res()

@@ -18,6 +18,7 @@ Configuration
     export PAGERV2_DEFAULT_RESOLVER="nagios"
     export PAGERV2_ENDPOINT="/hook"
     export PAGERV2_ANNOUNCE_ROOM="#dev"
+    export PAGERV2_NEED_GROUP_AUTH="0"
 
 Development
 --------------

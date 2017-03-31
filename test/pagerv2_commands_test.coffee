@@ -1124,3 +1124,98 @@ describe 'pagerv2_commands', ->
           it 'responds that the maintenance is now cancelled', ->
             expect(hubotResponse())
             .to.eql 'Maintenance ended.'
+
+# --------------------------------------------------------------------------------------------------
+  context 'permissions system', ->
+    beforeEach ->
+      process.env.HUBOT_AUTH_ADMIN = 'admin_user'
+      process.env.PAGERV2_NEED_GROUP_AUTH = '1'
+      room.robot.brain.data.pagerv2 = { users: { } }
+      room.robot.loadFile path.resolve('node_modules/hubot-auth/src'), 'auth.coffee'
+      room.robot.brain.userForId 'admin_user', {
+        id: 'admin_user',
+        name: 'admin_user'
+      }
+      room.robot.brain.data.pagerv2.users.admin_user = {
+        name: 'admin_user',
+        id: 'admin_user',
+        email: 'toto@example.com',
+        pdid: '11111111'
+      }
+      room.robot.brain.userForId 'pager_admin', {
+        id: 'pager_admin',
+        name: 'pager_admin',
+        phid: 'PHID-USER-123456789',
+        roles: [
+          'pdadmin'
+        ]
+      }
+      room.robot.brain.data.pagerv2.users.pager_admin = {
+        name: 'pager_admin',
+        id: 'pager_admin',
+        email: 'toto@example.com',
+        pdid: '87654321'
+      }
+      room.robot.brain.userForId 'pager_user', {
+        id: 'pager_user',
+        name: 'pager_user',
+        roles: [
+          'pduser'
+        ]
+      }
+      room.robot.brain.data.pagerv2.users.pager_user = {
+        name: 'pager_user',
+        id: 'pager_user',
+        email: 'toto@example.com',
+        pdid: '12345678'
+      }
+      room.robot.brain.userForId 'non_pager_user', {
+        id: 'non_pager_user',
+        name: 'non_pager_user'
+      }
+
+    afterEach ->
+      delete process.env.HUBOT_AUTH_ADMIN
+      delete process.env.PAGERV2_NEED_GROUP_AUTH
+
+
+    context 'user wants to resolve an alert', ->
+      beforeEach ->
+        room.receive = (userName, message) ->
+          new Promise (resolve) =>
+            @messages.push [userName, message]
+            user = @robot.brain.userForName(userName)
+            @robot.receive(new Hubot.TextMessage(user, message), resolve)
+
+        do nock.disableNetConnect
+        nock('https://api.pagerduty.com')
+        .put('/incidents')
+        .reply(200, require('./fixtures/incident_manage-ok.json'))
+
+      afterEach ->
+        nock.cleanAll()
+
+      context 'and user is admin', ->
+        hubot 'pd res PT4KHLK', 'admin_user'
+        it 'says incident was resolved', ->
+          expect(hubotResponse())
+          .to.eql 'Incident PT4KHLK resolved.'
+
+      context 'and user is pager_admin', ->
+        hubot 'pd res PT4KHLK', 'pager_admin'
+        it 'says incident was resolved', ->
+          expect(hubotResponse())
+          .to.eql 'Incident PT4KHLK resolved.'
+
+      context 'and user is pager_user', ->
+        hubot 'pd res PT4KHLK', 'pager_user'
+        it 'says incident was resolved', ->
+          expect(hubotResponse())
+          .to.eql 'Incident PT4KHLK resolved.'
+
+      context 'and user is not in pager_user', ->
+        hubot 'pd res PT4KHLK', 'non_pager_user'
+        it 'warns the user that he has no permission to use that command', ->
+          expect(hubotResponse()).to.eql 'You don\'t have permission to do that.'
+
+# --------------------------------------------------------------------------------------------------

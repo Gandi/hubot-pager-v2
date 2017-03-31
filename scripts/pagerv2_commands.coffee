@@ -72,7 +72,9 @@ module.exports = (robot) ->
 
 #   hubot pd me - check if the caller is known by pagerduty plugin
   robot.respond /pd me\s*$/, (res) ->
-    pagerv2.getUser(res.envelope.user, res.envelope.user)
+    pagerv2.getPermission(res.envelope.user, 'pduser')
+    .then ->
+      pagerv2.getUser(res.envelope.user, res.envelope.user)
     .then (data) ->
       res.send "Oh I know you, you are #{data}."
     .catch (e) ->
@@ -82,7 +84,9 @@ module.exports = (robot) ->
 #   hubot pd me as <email> - declare what email should be use to find user pagerduty id
   robot.respond /pd me as ([^\s@]+@[^\s]+)\s*$/, 'pd_me_as', (res) ->
     [ _, email ] = res.match
-    pagerv2.setUser(res.envelope.user, email)
+    pagerv2.getPermission(res.envelope.user, 'pduser')
+    .then ->
+      pagerv2.setUser(res.envelope.user, email)
     .then (data) ->
       res.send "Ok now I know you are #{data}."
     .catch (e) ->
@@ -92,9 +96,9 @@ module.exports = (robot) ->
 #   hubot pd <user> as <email> - declare what email should be use to find <user> pagerduty id
   robot.respond /pd ([^\s]+) as ([^\s@]+@[^\s]+)\s*$/, 'pd_user_as', (res) ->
     who = null
+    [ _, who, email ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pdadmin')
     .then ->
-      [ _, who, email ] = res.match
       pagerv2.setUser(who, email)
     .bind(who)
     .then (data) ->
@@ -152,7 +156,9 @@ module.exports = (robot) ->
 #   hubot pd incident <number> - gives more information about incident number <number>
   robot.respond /pd (?:inc |incident )(\d+|[A-Z0-9]{7})\s*$/, 'pd_incident', (res) ->
     [ _, incident ] = res.match
-    pagerv2.getIncident(incident)
+    pagerv2.getPermission(res.envelope.user, 'pduser')
+    .then ->
+      pagerv2.getIncident(incident)
     .then (data) ->
       res.send "#{data.incident.id} (#{data.incident.status}) #{data.incident.summary}"
     .catch (e) ->
@@ -161,7 +167,9 @@ module.exports = (robot) ->
 
 #   hubot pd sup|inc|incidents - lists currently unresolved incidents
   robot.respond /pd (?:sup|inc(?:idents))\s*$/, 'pd_incidents', (res) ->
-    pagerv2.listIncidents()
+    pagerv2.getPermission(res.envelope.user, 'pduser')
+    .then ->
+      pagerv2.listIncidents()
     .then (data) ->
       for inc in data.incidents
         res.send "#{inc.id} (#{inc.status}) #{inc.summary}"
@@ -171,7 +179,9 @@ module.exports = (robot) ->
 
 #   hubot pd ack               - acknowledges any unack incidents
   robot.respond /pd ack(?: all)?\s*$/, 'pd_ack_all', (res) ->
-    pagerv2.updateIncidents(res.envelope.user)
+    pagerv2.getPermission(res.envelope.user, 'pduser')
+    .then ->
+      pagerv2.updateIncidents(res.envelope.user)
     .then (data) ->
       plural = ''
       if data.incidents.length > 1
@@ -184,7 +194,9 @@ module.exports = (robot) ->
 #   hubot pd ack <#>           - acknowledges incident <number>
   robot.respond /pd ack (.+)\s*$/, 'pd_ack_one', (res) ->
     [ _, incidents ] = res.match
-    pagerv2.updateIncidents(res.envelope.user, incidents)
+    pagerv2.getPermission(res.envelope.user, 'pduser')
+    .then ->
+      pagerv2.updateIncidents(res.envelope.user, incidents)
     .then (data) ->
       plural = ''
       if data.incidents.length > 1
@@ -196,7 +208,9 @@ module.exports = (robot) ->
 
 #   hubot pd res|resolve       - acknowledges any unack incidents
   robot.respond /pd res(?:olve)?(?: all)?\s*$/, 'pd_res_all', (res) ->
-    pagerv2.updateIncidents(res.envelope.user, '', 'acknowledged', 'resolved')
+    pagerv2.getPermission(res.envelope.user, 'pduser')
+    .then ->
+      pagerv2.updateIncidents(res.envelope.user, '', 'acknowledged', 'resolved')
     .then (data) ->
       plural = ''
       if data.incidents.length > 1
@@ -209,7 +223,9 @@ module.exports = (robot) ->
 #   hubot pd res|resolve <#>   - acknowledges incident <number>
   robot.respond /pd res(?:olve)? (.+)\s*$/, 'pd_res_one', (res) ->
     [ _, incidents ] = res.match
-    pagerv2.updateIncidents(res.envelope.user, incidents, 'acknowledged', 'resolved')
+    pagerv2.getPermission(res.envelope.user, 'pduser')
+    .then ->
+      pagerv2.updateIncidents(res.envelope.user, incidents, 'acknowledged', 'resolved')
     .then (data) ->
       plural = ''
       if data.incidents.length > 1
@@ -223,9 +239,11 @@ module.exports = (robot) ->
 #   hubot pd assign [all] to <user>   - assigns all open incidents to user
   robot.respond /pd assign(?: all) to (me|[^ ]+)\s*$/, 'pd_assign_all', (res) ->
     [ _, who ] = res.match
-    if who is 'me'
-      who = res.envelope.user.name
-    pagerv2.assignIncidents(res.envelope.user, who)
+    pagerv2.getPermission(res.envelope.user, 'pduser')
+    .then ->
+      if who is 'me'
+        who = res.envelope.user.name
+      pagerv2.assignIncidents(res.envelope.user, who)
     .then (data) ->
       plural = ''
       if data.incidents.length > 1
@@ -240,9 +258,11 @@ module.exports = (robot) ->
 #   hubot pd assign <#,#,#> to <user> - assigns incidents <#,#,#> to user
   robot.respond /pd assign (.+) to (me|[^ ]+)\s*$/, 'pd_assign_one', (res) ->
     [ _, incidents, who ] = res.match
-    if who is 'me'
-      who = res.envelope.user.name
-    pagerv2.assignIncidents(res.envelope.user, who, incidents)
+    pagerv2.getPermission(res.envelope.user, 'pduser')
+    .then ->
+      if who is 'me'
+        who = res.envelope.user.name
+      pagerv2.assignIncidents(res.envelope.user, who, incidents)
     .then (data) ->
       plural = ''
       if data.incidents.length > 1
@@ -258,7 +278,9 @@ module.exports = (robot) ->
     /pd snooze(?: all)?(?: (?:for )(\d+)(?: min(?:utes)?)?)?\s*$/
   ), 'pd_snooze_all', (res) ->
     [ _, duration ] = res.match
-    pagerv2.snoozeIncidents(res.envelope.user, '', duration)
+    pagerv2.getPermission(res.envelope.user, 'pduser')
+    .then ->
+      pagerv2.snoozeIncidents(res.envelope.user, '', duration)
     .then (data) ->
       plural = ''
       if data.length > 1
@@ -273,7 +295,9 @@ module.exports = (robot) ->
     /pd snooze (.+)(?: (?:for )(\d+)(?: min(?:utes)?)?)?\s*$/
   ), 'pd_snooze_one', (res) ->
     [ _, incidents, duration ] = res.match
-    pagerv2.snoozeIncidents(res.envelope.user, incidents, duration)
+    pagerv2.getPermission(res.envelope.user, 'pduser')
+    .then ->
+      pagerv2.snoozeIncidents(res.envelope.user, incidents, duration)
     .then (data) ->
       plural = ''
       if data.length > 1
@@ -286,7 +310,9 @@ module.exports = (robot) ->
 #   hubot pd note <#,#,#> <note> - create a note for incidents <#,#,#>
   robot.respond /pd note ([^\s]+) (.*)$/, 'pd_note', (res) ->
     [ _, incident, note ] = res.match
-    pagerv2.addNote(res.envelope.user, incident, note)
+    pagerv2.getPermission(res.envelope.user, 'pduser')
+    .then ->
+      pagerv2.addNote(res.envelope.user, incident, note)
     .then (data) ->
       res.send "Note added to #{incident}: #{note}."
     .catch (e) ->
@@ -296,7 +322,9 @@ module.exports = (robot) ->
 #   hubot pd notes <#>           - read notes for incident <#>
   robot.respond /pd notes ([^\s]+)\s*$/, 'pd_notes', (res) ->
     [ _, incident ] = res.match
-    pagerv2.listNotes(incident)
+    pagerv2.getPermission(res.envelope.user, 'pduser')
+    .then ->
+      pagerv2.listNotes(incident)
     .then (data) ->
       for note in data.notes
         res.send "#{incident} - #{note.content}"
@@ -306,7 +334,9 @@ module.exports = (robot) ->
 
 #   hubot pd maintenances           - lists currently active maintenances
   robot.respond /pd maintenances?\s*$/, 'pd_maintenances', (res) ->
-    pagerv2.listMaintenances()
+    pagerv2.getPermission(res.envelope.user, 'pduser')
+    .then ->
+      pagerv2.listMaintenances()
     .then (data) ->
       for maintenance in data.maintenance_windows
         end = moment(maintenance.end_time).utc().format('HH:mm')
@@ -320,7 +350,9 @@ module.exports = (robot) ->
     /pd (?:stfu|down)(?: for)?\s*([0-9]+)?(?: min(?:utes)?)?(?: because (.+))?\s*$/
   ), 'pd_set_maintenance', (res) ->
     [ _, duration, description ] = res.match
-    pagerv2.addMaintenance(res.envelope.user, duration, description)
+    pagerv2.getPermission(res.envelope.user, 'pduser')
+    .then ->
+      pagerv2.addMaintenance(res.envelope.user, duration, description)
     .then (data) ->
       end_time = moment(data.maintenance_window.end_time).utc().format('HH:mm')
       res.send "Maintenance created for all services until #{end_time} UTC " +
@@ -332,7 +364,9 @@ module.exports = (robot) ->
 #   hubot pd up|end|back <maintenance> - ends <maintenance>
   robot.respond /pd (?:up|back|end) ([A-Z0-9]+)\s*$/, 'pd_end_maintenance', (res) ->
     [ _, maintenance ] = res.match
-    pagerv2.endMaintenance(res.envelope.user, maintenance)
+    pagerv2.getPermission(res.envelope.user, 'pduser')
+    .then ->
+      pagerv2.endMaintenance(res.envelope.user, maintenance)
     .then (data) ->
       res.send 'Maintenance ended.'
     .catch (e) ->
@@ -342,8 +376,10 @@ module.exports = (robot) ->
 # TODO
 #   hubot pd schedules [<search>]   - lists schedules (optionaly filtered by <search>)
   robot.respond /pd sched(?:ules?)?(?: ([A-Z0-9]+))?\s*$/, 'pd_schedules', (res) ->
-    [ _, filter ] = res.match
-    pagerv2.getSchedule(filter)
+    pagerv2.getPermission(res.envelope.user, 'pduser')
+    .then ->
+      [ _, filter ] = res.match
+      pagerv2.getSchedule(filter)
     .then (data) ->
       res.send ''
     .catch (e) ->
@@ -353,7 +389,9 @@ module.exports = (robot) ->
 #   hubot pd me now            - creates an override until the end of current oncall
   robot.respond /pd (?:([^ ]+) )?now\s*$/, 'pd_override_now', (res) ->
     [ _, who ] = res.match
-    pagerv2.setOverride(res.envelope.user, who)
+    pagerv2.getPermission(res.envelope.user, 'pduser')
+    .then ->
+      pagerv2.setOverride(res.envelope.user, who)
     .then (data) ->
       res.send "Rejoice #{data.user.summary}! #{data.over.name} is now on call."
     .catch (e) ->
@@ -363,7 +401,9 @@ module.exports = (robot) ->
 #   hubot pd not me            - cancels an override if any
   robot.respond /pd not ([^ ]+)\s*$/, 'pd_cancel_override', (res) ->
     [ _, who ] = res.match
-    pagerv2.dropOverride(res.envelope.user, who)
+    pagerv2.getPermission(res.envelope.user, 'pduser')
+    .then ->
+      pagerv2.dropOverride(res.envelope.user, who)
     .then (data) ->
       res.send "Ok, #{res.envelope.user.name}! " +
                "#{data.overrides[0].user.summary} override is cancelled."
@@ -374,7 +414,9 @@ module.exports = (robot) ->
 #   hubot pd me <duration>     - creates an override for <duration> minutes
   robot.respond /pd (?:([^ ]+) )?(?:for )?(\d+)(?: min(?:utes)?)?\s*$/, 'pd_override', (res) ->
     [ _, who, duration ] = res.match
-    pagerv2.setOverride(res.envelope.user, who, duration)
+    pagerv2.getPermission(res.envelope.user, 'pduser')
+    .then ->
+      pagerv2.setOverride(res.envelope.user, who, duration)
     .then (data) ->
       res.send "Rejoice #{data.user.summary}! #{data.over.name} is now on call."
     .catch (e) ->
