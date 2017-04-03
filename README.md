@@ -7,6 +7,12 @@ Hubot-pager-v2
 
 Work in progress, very early stage
 
+This plugin is based on the usage we have in Gandi of Pagerduty. It may, in its first instance, not match your setup, so please verify that first.
+
+- we have on main schedule that is for the general alert dispatch (`PAGERV2_SCHEDULE_ID`)
+- only one person is on call at any given time
+- we don't use teams
+
 Configuration
 ---------------
 
