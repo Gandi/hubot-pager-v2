@@ -23,13 +23,13 @@ class Pagerv2
 
   constructor: (@robot) ->
     @robot.brain.data.pagerv2 ?= {
-      users: { }
+      users: { },
+      services: { }
     }
-    @pagerServices = { }
+    @pagerServices = [ ]
     if process.env.PAGERV2_SERVICES?
       for service in process.env.PAGERV2_SERVICES.split(',')
-        [code, label] = service.split ':'
-        @pagerServices[code] = label
+        @pagerServices.push(service)
     @logger = @robot.logger
     @logger.debug 'Pagerv2 Loaded'
 
@@ -84,21 +84,20 @@ class Pagerv2
 
   getUser: (from, user) =>
     return new Promise (res, err) =>
-      @data = @robot.brain.data.pagerv2
       unless user.id?
         user.id = user.name
-      if @data.users[user.id]?.pdid?
-        res @data.users[user.id].pdid
+      if @robot.brain.data.pagerv2.users[user.id]?.pdid?
+        res @robot.brain.data.pagerv2.users[user.id].pdid
       else
-        @data.users[user.id] ?= {
+        @robot.brain.data.pagerv2.users[user.id] ?= {
           name: user.name,
           id: user.id
         }
-        email = @data.users[user.id].email or user.email_address
+        email = @robot.brain.data.pagerv2.users[user.id].email or user.email_address
         unless email
           err @_ask_for_email(from, user)
         else
-          user = @data.users[user.id]
+          user = @robot.brain.data.pagerv2.users[user.id]
           query = { 'query': email }
           @request('GET', '/users', query)
           .then (body) =>
@@ -112,8 +111,7 @@ class Pagerv2
     return new Promise (res, err) =>
       unless user.id?
         user.id = user.name
-      @data = @robot.brain.data.pagerv2
-      email = @data.users[user.id].email or user.email_address
+      email = @robot.brain.data.pagerv2.users[user.id].email or user.email_address
       if email?
         res email
       else
@@ -121,15 +119,14 @@ class Pagerv2
 
   setUser: (user, email) =>
     return new Promise (res, err) =>
-      @data = @robot.brain.data.pagerv2
       unless user.id?
         user.id = user.name
-      @data.users[user.id] ?= {
+      @robot.brain.data.pagerv2.users[user.id] ?= {
         name: user.name,
         email: email,
         id: user.id
       }
-      user = @data.users[user.id]
+      user = @robot.brain.data.pagerv2.users[user.id]
       query = { 'query': email }
       @request('GET', '/users', query)
       .then (body) =>
@@ -403,7 +400,7 @@ class Pagerv2
       }
       for service in @pagerServices
         payload.maintenance_window.services.push {
-          id: service,
+          id: serviceId[service],
           type: 'service_reference'
         }
       @request('POST', '/maintenance windows', payload, email)
@@ -426,6 +423,17 @@ class Pagerv2
       text
   }
 
+  getService: (name) ->
+    payload = {
+      query: name
+    }
+    @request('GET', '/services', payload)
+
+  serviceId: (name) ->
+    unless @robot.brain.data.pagerv2.services[name]?
+      @robot.brain.data.pagerv2.services[name] = @getService(name)
+    @robot.brain.data.pagerv2.services[name]
+
   parseWebhook: (adapter, messages) ->
     new Promise (res, err) =>
       colors = {
@@ -443,7 +451,7 @@ class Pagerv2
         else
           colorer = @coloring.generic
         origin = colorer(
-          "[#{@pagerServices[message.data.incident.service.id]}]",
+          "[#{message.data.incident.service.name}]",
           colors[level]
         )
         description = message.data.incident.trigger_summary_data.subject

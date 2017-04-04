@@ -65,7 +65,7 @@ describe 'phabs_feeds module', ->
 
     it 'should react', ->
       expected = [
-        '[undefined] CPU Load High on xdb_production_echo - trigger (Laura Haley)'
+        '[Production XDB Cluster] CPU Load High on xdb_production_echo - trigger (Laura Haley)'
       ]
       pagerv2 = new Pagerv2 room.robot
       pagerv2.parseWebhook(
@@ -84,7 +84,7 @@ describe 'phabs_feeds module', ->
 
       it 'should react', ->
         expected = [
-          '[undefined] CPU Load High on xdb_production_echo - trigger (monit system)'
+          '[Production XDB Cluster] CPU Load High on xdb_production_echo - trigger (monit system)'
         ]
         pagerv2 = new Pagerv2 room.robot
         pagerv2.parseWebhook(
@@ -98,7 +98,7 @@ describe 'phabs_feeds module', ->
     context 'and no default resolver is set', ->
       it 'should react', ->
         expected = [
-          '[undefined] CPU Load High on xdb_production_echo - trigger (nagios)'
+          '[Production XDB Cluster] CPU Load High on xdb_production_echo - trigger (nagios)'
         ]
         pagerv2 = new Pagerv2 room.robot
         pagerv2.parseWebhook(
@@ -112,7 +112,7 @@ describe 'phabs_feeds module', ->
 
     it 'should react', ->
       expected = [
-        '[undefined] CPU Load High on xdb_production_echo - resolve (Wiley Jacobson)'
+        '[Production XDB Cluster] CPU Load High on xdb_production_echo - resolve (Wiley Jacobson)'
       ]
       pagerv2 = new Pagerv2 room.robot
       pagerv2.parseWebhook(
@@ -126,7 +126,7 @@ describe 'phabs_feeds module', ->
 
     it 'should react', ->
       expected = [
-        '*[undefined]* CPU Load High on xdb_production_echo - resolve (Wiley Jacobson)'
+        '*[Production XDB Cluster]* CPU Load High on xdb_production_echo - resolve (Wiley Jacobson)'
       ]
       pagerv2 = new Pagerv2 room.robot
       pagerv2.parseWebhook(
@@ -140,8 +140,8 @@ describe 'phabs_feeds module', ->
 
     it 'should react', ->
       expected = [
-        '\u000303\u0002\u0002[undefined]\u0003 CPU Load High on xdb_production_echo - ' +
-        'resolve (Wiley Jacobson)'
+        '\u000303\u0002\u0002[Production XDB Cluster]\u0003 CPU Load High on ' +
+        'xdb_production_echo - resolve (Wiley Jacobson)'
       ]
       pagerv2 = new Pagerv2 room.robot
       pagerv2.parseWebhook(
@@ -155,7 +155,7 @@ describe 'phabs_feeds module', ->
 
     it 'should react', ->
       expected = [
-        '[undefined] CPU Load High on xdb_production_echo - plouf (nagios)'
+        '[Production XDB Cluster] CPU Load High on xdb_production_echo - plouf (nagios)'
       ]
       pagerv2 = new Pagerv2 room.robot
       msg = require('./fixtures/webhook_resolve.json').messages
