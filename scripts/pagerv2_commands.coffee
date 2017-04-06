@@ -166,14 +166,16 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pd sup|inc|incidents - lists currently unresolved incidents
-  robot.respond /pd (?:sup|inc(?:idents))\s*$/, 'pd_incidents', (res) ->
+  robot.respond /(?:pd )?(?:sup|inc(?:idents))\s*$/, 'pd_incidents', (res) ->
     pagerv2.getPermission(res.envelope.user, 'pduser')
     .then ->
       pagerv2.listIncidents()
     .then (data) ->
       if data.incidents.length > 0
         for inc in data.incidents
-          res.send "#{inc.id} (#{inc.status}) #{inc.summary}"
+          assigned = inc.assignments.map (i) ->
+            i.assignee.summary
+          res.send "#{inc.id} #{inc.summary} - #{inc.status} (#{assigned.join(', ')})"
       else
         res.send "There are no open incidents for now."
     .catch (e) ->

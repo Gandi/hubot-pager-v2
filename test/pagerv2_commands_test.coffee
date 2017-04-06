@@ -515,7 +515,7 @@ describe 'pagerv2_commands', ->
           say 'pd sup', ->
             it 'returns list of incidents', ->
               expect(hubotResponse())
-              .to.eql 'PT4KHLK (resolved) The server is on fire.'
+              .to.eql 'PT4KHLK The server is on fire. - resolved (Earline Greenholt)'
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd ack"', ->
