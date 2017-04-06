@@ -160,7 +160,10 @@ module.exports = (robot) ->
     .then ->
       pagerv2.getIncident(incident)
     .then (data) ->
-      res.send "#{data.incident.id} (#{data.incident.status}) #{data.incident.summary}"
+      assigned = data.incident.assignments.map (i) ->
+        i.assignee.summary
+      res.send "#{data.incident.id} #{data.incident.summary} - #{data.incident.status} " +
+               "(#{assigned.join(', ')})"
     .catch (e) ->
       res.send e
     res.finish()
