@@ -9,10 +9,13 @@
 #  PAGERV2_OVERRIDERS        # list of user_id that can be targets of overrides
 #  PAGERV2_SERVICES          # list of service ids that are watched
 #  PAGERV2_DEFAULT_RESOLVER  # name of the default user for resolution (ex. nagios)
+#  PAGERV2_LOG_PATH          # dir where are saved error logs
 #
 # Author:
 #   mose
 
+fs = require 'fs'
+path = require 'path'
 https = require 'https'
 moment = require 'moment'
 Promise = require 'bluebird'
@@ -32,7 +35,8 @@ class Pagerv2
         @pagerServices.push(service)
     @logger = @robot.logger
     @logger.debug 'Pagerv2 Loaded'
-    @errorlog = path.join process.env.FILE_BRAIN_PATH, "pagerv2-error.log"
+    if process.env.PAGERV2_LOG_PATH?
+      @errorlog = path.join process.env.PAGERV2_LOG_PATH, "pagerv2-error.log"
 
   getPermission: (user, group) =>
     return new Promise (res, err) =>
@@ -465,9 +469,10 @@ class Pagerv2
         "#{origin} #{description} - #{level} (#{who})"
 
   logError: (message, payload) ->
-    fs.appendFileSync @errorlog, "\n---------------------\n"
-    fs.appendFileSync @errorlog, "#{moment().utc().format()} - #{message}\n\n"
-    fs.appendFileSync @errorlog, JSON.stringify(payload, null, 2), 'utf-8'
+    if @errorlog?
+      fs.appendFileSync @errorlog, "\n---------------------\n"
+      fs.appendFileSync @errorlog, "#{moment().utc().format()} - #{message}\n\n"
+      fs.appendFileSync @errorlog, JSON.stringify(payload, null, 2), 'utf-8'
 
 
 

@@ -171,8 +171,11 @@ module.exports = (robot) ->
     .then ->
       pagerv2.listIncidents()
     .then (data) ->
-      for inc in data.incidents
-        res.send "#{inc.id} (#{inc.status}) #{inc.summary}"
+      if data.incidents.length > 0
+        for inc in data.incidents
+          res.send "#{inc.id} (#{inc.status}) #{inc.summary}"
+      else
+        res.send "There are no open incidents for now."
     .catch (e) ->
       res.send e
     res.finish()

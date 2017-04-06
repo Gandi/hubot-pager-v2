@@ -489,18 +489,33 @@ describe 'pagerv2_commands', ->
             .to.eql "503 it's all broken!"
 
       context 'when everything goes right,', ->
-        beforeEach ->
-          nock('https://api.pagerduty.com')
-          .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
-               '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
-          .reply(200, require('./fixtures/incident_list-ok.json'))
-        afterEach ->
-          nock.cleanAll()
+        context 'and there are no incidents', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
+                 '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
+            .reply(200, require('./fixtures/incident_list-empty.json'))
+          afterEach ->
+            nock.cleanAll()
 
-        say 'pd sup', ->
-          it 'returns list of incidents', ->
-            expect(hubotResponse())
-            .to.eql 'PT4KHLK (resolved) The server is on fire.'
+          say 'pd sup', ->
+            it 'returns list of incidents', ->
+              expect(hubotResponse())
+              .to.eql 'There are no open incidents for now.'
+
+        context 'and there are incidents', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
+                 '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
+            .reply(200, require('./fixtures/incident_list-ok.json'))
+          afterEach ->
+            nock.cleanAll()
+
+          say 'pd sup', ->
+            it 'returns list of incidents', ->
+              expect(hubotResponse())
+              .to.eql 'PT4KHLK (resolved) The server is on fire.'
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd ack"', ->
