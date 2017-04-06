@@ -154,7 +154,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pd incident <number> - gives more information about incident number <number>
-  robot.respond /pd (?:inc |incident )(\d+|[A-Z0-9]{7})\s*$/, 'pd_incident', (res) ->
+  robot.respond /pd (?:inc |incident )#?(\d+|[A-Z0-9]{7})\s*$/, 'pd_incident', (res) ->
     [ _, incident ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pduser')
     .then ->
@@ -200,7 +200,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pd ack <#>           - acknowledges incident <number>
-  robot.respond /pd ack (.+)\s*$/, 'pd_ack_one', (res) ->
+  robot.respond /pd ack #?(.+)\s*$/, 'pd_ack_one', (res) ->
     [ _, incidents ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pduser')
     .then ->
@@ -229,7 +229,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pd res|resolve <#>   - acknowledges incident <number>
-  robot.respond /pd res(?:olve)? (.+)\s*$/, 'pd_res_one', (res) ->
+  robot.respond /pd res(?:olve)? #?(.+)\s*$/, 'pd_res_one', (res) ->
     [ _, incidents ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pduser')
     .then ->
@@ -264,7 +264,7 @@ module.exports = (robot) ->
 
 #   hubot pd assign <#,#,#> to me     - assigns incidents <#,#,#> to caller
 #   hubot pd assign <#,#,#> to <user> - assigns incidents <#,#,#> to user
-  robot.respond /pd assign (.+) to (me|[^ ]+)\s*$/, 'pd_assign_one', (res) ->
+  robot.respond /pd assign #?(.+) to (me|[^ ]+)\s*$/, 'pd_assign_one', (res) ->
     [ _, incidents, who ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pduser')
     .then ->
@@ -300,7 +300,7 @@ module.exports = (robot) ->
 
 #   hubot pd snooze <#,#,#> [for] [<duration>] [min] - acknowledges incident <number>
   robot.respond (
-    /pd snooze (.+)(?: (?:for )(\d+)(?: min(?:utes)?)?)?\s*$/
+    /pd snooze #?(.+)(?: (?:for )(\d+)(?: min(?:utes)?)?)?\s*$/
   ), 'pd_snooze_one', (res) ->
     [ _, incidents, duration ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pduser')
@@ -316,7 +316,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pd note <#,#,#> <note> - create a note for incidents <#,#,#>
-  robot.respond /pd note ([^\s]+) (.*)$/, 'pd_note', (res) ->
+  robot.respond /pd note #?([^\s]+) (.*)$/, 'pd_note', (res) ->
     [ _, incident, note ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pduser')
     .then ->
@@ -328,7 +328,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pd notes <#>           - read notes for incident <#>
-  robot.respond /pd notes ([^\s]+)\s*$/, 'pd_notes', (res) ->
+  robot.respond /pd notes #?([^\s]+)\s*$/, 'pd_notes', (res) ->
     [ _, incident ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pduser')
     .then ->
