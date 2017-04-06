@@ -172,8 +172,9 @@ describe 'pagerv2_commands', ->
 
       say 'pd me as toto@example.com', ->
         it 'returns information from pager', ->
-          expect(hubotResponse())
-          .to.eql 'Ok now I know you are PXPGF42.'
+          expect(hubotResponse()).to.eql 'Ok now I know you are PXPGF42.'
+          expect(room.robot.brain.data.pagerv2.users.momo.email).to.eql 'toto@example.com'
+          expect(room.robot.brain.data.pagerv2.users.momo.pdid).to.eql 'PXPGF42'
 
   # ------------------------------------------------------------------------------------------------
   describe '".pd <user> as <email>"', ->
@@ -548,8 +549,7 @@ describe 'pagerv2_commands', ->
 
           say 'pd ack', ->
             it 'says incident was acknowledged', ->
-              expect(hubotResponse())
-              .to.eql 'Incident PT4KHLK acknowledged.'
+              expect(hubotResponse()).to.eql 'Incident PT4KHLK acknowledged.'
 
         context 'with multiple incidents', ->
           beforeEach ->

@@ -180,7 +180,7 @@ module.exports = (robot) ->
             i.assignee.summary
           res.send "#{inc.id} #{inc.summary} - #{inc.status} (#{assigned.join(', ')})"
       else
-        res.send "There are no open incidents for now."
+        res.send 'There are no open incidents for now.'
     .catch (e) ->
       res.send e
     res.finish()

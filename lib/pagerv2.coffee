@@ -36,7 +36,7 @@ class Pagerv2
     @logger = @robot.logger
     @logger.debug 'Pagerv2 Loaded'
     if process.env.PAGERV2_LOG_PATH?
-      @errorlog = path.join process.env.PAGERV2_LOG_PATH, "pagerv2-error.log"
+      @errorlog = path.join process.env.PAGERV2_LOG_PATH, 'pagerv2-error.log'
 
   getPermission: (user, group) =>
     return new Promise (res, err) =>
@@ -137,6 +137,7 @@ class Pagerv2
       .then (body) =>
         if body.users[0]?
           @robot.brain.data.pagerv2.users[user.id].pdid = body.users[0].id
+          @robot.brain.data.pagerv2.users[user.id].email = email
           res body.users[0].id
         else
           err "Sorry, I cannot find #{email}"
@@ -157,7 +158,7 @@ class Pagerv2
   getSchedule: (
     filter = false,
     fromtime = false,
-    totime = false, 
+    totime = false,
     schedule_id = process.env.PAGERV2_SCHEDULE_ID
   ) ->
     query = {
@@ -470,7 +471,7 @@ class Pagerv2
 
   logError: (message, payload) ->
     if @errorlog?
-      fs.appendFileSync @errorlog, "\n---------------------\n"
+      fs.appendFileSync @errorlog, '\n---------------------\n'
       fs.appendFileSync @errorlog, "#{moment().utc().format()} - #{message}\n\n"
       fs.appendFileSync @errorlog, JSON.stringify(payload, null, 2), 'utf-8'
 
