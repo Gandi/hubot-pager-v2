@@ -40,7 +40,9 @@ module.exports = (robot) ->
         else
           robot.logger.warning '[pagerv2] Invalid hook payload ' +
                                "type #{req.body.messages[0].type} from #{req.ip}"
+          pagerv2.logError 'invalid payload', req.body
           res.status(422).end()
       else
         robot.logger.warning "[pagerv2] Invalid hook payload from #{req.ip}"
+        pagerv2.logError 'invalid payload', req.body
         res.status(422).end()

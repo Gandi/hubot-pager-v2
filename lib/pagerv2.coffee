@@ -32,6 +32,7 @@ class Pagerv2
         @pagerServices.push(service)
     @logger = @robot.logger
     @logger.debug 'Pagerv2 Loaded'
+    @errorlog = path.join process.env.FILE_BRAIN_PATH, "pagerv2-error.log"
 
   getPermission: (user, group) =>
     return new Promise (res, err) =>
@@ -462,6 +463,11 @@ class Pagerv2
               else
                 process.env.PAGERV2_DEFAULT_RESOLVER or 'nagios'
         "#{origin} #{description} - #{level} (#{who})"
+
+  logError: (message, payload) ->
+    fs.appendFileSync @errorlog, "\n---------------------\n"
+    fs.appendFileSync @errorlog, "#{moment().utc().format()} - #{message}\n\n"
+    fs.appendFileSync @errorlog, JSON.stringify(payload, null, 2), 'utf-8'
 
 
 
