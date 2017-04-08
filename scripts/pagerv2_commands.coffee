@@ -13,7 +13,7 @@
 #   hubot pd <user> as <email>   - declare what email should be use to find <user> pagerduty id
 #
 #   hubot pd noc <duration>      - creates an override for <duration> minutes with the noc account
-#   hubot pd noc now             - creates a noc  override until the end of current oncall
+#   hubot pd noc now             - creates a noc override until the end of current oncall
 #   hubot pd not noc             - cancels a noc override if any
 #
 #   hubot pd incident <#>        - gives more information about incident number <number>
@@ -44,7 +44,7 @@
 #   hubot pd stfu|down [for] <duration> [because <reason>] - creates a maintenance
 #   hubot pd up|end|back <maintenance> - ends <maintenance>
 #
-#   hubot pd schedules [<search>]   - lists schedules (optionaly filtered by <search>)
+#   hubot pd schedules [<search>]   - lists schedules (operationally filtered by <search>)
 #
 #   hubot pd me <duration>       - creates an override for <duration> minutes
 #   hubot pd me now              - creates an override until the end of current oncall
