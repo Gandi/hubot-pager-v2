@@ -116,7 +116,7 @@ class Pagerv2
     return new Promise (res, err) =>
       unless user.id?
         user.id = user.name
-      email = @robot.brain.data.pagerv2.users[user.id].email or user.email_address
+      email = @robot.brain.data.pagerv2.users[user.id]?.email or user.email_address
       if email?
         res email
       else

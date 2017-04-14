@@ -329,6 +329,30 @@ describe 'pagerv2_commands', ->
           .to.eql "Bea Blala will be next on call at #{@start_time.format('HH:mm')} " +
                   "until #{@end_time.format('HH:mm')} (utc)."
 
+  # ----------------------------------------------------------------------------------------------
+  describe '".pd assign all to me"', ->
+    context 'when something goes wrong,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = {
+          users: {
+            momo: {
+              id: 'momo',
+              name: 'momo',
+              email: 'momo@example.com'
+            }
+          }
+        }
+        nock('https://api.pagerduty.com')
+        .get('/users?query=momo%40example.com')
+        .reply(200, require('./fixtures/users_list-nomatch.json'))
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pd assign all to me', ->
+        it 'returns the error message', ->
+          expect(hubotResponse())
+          .to.eql "Sorry, I cannot find momo@example.com"
 
   # ================================================================================================
   context 'caller is known', ->
@@ -344,8 +368,8 @@ describe 'pagerv2_commands', ->
         }
       }
 
-      afterEach ->
-        room.robot.brain.data.pagerv2 = { }
+    afterEach ->
+      room.robot.brain.data.pagerv2 = { }
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd 120000"', ->
