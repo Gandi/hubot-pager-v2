@@ -38,13 +38,10 @@
 #
 #   hubot pd [who is] oncall        - tells who is currently on call
 #   hubot pd [who is] next [oncall] - tells who is next on call
-#   hubot pd escalation             - tells who is involved in the escalation process
 #
 #   hubot pd maintenances           - lists currently active maintenances
 #   hubot pd stfu|down [for] <duration> [because <reason>] - creates a maintenance
 #   hubot pd up|end|back <maintenance> - ends <maintenance>
-#
-#   hubot pd schedules [<search>]   - lists schedules (operationally filtered by <search>)
 #
 #   hubot pd me <duration>       - creates an override for <duration> minutes
 #   hubot pd me now              - creates an override until the end of current oncall
@@ -145,12 +142,6 @@ module.exports = (robot) ->
       res.send "#{data.user.summary} will be next on call #{startDate} until #{endDate} (utc)."
     .catch (e) ->
       res.send e
-    res.finish()
-
-# TODO
-#   hubot pd escalation          - tells who is involved in the escalation process
-  robot.respond /pd escalation\s+$/, 'pd_escalation', (res) ->
-    res.send 'Not yet implemented'
     res.finish()
 
 #   hubot pd incident <number> - gives more information about incident number <number>
@@ -377,19 +368,6 @@ module.exports = (robot) ->
       pagerv2.endMaintenance(res.envelope.user, maintenance)
     .then (data) ->
       res.send 'Maintenance ended.'
-    .catch (e) ->
-      res.send e
-    res.finish()
-
-# TODO
-#   hubot pd schedules [<search>]   - lists schedules (optionaly filtered by <search>)
-  robot.respond /pd sched(?:ules?)?(?: ([A-Z0-9]+))?\s*$/, 'pd_schedules', (res) ->
-    pagerv2.getPermission(res.envelope.user, 'pduser')
-    .then ->
-      [ _, filter ] = res.match
-      pagerv2.getSchedule(filter)
-    .then (data) ->
-      res.send ''
     .catch (e) ->
       res.send e
     res.finish()

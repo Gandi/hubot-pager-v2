@@ -331,7 +331,7 @@ describe 'pagerv2_commands', ->
 
   # ----------------------------------------------------------------------------------------------
   describe '".pd assign all to me"', ->
-    context 'when something goes wrong,', ->
+    context 'when the recorded email is not known by pagerduty,', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = {
           users: {
