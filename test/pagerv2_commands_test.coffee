@@ -48,6 +48,7 @@ describe 'pagerv2_commands', ->
 
     process.env.PAGERV2_API_KEY = 'xxx'
     process.env.PAGERV2_SCHEDULE_ID = '42'
+    process.env.PAGERV2_SERVICES = 'My Application Service,Other Service'
     room = helper.createRoom { httpd: false }
     room.robot.brain.userForId 'user', {
       name: 'user'
@@ -66,6 +67,7 @@ describe 'pagerv2_commands', ->
   afterEach ->
     delete process.env.PAGERV2_API_KEY
     delete process.env.PAGERV2_SCHEDULE_ID
+    delete process.env.PAGERV2_SERVICES
 
   # ------------------------------------------------------------------------------------------------
   say 'pd version', ->
@@ -83,7 +85,6 @@ describe 'pagerv2_commands', ->
 
     context 'with a user that has unknown email,', ->
       beforeEach ->
-        room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
         .get('/users')
         .reply 200, require('./fixtures/users_list-nomatch.json')
@@ -365,7 +366,8 @@ describe 'pagerv2_commands', ->
             email: 'momo@example.com',
             pdid: 'PEYSGVF'
           }
-        }
+        },
+        services: { }
       }
 
     afterEach ->
@@ -1108,13 +1110,17 @@ describe 'pagerv2_commands', ->
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd stfu"', ->
+
       context 'when something goes wrong,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
+          .get('/services?query=My%20Application%20Service')
+          .reply(200, require('./fixtures/services_list1-ok.json'))
+          .get('/services?query=Other%20Service')
+          .reply(200, require('./fixtures/services_list2-ok.json'))
           .post('/maintenance windows')
           .reply 503, { error: { code: 503, message: "it's all broken!" } }
         afterEach ->
-          room.robot.brain.data.pagerv2 = { }
           nock.cleanAll()
 
         say 'pd stfu', ->
@@ -1125,6 +1131,10 @@ describe 'pagerv2_commands', ->
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
+          .get('/services?query=My%20Application%20Service')
+          .reply(200, require('./fixtures/services_list1-ok.json'))
+          .get('/services?query=Other%20Service')
+          .reply(200, require('./fixtures/services_list2-ok.json'))
           .post('/maintenance windows')
           .reply(200, require('./fixtures/maintenance_create-ok.json'))
         afterEach ->
@@ -1216,6 +1226,7 @@ describe 'pagerv2_commands', ->
     afterEach ->
       delete process.env.HUBOT_AUTH_ADMIN
       delete process.env.PAGERV2_NEED_GROUP_AUTH
+      room.robot.brain.data.pagerv2 = { }
 
 
     context 'user wants to resolve an alert', ->

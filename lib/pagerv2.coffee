@@ -7,7 +7,7 @@
 #  PAGERV2_API_KEY
 #  PAGERV2_SCHEDULE_ID       # the schedule used for oncall and overrides
 #  PAGERV2_OVERRIDERS        # list of user_id that can be targets of overrides
-#  PAGERV2_SERVICES          # list of service ids that are watched
+#  PAGERV2_SERVICES          # list of services that are concerned by massive maintenance
 #  PAGERV2_DEFAULT_RESOLVER  # name of the default user for resolution (ex. nagios)
 #  PAGERV2_LOG_PATH          # dir where are saved error logs
 #
@@ -394,7 +394,13 @@ class Pagerv2
 
   addMaintenance: (user, duration, description) ->
     @getUserEmail(user, user)
+    .bind(@email)
     .then (email) =>
+      @email = email
+      service_ids = Promise.map @pagerServices, (service) =>
+        @serviceId(service)
+      Promise.all(service_ids)
+    .then (service_ids) =>
       payload = {
         maintenance_window: {
           type: 'maintenance_window',
@@ -404,12 +410,12 @@ class Pagerv2
           services: [ ]
         }
       }
-      for service in @pagerServices
+      for service in service_ids
         payload.maintenance_window.services.push {
-          id: serviceId[service],
+          id: service,
           type: 'service_reference'
         }
-      @request('POST', '/maintenance windows', payload, email)
+      @request('POST', '/maintenance windows', payload, @email)
 
   endMaintenance: (user, id) ->
     @request('DELETE', "/maintenance windows/#{id}", { })
@@ -436,9 +442,14 @@ class Pagerv2
     @request('GET', '/services', payload)
 
   serviceId: (name) ->
-    unless @robot.brain.data.pagerv2.services[name]?
-      @robot.brain.data.pagerv2.services[name] = @getService(name)
-    @robot.brain.data.pagerv2.services[name]
+    new Promise (res, err) =>
+      if @robot.brain.data.pagerv2.services[name]?
+        res @robot.brain.data.pagerv2.services[name]
+      else
+        @getService(name)
+        .then (payload) =>
+          @robot.brain.data.pagerv2.services[name] = payload.services[0].id
+          res @robot.brain.data.pagerv2.services[name]
 
   parseWebhook: (adapter, messages) ->
     new Promise (res, err) =>
