@@ -155,21 +155,21 @@ class Pagerv2
         "Sorry, I can't figure #{user.name} email address. " +
         'Can you ask them to `.pd me as <email>`?'
 
-  getSchedule: (
-    filter = false,
-    fromtime = false,
-    totime = false,
-    schedule_id = process.env.PAGERV2_SCHEDULE_ID
-  ) ->
-    query = {
-      since: fromtime or moment().utc().format(),
-      until: totime or moment().utc().add(1, 'minutes').format(),
-      time_zone: 'UTC'
-    }
-    @request('GET', "/schedules/#{schedule_id}", query)
-    .then (body) ->
-      # console.log body.schedule
-      body.schedule.final_schedule.rendered_schedule_entries[0]
+  # getSchedule: (
+  #   filter = false,
+  #   fromtime = false,
+  #   totime = false,
+  #   schedule_id = process.env.PAGERV2_SCHEDULE_ID
+  # ) ->
+  #   query = {
+  #     since: fromtime or moment().utc().format(),
+  #     until: totime or moment().utc().add(1, 'minutes').format(),
+  #     time_zone: 'UTC'
+  #   }
+  #   @request('GET', "/schedules/#{schedule_id}", query)
+  #   .then (body) ->
+  #     # console.log body.schedule
+  #     body.schedule.final_schedule.rendered_schedule_entries[0]
 
   getOverride: (schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
     query = {

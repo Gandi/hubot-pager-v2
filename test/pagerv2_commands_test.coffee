@@ -353,7 +353,7 @@ describe 'pagerv2_commands', ->
       say 'pd assign all to me', ->
         it 'returns the error message', ->
           expect(hubotResponse())
-          .to.eql "Sorry, I cannot find momo@example.com"
+          .to.eql 'Sorry, I cannot find momo@example.com'
 
   # ================================================================================================
   context 'caller is known', ->
