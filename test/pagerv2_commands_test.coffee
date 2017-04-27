@@ -177,6 +177,18 @@ describe 'pagerv2_commands', ->
           expect(room.robot.brain.data.pagerv2.users.momo.email).to.eql 'toto@example.com'
           expect(room.robot.brain.data.pagerv2.users.momo.pdid).to.eql 'PXPGF42'
 
+    context 'but pagerduty api key is not set,', ->
+      beforeEach ->
+        delete process.env.PAGERV2_API_KEY
+        room.robot.brain.data.pagerv2 = { users: { } }
+
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+
+      say 'pd me as toto@example.com', ->
+        it 'returns an error message', ->
+          expect(hubotResponse()).to.eql 'PAGERV2_API_KEY is not set in your environment.'
+
   # ------------------------------------------------------------------------------------------------
   describe '".pd <user> as <email>"', ->
     context 'with an unknown email,', ->

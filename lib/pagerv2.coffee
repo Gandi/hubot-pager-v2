@@ -141,6 +141,8 @@ class Pagerv2
           res body.users[0].id
         else
           err "Sorry, I cannot find #{email}"
+      .catch (e) ->
+        err e
 
   _ask_for_email: (from, user) ->
     if from.name is user.name
