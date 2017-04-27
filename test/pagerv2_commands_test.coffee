@@ -177,6 +177,20 @@ describe 'pagerv2_commands', ->
           expect(room.robot.brain.data.pagerv2.users.momo.email).to.eql 'toto@example.com'
           expect(room.robot.brain.data.pagerv2.users.momo.pdid).to.eql 'PXPGF42'
 
+    context 'but an http error occurs,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = { users: { } }
+        nock('https://api.pagerduty.com')
+        .get('/users?query=toto%40example.com')
+        .replyWithError({ message: "server error", code: 500 })
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pd me as toto@example.com', ->
+        it 'returns information from pager', ->
+          expect(hubotResponse()).to.eql '500 server error'
+
     context 'but pagerduty api key is not set,', ->
       beforeEach ->
         delete process.env.PAGERV2_API_KEY
