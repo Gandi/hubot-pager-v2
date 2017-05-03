@@ -1,5 +1,5 @@
 {
-  "name": "hubot-pagerv2",
+  "name": "hubot-pager-v2",
   "description": "A hubot plugin for Pagerduty API v2.",
   "version": "0.0.1",
   "author": {
