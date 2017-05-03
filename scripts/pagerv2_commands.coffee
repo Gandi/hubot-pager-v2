@@ -164,11 +164,13 @@ module.exports = (robot) ->
     [ _, from, duration, limit ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pduser')
     .then ->
+      status = null
       if from?
         from = moment().subtract(from, 'hours')
         if duration?
           to = moment().subtract(from, 'hours').add(duration, 'hours')
-      pagerv2.listIncidents('', null, from, to, limit)
+        status = 'triggered,acknowledged,resolved'
+      pagerv2.listIncidents('', status, from, to, limit)
     .then (data) ->
       if data.incidents.length > 0
         for inc in data.incidents

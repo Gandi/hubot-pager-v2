@@ -4,11 +4,11 @@ Helper = require 'hubot-test-helper'
 helper = new Helper('../scripts/pagerv2_commands.coffee')
 Hubot = require '../node_modules/hubot'
 
-path   = require 'path'
-nock   = require 'nock'
-sinon  = require 'sinon'
-moment = require 'moment'
-expect = require('chai').use(require('sinon-chai')).expect
+path     = require 'path'
+nock     = require 'nock'
+sinon    = require 'sinon'
+moment   = require 'moment'
+expect   = require('chai').use(require('sinon-chai')).expect
 
 room = null
 
@@ -45,7 +45,6 @@ describe 'pagerv2_commands', ->
 
   beforeEach ->
     do nock.enableNetConnect
-
     process.env.PAGERV2_API_KEY = 'xxx'
     process.env.PAGERV2_SCHEDULE_ID = '42'
     process.env.PAGERV2_SERVICES = 'My Application Service,Other Service'
@@ -529,8 +528,20 @@ describe 'pagerv2_commands', ->
         beforeEach ->
           room.robot.brain.data.pagerv2 = { users: { } }
           nock('https://api.pagerduty.com')
-          .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
-               '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged&limit=100&total=true')
+          .get('/incidents')
+          .query({
+            time_zone: 'UTC',
+            include: [
+              'first_trigger_log_entry'
+            ],
+            date_range: 'all',
+            statuses: [
+              'triggered',
+              'acknowledged'
+            ],
+            limit: 100,
+            total: 'true'
+          })
           .reply 503, { error: { code: 503, message: "it's all broken!" } }
         afterEach ->
           room.robot.brain.data.pagerv2 = { }
@@ -545,8 +556,20 @@ describe 'pagerv2_commands', ->
         context 'and there are no incidents', ->
           beforeEach ->
             nock('https://api.pagerduty.com')
-            .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
-                 '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged&limit=100&total=true')
+            .get('/incidents')
+            .query({
+              time_zone: 'UTC',
+              include: [
+                'first_trigger_log_entry'
+              ],
+              date_range: 'all',
+              statuses: [
+                'triggered',
+                'acknowledged'
+              ],
+              limit: 100,
+              total: 'true'
+            })
             .reply(200, require('./fixtures/incident_list-empty.json'))
           afterEach ->
             nock.cleanAll()
@@ -559,13 +582,39 @@ describe 'pagerv2_commands', ->
         context 'and there are incidents', ->
           beforeEach ->
             nock('https://api.pagerduty.com')
-            .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
-                 '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged&limit=100&total=true')
+            .get('/incidents')
+            .query({
+              time_zone: 'UTC',
+              include: [
+                'first_trigger_log_entry'
+              ],
+              date_range: 'all',
+              statuses: [
+                'triggered',
+                'acknowledged'
+              ],
+              limit: 100,
+              total: 'true'
+            })
             .reply(200, require('./fixtures/incident_list-ok.json'))
           afterEach ->
             nock.cleanAll()
 
           say 'pd sup', ->
+            it 'returns list of incidents', ->
+              expect(hubotResponse())
+              .to.eql 'PT4KHLK The server is on fire. - resolved (Earline Greenholt)'
+
+        context 'and we want incidents for the past 2 hours', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .get('/incidents')
+            .query(true) # would need to find a way to mock date without fucking up setTimeout
+            .reply(200, require('./fixtures/incident_list-ok.json'))
+          afterEach ->
+            nock.cleanAll()
+
+          say 'pd sup 2', ->
             it 'returns list of incidents', ->
               expect(hubotResponse())
               .to.eql 'PT4KHLK The server is on fire. - resolved (Earline Greenholt)'
