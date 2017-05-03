@@ -530,7 +530,7 @@ describe 'pagerv2_commands', ->
           room.robot.brain.data.pagerv2 = { users: { } }
           nock('https://api.pagerduty.com')
           .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
-               '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
+               '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged&limit=100&total=true')
           .reply 503, { error: { code: 503, message: "it's all broken!" } }
         afterEach ->
           room.robot.brain.data.pagerv2 = { }
@@ -546,7 +546,7 @@ describe 'pagerv2_commands', ->
           beforeEach ->
             nock('https://api.pagerduty.com')
             .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
-                 '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
+                 '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged&limit=100&total=true')
             .reply(200, require('./fixtures/incident_list-empty.json'))
           afterEach ->
             nock.cleanAll()
@@ -560,7 +560,7 @@ describe 'pagerv2_commands', ->
           beforeEach ->
             nock('https://api.pagerduty.com')
             .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
-                 '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
+                 '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged&limit=100&total=true')
             .reply(200, require('./fixtures/incident_list-ok.json'))
           afterEach ->
             nock.cleanAll()
@@ -576,7 +576,7 @@ describe 'pagerv2_commands', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
           .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
-               '&statuses%5B%5D=triggered')
+               '&statuses%5B%5D=triggered&limit=100&total=true')
           .reply 503, { error: { code: 503, message: "it's all broken!" } }
         afterEach ->
           room.robot.brain.data.pagerv2 = { }
@@ -592,7 +592,7 @@ describe 'pagerv2_commands', ->
           beforeEach ->
             nock('https://api.pagerduty.com')
             .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
-                 '&statuses%5B%5D=triggered')
+                 '&statuses%5B%5D=triggered&limit=100&total=true')
             .reply(200, require('./fixtures/incident_list-ok.json'))
             .put('/incidents')
             .reply(200, require('./fixtures/incident_manage-ok.json'))
@@ -607,7 +607,7 @@ describe 'pagerv2_commands', ->
           beforeEach ->
             nock('https://api.pagerduty.com')
             .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
-                 '&statuses%5B%5D=triggered')
+                 '&statuses%5B%5D=triggered&limit=100&total=true')
             .reply(200, require('./fixtures/incident_list_multi-ok.json'))
             .put('/incidents')
             .reply(200, require('./fixtures/incident_manage_multi-ok.json'))
@@ -623,7 +623,7 @@ describe 'pagerv2_commands', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
           .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all&' +
-               'statuses%5B%5D=triggered')
+               'statuses%5B%5D=triggered&limit=100&total=true')
           .reply(200, require('./fixtures/incident_list-empty.json'))
         afterEach ->
           nock.cleanAll()
@@ -692,7 +692,7 @@ describe 'pagerv2_commands', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
           .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all&' +
-               'statuses%5B%5D=acknowledged')
+               'statuses%5B%5D=acknowledged&limit=100&total=true')
           .reply 503, { error: { code: 503, message: "it's all broken!" } }
         afterEach ->
           room.robot.brain.data.pagerv2 = { }
@@ -708,7 +708,7 @@ describe 'pagerv2_commands', ->
           beforeEach ->
             nock('https://api.pagerduty.com')
             .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all&' +
-                 'statuses%5B%5D=acknowledged')
+                 'statuses%5B%5D=acknowledged&limit=100&total=true')
             .reply(200, require('./fixtures/incident_list-ok.json'))
             .put('/incidents')
             .reply(200, require('./fixtures/incident_manage-ok.json'))
@@ -725,7 +725,7 @@ describe 'pagerv2_commands', ->
           beforeEach ->
             nock('https://api.pagerduty.com')
             .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all&' +
-                 'statuses%5B%5D=acknowledged')
+                 'statuses%5B%5D=acknowledged&limit=100&total=true')
             .reply(200, require('./fixtures/incident_list_multi-ok.json'))
             .put('/incidents')
             .reply(200, require('./fixtures/incident_manage_multi-ok.json'))
@@ -742,7 +742,7 @@ describe 'pagerv2_commands', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
           .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all&' +
-               'statuses%5B%5D=acknowledged')
+               'statuses%5B%5D=acknowledged&limit=100&total=true')
           .reply(200, require('./fixtures/incident_list-empty.json'))
         afterEach ->
           nock.cleanAll()
@@ -811,7 +811,7 @@ describe 'pagerv2_commands', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
           .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
-               '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
+               '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged&limit=100&total=true')
           .reply 503, { error: { code: 503, message: "it's all broken!" } }
         afterEach ->
           room.robot.brain.data.pagerv2 = { }
@@ -827,7 +827,7 @@ describe 'pagerv2_commands', ->
           beforeEach ->
             nock('https://api.pagerduty.com')
             .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
-                 '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
+                 '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged&limit=100&total=true')
             .reply(200, require('./fixtures/incident_list-ok.json'))
             .put('/incidents')
             .reply(200, require('./fixtures/incident_manage-ok.json'))
@@ -844,7 +844,7 @@ describe 'pagerv2_commands', ->
           beforeEach ->
             nock('https://api.pagerduty.com')
             .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
-                 '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
+                 '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged&limit=100&total=true')
             .reply(200, require('./fixtures/incident_list-ok.json'))
             .put('/incidents')
             .reply(200, require('./fixtures/incident_manage_multi-ok.json'))
@@ -861,7 +861,7 @@ describe 'pagerv2_commands', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
           .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
-               '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
+               '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged&limit=100&total=true')
           .reply(200, require('./fixtures/incident_list-empty.json'))
         afterEach ->
           nock.cleanAll()
@@ -930,7 +930,7 @@ describe 'pagerv2_commands', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
           .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
-               '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
+               '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged&limit=100&total=true')
           .reply 503, { error: { code: 503, message: "it's all broken!" } }
         afterEach ->
           room.robot.brain.data.pagerv2 = { }
@@ -946,7 +946,7 @@ describe 'pagerv2_commands', ->
           beforeEach ->
             nock('https://api.pagerduty.com')
             .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
-                 '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
+                 '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged&limit=100&total=true')
             .reply(200, require('./fixtures/incident_list-ok.json'))
             .post('/incidents/PT4KHLK/snooze')
             .reply(200, require('./fixtures/incident_snooze-ok.json'))
@@ -963,7 +963,7 @@ describe 'pagerv2_commands', ->
           beforeEach ->
             nock('https://api.pagerduty.com')
             .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
-                 '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
+                 '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged&limit=100&total=true')
             .reply(200, require('./fixtures/incident_list_multi-ok.json'))
             .post('/incidents/PT4KHLK/snooze')
             .reply(200, require('./fixtures/incident_snooze-ok.json'))
@@ -982,7 +982,7 @@ describe 'pagerv2_commands', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
           .get('/incidents?time_zone=UTC&include%5B%5D=first_trigger_log_entry&date_range=all' +
-               '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged')
+               '&statuses%5B%5D=triggered&statuses%5B%5D=acknowledged&limit=100&total=true')
           .reply(200, require('./fixtures/incident_list-empty.json'))
         afterEach ->
           nock.cleanAll()

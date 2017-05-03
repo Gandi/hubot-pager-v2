@@ -160,10 +160,15 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pd sup|inc|incidents - lists currently unresolved incidents
-  robot.respond /(?:pd )?(?:sup|inc(?:idents))\s*$/, 'pd_incidents', (res) ->
+  robot.respond /(?:pd )?(?:sup|inc(?:idents))\s*(\d+)?(?: (\d+))?(?: (\d+))?\s*$/, 'pd_incidents', (res) ->
+    [ _, from, duration, limit ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pduser')
     .then ->
-      pagerv2.listIncidents()
+      if from?
+        from = moment().subtract(from, 'hours')
+        if duration?
+          to = moment().subtract(from, 'hours').add(duration, 'hours')
+      pagerv2.listIncidents('', null, from, to, limit)
     .then (data) ->
       if data.incidents.length > 0
         for inc in data.incidents

@@ -281,7 +281,8 @@ class Pagerv2
     incidents = '',
     statuses = 'triggered,acknowledged',
     date_since = null,
-    date_until = null
+    date_until = null,
+    limit = 100
   ) ->
     if incidents isnt ''
       new Promise (res, err) ->
@@ -303,7 +304,11 @@ class Pagerv2
         query['date_range'] = 'all'
       if statuses?
         query['statuses[]'] = statuses.split /,/
+      query['limit'] = limit
+      query['total'] = 'true'
       @request('GET', '/incidents', query)
+      .then (data) ->
+        data
 
   updateIncidents: (user, incidents = '', which = 'triggered', status = 'acknowledged') ->
     @getUserEmail(user, user)
