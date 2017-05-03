@@ -1092,6 +1092,19 @@ describe 'pagerv2_commands', ->
             expect(hubotResponse())
             .to.eql "503 it's all broken!"
 
+      context 'when there are no notes,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/incidents/PT4KHLK/notes')
+          .reply(200, require('./fixtures/notes_empty-ok.json'))
+        afterEach ->
+          nock.cleanAll()
+
+        say 'pd notes PT4KHLK', ->
+          it 'returns a message warning that there is no notes', ->
+            expect(hubotResponse())
+            .to.eql 'PT4KHLK has no notes.'
+
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -1104,6 +1117,7 @@ describe 'pagerv2_commands', ->
           it 'returns notes for the incident', ->
             expect(hubotResponse())
             .to.eql 'PT4KHLK - Firefighters are on the scene.'
+
 
     # ----------------------------------------------------------------------------------------------
     describe '".pd maintenances"', ->

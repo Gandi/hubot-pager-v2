@@ -325,8 +325,11 @@ module.exports = (robot) ->
     .then ->
       pagerv2.listNotes(incident)
     .then (data) ->
-      for note in data.notes
-        res.send "#{incident} - #{note.content}"
+      if data.notes.length > 0
+        for note in data.notes
+          res.send "#{incident} - #{note.content}"
+      else
+        res.send "#{incident} has no notes."
     .catch (e) ->
       res.send e
     res.finish()
