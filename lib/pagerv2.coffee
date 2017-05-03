@@ -480,7 +480,8 @@ class Pagerv2
                 message.data.incident.assigned_to_user.name
               else
                 process.env.PAGERV2_DEFAULT_RESOLVER or 'nagios'
-        "#{origin} #{description} - #{level} (#{who})"
+        id = message.data.incident.id
+        "#{origin} #{id} - #{description} - #{level} (#{who})"
 
   logError: (message, payload) ->
     if @errorlog?
