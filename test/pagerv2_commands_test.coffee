@@ -151,7 +151,10 @@ describe 'pagerv2_commands', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-        .get('/users?query=toto%40example.com')
+        .get('/users')
+        .query({
+          query: 'toto@example.com'
+        })
         .reply 200, require('./fixtures/users_list-nomatch.json')
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
@@ -166,7 +169,10 @@ describe 'pagerv2_commands', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-        .get('/users?query=toto%40example.com')
+        .get('/users')
+        .query({
+          query: 'toto@example.com'
+        })
         .reply 200, require('./fixtures/users_list-match.json')
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
@@ -182,7 +188,10 @@ describe 'pagerv2_commands', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-        .get('/users?query=toto%40example.com')
+        .get('/users')
+        .query({
+          query: 'toto@example.com'
+        })
         .replyWithError({ message: "server error", code: 500 })
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
@@ -210,7 +219,10 @@ describe 'pagerv2_commands', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-        .get('/users?query=toto%40example.com')
+        .get('/users')
+        .query({
+          query: 'toto@example.com'
+        })
         .reply 200, require('./fixtures/users_list-nomatch.json')
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
@@ -225,7 +237,10 @@ describe 'pagerv2_commands', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-        .get('/users?query=toto%40example.com')
+        .get('/users')
+        .query({
+          query: 'toto@example.com'
+        })
         .reply 200, require('./fixtures/users_list-match.json')
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
@@ -242,7 +257,12 @@ describe 'pagerv2_commands', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-        .get('/oncalls?time_zone=UTC&schedule_ids%5B%5D=42&earliest=true')
+        .get('/oncalls')
+        .query({
+          time_zone: 'UTC',
+          schedule_ids: [ 42 ],
+          earliest: true
+        })
         .reply 503, { error: { code: 503, message: "it's all broken!" } }
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
@@ -257,7 +277,12 @@ describe 'pagerv2_commands', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-        .get('/oncalls?time_zone=UTC&schedule_ids%5B%5D=42&earliest=true')
+        .get('/oncalls')
+        .query({
+          time_zone: 'UTC',
+          schedule_ids: [ 42 ],
+          earliest: true
+        })
         .reply 200, require('./fixtures/oncall_list-ok.json')
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
@@ -276,7 +301,12 @@ describe 'pagerv2_commands', ->
         payload.oncalls[0].end = @end_time.format()
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-        .get('/oncalls?time_zone=UTC&schedule_ids%5B%5D=42&earliest=true')
+        .get('/oncalls')
+        .query({
+          time_zone: 'UTC',
+          schedule_ids: [ 42 ],
+          earliest: true
+        })
         .reply 200, payload
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
@@ -293,7 +323,12 @@ describe 'pagerv2_commands', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-        .get('/oncalls?time_zone=UTC&schedule_ids%5B%5D=42&earliest=true')
+        .get('/oncalls')
+        .query({
+          time_zone: 'UTC',
+          schedule_ids: [ 42 ],
+          earliest: true
+        })
         .reply 503, { error: { code: 503, message: "it's all broken!" } }
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
@@ -308,12 +343,24 @@ describe 'pagerv2_commands', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-        .get('/oncalls?time_zone=UTC&schedule_ids%5B%5D=42&earliest=true')
+        .get('/oncalls')
+        .query({
+          time_zone: 'UTC',
+          schedule_ids: [ 42 ],
+          earliest: true
+        })
         .reply(200, require('./fixtures/oncall_list-ok.json'))
         .filteringPath( (path) ->
           path.replace /(since|until)=[^&]*/g, '$1=x'
         )
-        .get('/oncalls?time_zone=UTC&schedule_ids%5B%5D=42&earliest=true&since=x&until=x')
+        .get('/oncalls')
+        .query({
+          time_zone: 'UTC',
+          schedule_ids: [ 42 ],
+          earliest: true,
+          since: 'x',
+          until: 'x'
+        })
         .reply 200, require('./fixtures/oncall_list_next-ok.json')
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
@@ -338,7 +385,12 @@ describe 'pagerv2_commands', ->
 
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
-        .get('/oncalls?time_zone=UTC&schedule_ids%5B%5D=42&earliest=true')
+        .get('/oncalls')
+        .query({
+          time_zone: 'UTC',
+          schedule_ids: [ 42 ],
+          earliest: true
+        })
         .reply(200, payload1)
         .get(
           '/oncalls?time_zone=UTC&schedule_ids%5B%5D=42&earliest=true' +
