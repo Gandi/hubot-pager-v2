@@ -464,7 +464,12 @@ describe 'pagerv2_commands', ->
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .get('/oncalls?time_zone=UTC&schedule_ids%5B%5D=42&earliest=true')
+          .get('/oncalls')
+          .query({
+            time_zone: 'UTC',
+            schedule_ids: [ 42 ],
+            earliest: true
+          })
           .reply(200, require('./fixtures/oncall_list-ok.json'))
           .post('/schedules/42/overrides')
           .reply(200, require('./fixtures/override_create-ok.json'))
@@ -484,7 +489,13 @@ describe 'pagerv2_commands', ->
           .filteringPath( (path) ->
             path.replace /(since|until)=[^&]*/g, '$1=x'
           )
-          .get('/schedules/42/overrides?since=x&until=x&editable=true&overflow=true')
+          .get('/schedules/42/overrides')
+          .query({
+            since: 'x',
+            until: 'x',
+            editable: true,
+            overflow: true
+          })
           .reply(200, require('./fixtures/override_get-ok.json'))
           .delete('/schedules/42/overrides/PQ47DCP')
           .reply 503, { error: { code: 503, message: "it's all broken!" } }
@@ -503,7 +514,13 @@ describe 'pagerv2_commands', ->
           .filteringPath( (path) ->
             path.replace /(since|until)=[^&]*/g, '$1=x'
           )
-          .get('/schedules/42/overrides?since=x&until=x&editable=true&overflow=true')
+          .get('/schedules/42/overrides')
+          .query({
+            since: 'x',
+            until: 'x',
+            editable: true,
+            overflow: true
+          })
           .reply(200, require('./fixtures/override_get-ok.json'))
           .delete('/schedules/42/overrides/PQ47DCP')
           .reply(200, require('./fixtures/override_get-ok.json'))
@@ -520,7 +537,12 @@ describe 'pagerv2_commands', ->
       context 'when something goes wrong,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .get('/oncalls?time_zone=UTC&schedule_ids%5B%5D=42&earliest=true')
+          .get('/oncalls')
+          .query({
+            time_zone: 'UTC',
+            schedule_ids: [ 42 ],
+            earliest: true
+          })
           .reply 503, { error: { code: 503, message: "it's all broken!" } }
         afterEach ->
           room.robot.brain.data.pagerv2 = { }
@@ -534,7 +556,12 @@ describe 'pagerv2_commands', ->
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .get('/oncalls?time_zone=UTC&schedule_ids%5B%5D=42&earliest=true')
+          .get('/oncalls')
+          .query({
+            time_zone: 'UTC',
+            schedule_ids: [ 42 ],
+            earliest: true
+          })
           .reply(200, require('./fixtures/oncall_list-ok.json'))
           .post('/schedules/42/overrides')
           .reply(200, require('./fixtures/override_create-ok.json'))
