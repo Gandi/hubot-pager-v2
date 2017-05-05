@@ -111,7 +111,10 @@ describe 'pagerv2_commands', ->
           }
         }
         nock('https://api.pagerduty.com')
-        .get('/users?query=momo%40example.com')
+        .get('/users')
+        .query({
+          query: 'momo@example.com'
+        })
         .reply 200, require('./fixtures/users_list-match.json')
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
@@ -392,11 +395,14 @@ describe 'pagerv2_commands', ->
           earliest: true
         })
         .reply(200, payload1)
-        .get(
-          '/oncalls?time_zone=UTC&schedule_ids%5B%5D=42&earliest=true' +
-          '&since=' + encodeURIComponent(moment(@start_time).utc().add(2, 'minute').format()) +
-          '&until=' + encodeURIComponent(moment(@start_time).utc().add(3, 'minute').format())
-        )
+        .get('/oncalls')
+        .query({
+          time_zone: 'UTC',
+          schedule_ids: [ 42 ],
+          earliest: true,
+          since: moment(@start_time).utc().add(2, 'minute').format(),
+          until: moment(@start_time).utc().add(3, 'minute').format()
+        })
         .reply(200, payload2)
 
       afterEach ->
@@ -423,7 +429,10 @@ describe 'pagerv2_commands', ->
           }
         }
         nock('https://api.pagerduty.com')
-        .get('/users?query=momo%40example.com')
+        .get('/users')
+        .query({
+          query: 'momo@example.com'
+        })
         .reply(200, require('./fixtures/users_list-nomatch.json'))
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
@@ -1480,7 +1489,10 @@ describe 'pagerv2_commands', ->
       context 'when something goes wrong,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .get('/maintenance windows?filter=ongoing')
+          .get('/maintenance windows')
+          .query({
+            filter: 'ongoing'
+          })
           .reply 503, { error: { code: 503, message: "it's all broken!" } }
         afterEach ->
           room.robot.brain.data.pagerv2 = { }
@@ -1494,7 +1506,10 @@ describe 'pagerv2_commands', ->
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .get('/maintenance windows?filter=ongoing')
+          .get('/maintenance windows')
+          .query({
+            filter: 'ongoing'
+          })
           .reply(200, require('./fixtures/maintenance_list-ok.json'))
         afterEach ->
           nock.cleanAll()
@@ -1510,9 +1525,15 @@ describe 'pagerv2_commands', ->
       context 'when something goes wrong,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .get('/services?query=My%20Application%20Service')
+          .get('/services')
+          .query({
+            query: 'My Application Service'
+          })
           .reply(200, require('./fixtures/services_list1-ok.json'))
-          .get('/services?query=Other%20Service')
+          .get('/services')
+          .query({
+            query: 'Other Service'
+          })
           .reply(200, require('./fixtures/services_list2-ok.json'))
           .post('/maintenance windows')
           .reply 503, { error: { code: 503, message: "it's all broken!" } }
@@ -1527,9 +1548,15 @@ describe 'pagerv2_commands', ->
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .get('/services?query=My%20Application%20Service')
+          .get('/services')
+          .query({
+            query: 'My Application Service'
+          })
           .reply(200, require('./fixtures/services_list1-ok.json'))
-          .get('/services?query=Other%20Service')
+          .get('/services')
+          .query({
+            query: 'Other Service'
+          })
           .reply(200, require('./fixtures/services_list2-ok.json'))
           .post('/maintenance windows')
           .reply(200, require('./fixtures/maintenance_create-ok.json'))
