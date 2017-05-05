@@ -297,7 +297,7 @@ class Pagerv2
       }
       if date_since?
         unless date_until?
-          date_until = moment()
+          date_until = moment().utc()
         query['date_since'] = moment(date_since).format()
         query['date_until'] = moment(date_until).format()
       else

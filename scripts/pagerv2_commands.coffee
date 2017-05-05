@@ -166,9 +166,9 @@ module.exports = (robot) ->
     .then ->
       status = null
       if from?
-        from = moment().subtract(from, 'hours')
+        from = moment().utc().subtract(from, 'hours')
         if duration?
-          to = moment().subtract(from, 'hours').add(duration, 'hours')
+          to = moment(from).add(duration, 'hours')
         status = 'triggered,acknowledged,resolved'
       pagerv2.listIncidents('', status, from, to, limit)
     .then (data) ->

@@ -14,12 +14,12 @@ room = null
 
 describe 'pagerv2_commands', ->
 
-  hubotEmit = (e, data, tempo = 40) ->
+  hubotEmit = (e, data, tempo = 50) ->
     beforeEach (done) ->
       room.robot.emit e, data
       setTimeout (done), tempo
  
-  hubotHear = (message, userName = 'momo', tempo = 40) ->
+  hubotHear = (message, userName = 'momo', tempo = 50) ->
     beforeEach (done) ->
       room.user.say userName, message
       setTimeout (done), tempo
@@ -56,6 +56,8 @@ describe 'pagerv2_commands', ->
       name: 'user_with_email',
       email_address: 'user@example.com'
     }
+    moment.now = ->
+      +new Date("February 2, 2017 02:02:00 UTC")
 
     room.receive = (userName, message) ->
       new Promise (resolve) =>
@@ -609,12 +611,54 @@ describe 'pagerv2_commands', ->
           beforeEach ->
             nock('https://api.pagerduty.com')
             .get('/incidents')
-            .query(true) # would need to find a way to mock date without fucking up setTimeout
+            .query({
+              time_zone: 'UTC',
+              include: [
+                'first_trigger_log_entry'
+              ],
+              date_since: '2017-02-02T00:02:00Z',
+              date_until: '2017-02-02T02:02:00Z',
+              statuses: [
+                'triggered',
+                'acknowledged',
+                'resolved'
+              ],
+              limit: 100,
+              total: 'true'
+            })
             .reply(200, require('./fixtures/incident_list-ok.json'))
           afterEach ->
             nock.cleanAll()
 
           say 'pd sup 2', ->
+            it 'returns list of incidents', ->
+              expect(hubotResponse())
+              .to.eql 'PT4KHLK The server is on fire. - resolved (Earline Greenholt)'
+
+        context 'and we want incidents since 8 hours ago for 4 hours', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .get('/incidents')
+            .query({
+              time_zone: 'UTC',
+              include: [
+                'first_trigger_log_entry'
+              ],
+              date_since: '2017-02-01T18:02:00Z',
+              date_until: '2017-02-01T22:02:00Z',
+              statuses: [
+                'triggered',
+                'acknowledged',
+                'resolved'
+              ],
+              limit: 100,
+              total: 'true'
+            })
+            .reply(200, require('./fixtures/incident_list-ok.json'))
+          afterEach ->
+            nock.cleanAll()
+
+          say 'pd sup 8 4', ->
             it 'returns list of incidents', ->
               expect(hubotResponse())
               .to.eql 'PT4KHLK The server is on fire. - resolved (Earline Greenholt)'
