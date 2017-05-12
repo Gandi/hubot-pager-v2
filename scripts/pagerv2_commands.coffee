@@ -25,7 +25,7 @@
 #   hubot pd res|resolve [all]   - resolves any un-resolved incidents
 #   hubot pd res|resolve <#,#,#> - resolves incident <number>
 #
-#   hubot pd snooze [all] [for] [<duration>] [min]   - snoozes any open incidents
+#   hubot pd snooze [all] [for] [<duration>] [min]   - snoozes any open incidents for [<duration>] (default 120m)
 #   hubot pd snooze <#,#,#> [for] [<duration>] [min] - snoozes incident <number>
 #
 #   hubot pd assign [all] to me       - assigns all open incidents to caller
@@ -104,7 +104,7 @@ module.exports = (robot) ->
       res.send e
     res.finish()
 
-#   hubot pd oncall - returns who is on call
+#   hubot pd [who is] oncall - returns who is on call
   robot.respond /(?:pd )?(?:who(?: is|'s) )?on ?call\s*$/, 'pd_oncall', (res) ->
     pagerv2.getOncall()
     .then (data) ->
@@ -144,7 +144,7 @@ module.exports = (robot) ->
       res.send e
     res.finish()
 
-#   hubot pd incident <number> - gives more information about incident number <number>
+#   hubot pd incident <#> - gives more information about incident number <number>
   robot.respond /pd (?:inc |incident )#?(\d+|[A-Z0-9]{7})\s*$/, 'pd_incident', (res) ->
     [ _, incident ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pduser')
@@ -183,7 +183,7 @@ module.exports = (robot) ->
       res.send e
     res.finish()
 
-#   hubot pd ack               - acknowledges any unack incidents
+#   hubot pd ack [all]         - acknowledges any unack incidents
   robot.respond /pd ack(?: all)?\s*$/, 'pd_ack_all', (res) ->
     pagerv2.getPermission(res.envelope.user, 'pduser')
     .then ->
@@ -197,7 +197,7 @@ module.exports = (robot) ->
       res.send e.message or e
     res.finish()
 
-#   hubot pd ack <#>           - acknowledges incident <number>
+#   hubot pd ack <#,#,#>           - acknowledges incident <number>
   robot.respond /pd ack #?(.+)\s*$/, 'pd_ack_one', (res) ->
     [ _, incidents ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pduser')
@@ -212,7 +212,7 @@ module.exports = (robot) ->
       res.send e.message or e
     res.finish()
 
-#   hubot pd res|resolve       - acknowledges any unack incidents
+#   hubot pd res|resolve [all]      - resolves any unresolved incidents
   robot.respond /pd res(?:olve)?(?: all)?\s*$/, 'pd_res_all', (res) ->
     pagerv2.getPermission(res.envelope.user, 'pduser')
     .then ->
@@ -226,7 +226,7 @@ module.exports = (robot) ->
       res.send e.message or e
     res.finish()
 
-#   hubot pd res|resolve <#>   - acknowledges incident <number>
+#   hubot pd res|resolve <#,#,#>   - resolves incident <number>
   robot.respond /pd res(?:olve)? #?(.+)\s*$/, 'pd_res_one', (res) ->
     [ _, incidents ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pduser')
@@ -279,7 +279,7 @@ module.exports = (robot) ->
       res.send e.message or e
     res.finish()
 
-#   hubot pd snooze [all] [for] [<duration>] [min]  - acknowledges any unack incidents
+#   hubot pd snooze [all] [for] [<duration>] [min]  - snoozes all incidents for [<duration>] (default 120m)
   robot.respond (
     /pd snooze(?: all)?(?: (?:for )(\d+)(?: min(?:utes)?)?)?\s*$/
   ), 'pd_snooze_all', (res) ->
@@ -296,7 +296,7 @@ module.exports = (robot) ->
       res.send e.message or e
     res.finish()
 
-#   hubot pd snooze <#,#,#> [for] [<duration>] [min] - acknowledges incident <number>
+#   hubot pd snooze <#,#,#> [for] [<duration>] [min] - snoozes incident <number> for [<duration>] (default 120m)
   robot.respond (
     /pd snooze #?(.+)(?: (?:for )(\d+)(?: min(?:utes)?)?)?\s*$/
   ), 'pd_snooze_one', (res) ->
