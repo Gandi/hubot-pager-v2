@@ -39,7 +39,7 @@
 #   hubot pd [who is] oncall        - tells who is currently on call
 #   hubot pd [who is] next [oncall] - tells who is next on call
 #
-#   hubot pd [tell to|cc] oncall <message> - cc oncall and send <message> to alerting channel
+#   hubot pd [tell to |cc ] oncall <message> - cc oncall and send <message> to alerting channel
 #
 #   hubot pd maintenances           - lists currently active maintenances
 #   hubot pd stfu|down [for] <duration> [because <reason>] - creates a maintenance
@@ -106,8 +106,8 @@ module.exports = (robot) ->
       res.send e
     res.finish()
 
-#   hubot pd [tell to|cc] oncall <message> - cc oncall and send <message> to alerting channel
-  robot.respond /(?:pd )?(?:tell to|cc)?on ?call\s(.+)/, 'pd_msg_oncall', (res) ->
+#   hubot pd [tell to |cc ] oncall <message> - cc oncall and send <message> to alerting channel
+  robot.respond /(?:pd )?(?:tell to |cc )?on ?call\s(.+)/, 'pd_msg_oncall', (res) ->
     [ _, msg ] = res.match
     alertchan = process.env.PAGERV2_ANNOUNCE_ROOM
     pagerv2.getOncall()
