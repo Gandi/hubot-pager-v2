@@ -270,7 +270,7 @@ describe 'pagerv2_commands', ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
 
-      say 'pd oncall', ->
+      say 'pd oncall doing stuff', ->
         it 'returns the error message', ->
           expect(hubotResponse())
           .to.eql "503 it's all broken!"
