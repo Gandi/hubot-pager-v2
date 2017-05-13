@@ -253,7 +253,47 @@ describe 'pagerv2_commands', ->
         it 'returns information from pager', ->
           expect(hubotResponse())
           .to.eql 'Ok now I know toto is PXPGF42.'
+  # ------------------------------------------------------------------------------------------------
+  describe '".pd oncall <msg>"', ->
+    context 'when something goes wrong,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = { users: { } }
+        nock('https://api.pagerduty.com')
+        .get('/oncalls')
+        .query({
+          time_zone: 'UTC',
+          schedule_ids: [ 42 ],
+          earliest: true
+        })
+        .reply 503, { error: { code: 503, message: "it's all broken!" } }
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
 
+      say 'pd oncall doing stuff', ->
+        it 'returns the error message', ->
+          expect(hubotResponse())
+          .to.eql "503 it's all broken!"
+
+    context 'when everything goes right,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = { users: { } }
+        nock('https://api.pagerduty.com')
+        .get('/oncalls')
+        .query({
+          time_zone: 'UTC',
+          schedule_ids: [ 42 ],
+          earliest: true
+        })
+        .reply 200, require('./fixtures/oncall_list-ok.json')
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pd oncall doing stuff', ->
+        it 'returns name of who is on call', ->
+          expect(hubotResponse())
+          .to.eql 'I\'ll notify Tim Wright'
   # ------------------------------------------------------------------------------------------------
   describe '".pd oncall"', ->
     context 'when something goes wrong,', ->
