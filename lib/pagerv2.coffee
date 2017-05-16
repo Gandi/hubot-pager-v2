@@ -40,7 +40,7 @@ class Pagerv2
 
   getPermission: (user, group) =>
     return new Promise (res, err) =>
-      isAuthorized = @robot.auth?.hasRole(user, [group, 'pdadmin']) or
+      isAuthorized = @robot.auth?.hasRole(user, [group, 'pageradmin']) or
                      @robot.auth?.isAdmin(user)
       if process.env.PAGERV2_NEED_GROUP_AUTH? and
          process.env.PAGERV2_NEED_GROUP_AUTH isnt '0' and
@@ -91,8 +91,8 @@ class Pagerv2
     return new Promise (res, err) =>
       unless user.id?
         user.id = user.name
-      if @robot.brain.data.pagerv2.users[user.id]?.pdid?
-        res @robot.brain.data.pagerv2.users[user.id].pdid
+      if @robot.brain.data.pagerv2.users[user.id]?.pagerid?
+        res @robot.brain.data.pagerv2.users[user.id].pagerid
       else
         @robot.brain.data.pagerv2.users[user.id] ?= {
           name: user.name,
@@ -107,7 +107,7 @@ class Pagerv2
           @request('GET', '/users', query)
           .then (body) =>
             if body.users[0]?
-              @robot.brain.data.pagerv2.users[user.id].pdid = body.users[0].id
+              @robot.brain.data.pagerv2.users[user.id].pagerid = body.users[0].id
               res body.users[0].id
             else
               err "Sorry, I cannot find #{email}"
@@ -136,7 +136,7 @@ class Pagerv2
       @request('GET', '/users', query)
       .then (body) =>
         if body.users[0]?
-          @robot.brain.data.pagerv2.users[user.id].pdid = body.users[0].id
+          @robot.brain.data.pagerv2.users[user.id].pagerid = body.users[0].id
           @robot.brain.data.pagerv2.users[user.id].email = email
           res body.users[0].id
         else
@@ -147,15 +147,15 @@ class Pagerv2
   _ask_for_email: (from, user) ->
     if from.name is user.name
       "Sorry, I can't figure out your email address :( " +
-      'Can you tell me with `.pd me as <email>`?'
+      'Can you tell me with `.pager me as <email>`?'
     else
-      if @robot.auth? and (@robot.auth.hasRole(from, ['pdadmin']) or
+      if @robot.auth? and (@robot.auth.hasRole(from, ['pageradmin']) or
          @robot.auth.isAdmin(from))
         "Sorry, I can't figure #{user.name} email address. " +
-        "Can you help me with `.pd #{user.name} as <email>`?"
+        "Can you help me with `.pager #{user.name} as <email>`?"
       else
         "Sorry, I can't figure #{user.name} email address. " +
-        'Can you ask them to `.pd me as <email>`?'
+        'Can you ask them to `.pager me as <email>`?'
 
   # getSchedule: (
   #   filter = false,
@@ -209,7 +209,7 @@ class Pagerv2
         else
           if overriders and who not in overriders
             unless @robot.auth? and
-               (@robot.auth.hasRole(from, ['pdadmin']) or @robot.auth.isAdmin(from))
+               (@robot.auth.hasRole(from, ['pageradmin']) or @robot.auth.isAdmin(from))
               who = null
               err "You cannot force #{who.name} to take the override."
         if who?
@@ -251,7 +251,7 @@ class Pagerv2
       else
         if overriders and who not in overriders
           unless @robot.auth? and
-             (@robot.auth.hasRole(from, ['pdadmin']) or @robot.auth.isAdmin(from))
+             (@robot.auth.hasRole(from, ['pageradmin']) or @robot.auth.isAdmin(from))
             who = null
             err "You cannot force #{who.name} to take the override."
       if who?
@@ -310,7 +310,7 @@ class Pagerv2
       .then (data) ->
         data
 
-  updateIncidents: (user, incidents = '', which = 'triggered', status = 'acknowledged') ->
+  upagerateIncidents: (user, incidents = '', which = 'triggered', status = 'acknowledged') ->
     @getUserEmail(user, user)
     .bind({ from: null })
     .then (email) =>

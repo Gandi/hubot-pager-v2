@@ -71,18 +71,18 @@ describe 'pagerv2_commands', ->
     delete process.env.PAGERV2_SERVICES
 
   # ------------------------------------------------------------------------------------------------
-  say 'pd version', ->
+  say 'pager version', ->
     it 'replies version number', ->
       expect(hubotResponse()).to.match /hubot-pager-v2 is version [0-9]+\.[0-9]+\.[0-9]+/
 
   # ------------------------------------------------------------------------------------------------
-  describe '".pd me"', ->
+  describe '".pager me"', ->
     context 'with a first time user,', ->
-      say 'pd me', ->
+      say 'pager me', ->
         it 'asks to declare email', ->
           expect(hubotResponse())
           .to.eql "Sorry, I can't figure out your email address :( " +
-                  'Can you tell me with `.pd me as <email>`?'
+                  'Can you tell me with `.pager me as <email>`?'
 
     context 'with a user that has unknown email,', ->
       beforeEach ->
@@ -93,11 +93,11 @@ describe 'pagerv2_commands', ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
 
-      say 'pd me', ->
+      say 'pager me', ->
         it 'asks to declare email', ->
           expect(hubotResponse())
           .to.eql "Sorry, I can't figure out your email address :( " +
-                  'Can you tell me with `.pd me as <email>`?'
+                  'Can you tell me with `.pager me as <email>`?'
 
     context 'with a user that has a known email,', ->
       beforeEach ->
@@ -120,15 +120,15 @@ describe 'pagerv2_commands', ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
 
-      say 'pd me', ->
-        it 'gets user information from PD', ->
+      say 'pager me', ->
+        it 'gets user information from pager', ->
           expect(hubotResponse())
           .to.eql 'Oh I know you, you are PXPGF42.'
-        it 'records PDid in brain', ->
-          expect(room.robot.brain.data.pagerv2.users['momo'].pdid)
+        it 'records pagerid in brain', ->
+          expect(room.robot.brain.data.pagerv2.users['momo'].pagerid)
           .to.eql 'PXPGF42'
 
-    context 'with a user that already has a pdid,', ->
+    context 'with a user that already has a pagerid,', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = {
           users: {
@@ -136,20 +136,20 @@ describe 'pagerv2_commands', ->
               id: 'momo',
               name: 'momo',
               email: 'momo@example.com',
-              pdid: 'AAAAA42'
+              pagerid: 'AAAAA42'
             }
           }
         }
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
 
-      say 'pd me', ->
+      say 'pager me', ->
         it 'returns information from brain', ->
           expect(hubotResponse())
           .to.eql 'Oh I know you, you are AAAAA42.'
 
   # ------------------------------------------------------------------------------------------------
-  describe '".pd me as <email>"', ->
+  describe '".pager me as <email>"', ->
     context 'with an unknown email,', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
@@ -163,7 +163,7 @@ describe 'pagerv2_commands', ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
 
-      say 'pd me as toto@example.com', ->
+      say 'pager me as toto@example.com', ->
         it 'asks to declare email', ->
           expect(hubotResponse())
           .to.eql 'Sorry, I cannot find toto@example.com'
@@ -181,11 +181,11 @@ describe 'pagerv2_commands', ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
 
-      say 'pd me as toto@example.com', ->
+      say 'pager me as toto@example.com', ->
         it 'returns information from pager', ->
           expect(hubotResponse()).to.eql 'Ok now I know you are PXPGF42.'
           expect(room.robot.brain.data.pagerv2.users.momo.email).to.eql 'toto@example.com'
-          expect(room.robot.brain.data.pagerv2.users.momo.pdid).to.eql 'PXPGF42'
+          expect(room.robot.brain.data.pagerv2.users.momo.pagerid).to.eql 'PXPGF42'
 
     context 'but an http error occurs,', ->
       beforeEach ->
@@ -200,7 +200,7 @@ describe 'pagerv2_commands', ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
 
-      say 'pd me as toto@example.com', ->
+      say 'pager me as toto@example.com', ->
         it 'returns information from pager', ->
           expect(hubotResponse()).to.eql '500 server error'
 
@@ -212,12 +212,12 @@ describe 'pagerv2_commands', ->
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
 
-      say 'pd me as toto@example.com', ->
+      say 'pager me as toto@example.com', ->
         it 'returns an error message', ->
           expect(hubotResponse()).to.eql 'PAGERV2_API_KEY is not set in your environment.'
 
   # ------------------------------------------------------------------------------------------------
-  describe '".pd <user> as <email>"', ->
+  describe '".pager <user> as <email>"', ->
     context 'with an unknown email,', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
@@ -231,7 +231,7 @@ describe 'pagerv2_commands', ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
 
-      say 'pd toto as toto@example.com', ->
+      say 'pager toto as toto@example.com', ->
         it 'asks to declare email', ->
           expect(hubotResponse())
           .to.eql 'Sorry, I cannot find toto@example.com'
@@ -249,12 +249,13 @@ describe 'pagerv2_commands', ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
 
-      say 'pd toto as toto@example.com', ->
+      say 'pager toto as toto@example.com', ->
         it 'returns information from pager', ->
           expect(hubotResponse())
           .to.eql 'Ok now I know toto is PXPGF42.'
+
   # ------------------------------------------------------------------------------------------------
-  describe '".pd oncall <msg>"', ->
+  describe '".pager oncall <msg>"', ->
     context 'when something goes wrong,', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
@@ -270,7 +271,7 @@ describe 'pagerv2_commands', ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
 
-      say 'pd oncall doing stuff', ->
+      say 'pager oncall doing stuff', ->
         it 'returns the error message', ->
           expect(hubotResponse())
           .to.eql "503 it's all broken!"
@@ -290,12 +291,13 @@ describe 'pagerv2_commands', ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
 
-      say 'pd oncall doing stuff', ->
+      say 'pager oncall doing stuff', ->
         it 'returns name of who is on call', ->
           expect(hubotResponse())
           .to.eql 'I\'ll notify Tim Wright'
+
   # ------------------------------------------------------------------------------------------------
-  describe '".pd oncall"', ->
+  describe '".pager oncall"', ->
     context 'when something goes wrong,', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
@@ -311,7 +313,7 @@ describe 'pagerv2_commands', ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
 
-      say 'pd oncall', ->
+      say 'pager oncall', ->
         it 'returns the error message', ->
           expect(hubotResponse())
           .to.eql "503 it's all broken!"
@@ -331,7 +333,7 @@ describe 'pagerv2_commands', ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
 
-      say 'pd oncall', ->
+      say 'pager oncall', ->
         it 'returns name of who is on call', ->
           expect(hubotResponse())
           .to.eql 'Tim Wright is on call until Saturday 20:28 (utc).'
@@ -355,13 +357,13 @@ describe 'pagerv2_commands', ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
 
-      say 'pd oncall', ->
+      say 'pager oncall', ->
         it 'returns name of who is on call', ->
           expect(hubotResponse())
           .to.eql "Tim Wright is on call until #{@end_time.format('HH:mm')} (utc)."
 
   # ------------------------------------------------------------------------------------------------
-  describe '".pd next oncall"', ->
+  describe '".pager next oncall"', ->
     context 'when something goes wrong,', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
@@ -377,7 +379,7 @@ describe 'pagerv2_commands', ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
 
-      say 'pd next oncall', ->
+      say 'pager next oncall', ->
         it 'returns the error message', ->
           expect(hubotResponse())
           .to.eql "503 it's all broken!"
@@ -409,7 +411,7 @@ describe 'pagerv2_commands', ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
 
-      say 'pd next oncall', ->
+      say 'pager next oncall', ->
         it 'returns name of who is on call', ->
           expect(hubotResponse())
           .to.eql 'Bea Blala will be next on call on Saturday 20:28 until Saturday 23:28 (utc).'
@@ -449,14 +451,14 @@ describe 'pagerv2_commands', ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
 
-      say 'pd next oncall', ->
+      say 'pager next oncall', ->
         it 'returns name of who is on call', ->
           expect(hubotResponse())
           .to.eql "Bea Blala will be next on call at #{@start_time.format('HH:mm')} " +
                   "until #{@end_time.format('HH:mm')} (utc)."
 
   # ----------------------------------------------------------------------------------------------
-  describe '".pd assign all to me"', ->
+  describe '".pager assign all to me"', ->
     context 'when the recorded email is not known by pagerduty,', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = {
@@ -478,7 +480,7 @@ describe 'pagerv2_commands', ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
 
-      say 'pd assign all to me', ->
+      say 'pager assign all to me', ->
         it 'returns the error message', ->
           expect(hubotResponse())
           .to.eql 'Sorry, I cannot find momo@example.com'
@@ -492,7 +494,7 @@ describe 'pagerv2_commands', ->
             id: 'momo',
             name: 'momo',
             email: 'momo@example.com',
-            pdid: 'PEYSGVF'
+            pagerid: 'PEYSGVF'
           }
         },
         services: { }
@@ -502,14 +504,14 @@ describe 'pagerv2_commands', ->
       room.robot.brain.data.pagerv2 = { }
 
     # ----------------------------------------------------------------------------------------------
-    describe '".pd 120000"', ->
+    describe '".pager 120000"', ->
       context 'when everything goes right,', ->
-        say 'pd 120000', ->
+        say 'pager 120000', ->
           it 'warns that this duration does not make any sense', ->
             expect(hubotResponse())
             .to.eql 'Sorry you cannot set an override of more than 1 day.'
 
-    describe '".pd 120"', ->
+    describe '".pager 120"', ->
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -525,13 +527,13 @@ describe 'pagerv2_commands', ->
         afterEach ->
           nock.cleanAll()
 
-        say 'pd 120', ->
+        say 'pager 120', ->
           it 'says override is done', ->
             expect(hubotResponse())
             .to.eql 'Rejoice Aurelio Rice! momo is now on call.'
 
     # ----------------------------------------------------------------------------------------------
-    describe '".pd not me"', ->
+    describe '".pager not me"', ->
       context 'when something goes wrong,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -552,7 +554,7 @@ describe 'pagerv2_commands', ->
           room.robot.brain.data.pagerv2 = { }
           nock.cleanAll()
 
-        say 'pd not me', ->
+        say 'pager not me', ->
           it 'returns the error message', ->
             expect(hubotResponse())
             .to.eql "503 it's all broken!"
@@ -576,13 +578,13 @@ describe 'pagerv2_commands', ->
         afterEach ->
           nock.cleanAll()
 
-        say 'pd not me', ->
+        say 'pager not me', ->
           it 'returns name of who is on call', ->
             expect(hubotResponse())
             .to.eql 'Ok, momo! Aurelio Rice override is cancelled.'
 
     # ----------------------------------------------------------------------------------------------
-    describe '".pd me now"', ->
+    describe '".pager me now"', ->
       context 'when something goes wrong,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -597,7 +599,7 @@ describe 'pagerv2_commands', ->
           room.robot.brain.data.pagerv2 = { }
           nock.cleanAll()
 
-        say 'pd me now', ->
+        say 'pager me now', ->
           it 'returns the error message', ->
             expect(hubotResponse())
             .to.eql "503 it's all broken!"
@@ -617,13 +619,13 @@ describe 'pagerv2_commands', ->
         afterEach ->
           nock.cleanAll()
 
-        say 'pd me now', ->
+        say 'pager me now', ->
           it 'returns name of who is on call', ->
             expect(hubotResponse())
             .to.eql 'Rejoice Aurelio Rice! momo is now on call.'
 
     # ----------------------------------------------------------------------------------------------
-    describe '".pd incident 1234"', ->
+    describe '".pager incident 1234"', ->
       context 'when something goes wrong,', ->
         beforeEach ->
           room.robot.brain.data.pagerv2 = { users: { } }
@@ -634,7 +636,7 @@ describe 'pagerv2_commands', ->
           room.robot.brain.data.pagerv2 = { }
           nock.cleanAll()
 
-        say 'pd incident 1234', ->
+        say 'pager incident 1234', ->
           it 'returns the error message', ->
             expect(hubotResponse())
             .to.eql "503 it's all broken!"
@@ -647,13 +649,13 @@ describe 'pagerv2_commands', ->
         afterEach ->
           nock.cleanAll()
 
-        say 'pd incident 1234', ->
+        say 'pager incident 1234', ->
           it 'returns details on the incident', ->
             expect(hubotResponse())
             .to.eql 'PT4KHLK The server is on fire. - resolved (Earline Greenholt)'
 
     # ----------------------------------------------------------------------------------------------
-    describe '".pd sup"', ->
+    describe '".pager sup"', ->
       context 'when something goes wrong,', ->
         beforeEach ->
           room.robot.brain.data.pagerv2 = { users: { } }
@@ -677,7 +679,7 @@ describe 'pagerv2_commands', ->
           room.robot.brain.data.pagerv2 = { }
           nock.cleanAll()
 
-        say 'pd sup', ->
+        say 'pager sup', ->
           it 'returns the error message', ->
             expect(hubotResponse())
             .to.eql "503 it's all broken!"
@@ -704,7 +706,7 @@ describe 'pagerv2_commands', ->
           afterEach ->
             nock.cleanAll()
 
-          say 'pd sup', ->
+          say 'pager sup', ->
             it 'returns list of incidents', ->
               expect(hubotResponse())
               .to.eql 'There are no open incidents for now.'
@@ -730,7 +732,7 @@ describe 'pagerv2_commands', ->
           afterEach ->
             nock.cleanAll()
 
-          say 'pd sup', ->
+          say 'pager sup', ->
             it 'returns list of incidents', ->
               expect(hubotResponse())
               .to.eql 'PT4KHLK The server is on fire. - resolved (Earline Greenholt)'
@@ -758,7 +760,7 @@ describe 'pagerv2_commands', ->
           afterEach ->
             nock.cleanAll()
 
-          say 'pd sup 2', ->
+          say 'pager sup 2', ->
             it 'returns list of incidents', ->
               expect(hubotResponse())
               .to.eql 'PT4KHLK The server is on fire. - resolved (Earline Greenholt)'
@@ -786,13 +788,13 @@ describe 'pagerv2_commands', ->
           afterEach ->
             nock.cleanAll()
 
-          say 'pd sup 8 4', ->
+          say 'pager sup 8 4', ->
             it 'returns list of incidents', ->
               expect(hubotResponse())
               .to.eql 'PT4KHLK The server is on fire. - resolved (Earline Greenholt)'
 
     # ----------------------------------------------------------------------------------------------
-    describe '".pd ack"', ->
+    describe '".pager ack"', ->
       context 'when something goes wrong,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -814,7 +816,7 @@ describe 'pagerv2_commands', ->
           room.robot.brain.data.pagerv2 = { }
           nock.cleanAll()
 
-        say 'pd ack', ->
+        say 'pager ack', ->
           it 'returns the error message', ->
             expect(hubotResponse())
             .to.eql "503 it's all broken!"
@@ -842,7 +844,7 @@ describe 'pagerv2_commands', ->
           afterEach ->
             nock.cleanAll()
 
-          say 'pd ack', ->
+          say 'pager ack', ->
             it 'says incident was acknowledged', ->
               expect(hubotResponse()).to.eql 'Incident PT4KHLK acknowledged.'
 
@@ -868,7 +870,7 @@ describe 'pagerv2_commands', ->
           afterEach ->
             nock.cleanAll()
 
-          say 'pd ack', ->
+          say 'pager ack', ->
             it 'says incident was acknowledged', ->
               expect(hubotResponse())
               .to.eql 'Incidents PT4KHLK, 1234567 acknowledged.'
@@ -893,13 +895,13 @@ describe 'pagerv2_commands', ->
         afterEach ->
           nock.cleanAll()
 
-        say 'pd ack', ->
+        say 'pager ack', ->
           it 'says there is no incidents', ->
             expect(hubotResponse())
             .to.eql 'There is no triggered incidents at the moment.'
 
     # ----------------------------------------------------------------------------------------------
-    describe '".pd ack PT4KHLK"', ->
+    describe '".pager ack PT4KHLK"', ->
       context 'when something goes wrong,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -909,7 +911,7 @@ describe 'pagerv2_commands', ->
           room.robot.brain.data.pagerv2 = { }
           nock.cleanAll()
 
-        say 'pd ack PT4KHLK', ->
+        say 'pager ack PT4KHLK', ->
           it 'returns the error message', ->
             expect(hubotResponse())
             .to.eql "503 it's all broken!"
@@ -923,7 +925,7 @@ describe 'pagerv2_commands', ->
           afterEach ->
             nock.cleanAll()
 
-          say 'pd ack PT4KHLK', ->
+          say 'pager ack PT4KHLK', ->
             it 'says incident was acknowledged', ->
               expect(hubotResponse())
               .to.eql 'Incident PT4KHLK acknowledged.'
@@ -936,23 +938,23 @@ describe 'pagerv2_commands', ->
           afterEach ->
             nock.cleanAll()
 
-          say 'pd ack PT4KHLK,1234567', ->
+          say 'pager ack PT4KHLK,1234567', ->
             it 'says incidents were acknowledged', ->
               expect(hubotResponse())
               .to.eql 'Incidents PT4KHLK, 1234567 acknowledged.'
 
-          say 'pd ack PT4KHLK, 1234567', ->
+          say 'pager ack PT4KHLK, 1234567', ->
             it 'says incidents were acknowledged', ->
               expect(hubotResponse())
               .to.eql 'Incidents PT4KHLK, 1234567 acknowledged.'
 
-          say 'pd ack PT4KHLK 1234567', ->
+          say 'pager ack PT4KHLK 1234567', ->
             it 'says incidents were acknowledged', ->
               expect(hubotResponse())
               .to.eql 'Incidents PT4KHLK, 1234567 acknowledged.'
 
     # ----------------------------------------------------------------------------------------------
-    describe '".pd res"', ->
+    describe '".pager res"', ->
       context 'when something goes wrong,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -974,7 +976,7 @@ describe 'pagerv2_commands', ->
           room.robot.brain.data.pagerv2 = { }
           nock.cleanAll()
 
-        say 'pd res', ->
+        say 'pager res', ->
           it 'returns the error message', ->
             expect(hubotResponse())
             .to.eql "503 it's all broken!"
@@ -1003,7 +1005,7 @@ describe 'pagerv2_commands', ->
           afterEach ->
             nock.cleanAll()
 
-          say 'pd res', ->
+          say 'pager res', ->
             it 'says incident was resolved', ->
               expect(hubotResponse())
               .to.eql 'Incident PT4KHLK resolved.'
@@ -1031,7 +1033,7 @@ describe 'pagerv2_commands', ->
           afterEach ->
             nock.cleanAll()
 
-          say 'pd res', ->
+          say 'pager res', ->
             it 'says incident was resolved', ->
               expect(hubotResponse())
               .to.eql 'Incidents PT4KHLK, 1234567 resolved.'
@@ -1056,13 +1058,13 @@ describe 'pagerv2_commands', ->
         afterEach ->
           nock.cleanAll()
 
-        say 'pd res', ->
+        say 'pager res', ->
           it 'says there is no incidents', ->
             expect(hubotResponse())
             .to.eql 'There is no acknowledged incidents at the moment.'
 
     # ----------------------------------------------------------------------------------------------
-    describe '".pd res PT4KHLK"', ->
+    describe '".pager res PT4KHLK"', ->
       context 'when something goes wrong,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -1072,7 +1074,7 @@ describe 'pagerv2_commands', ->
           room.robot.brain.data.pagerv2 = { }
           nock.cleanAll()
 
-        say 'pd res PT4KHLK', ->
+        say 'pager res PT4KHLK', ->
           it 'returns the error message', ->
             expect(hubotResponse())
             .to.eql "503 it's all broken!"
@@ -1086,7 +1088,7 @@ describe 'pagerv2_commands', ->
           afterEach ->
             nock.cleanAll()
 
-          say 'pd res PT4KHLK', ->
+          say 'pager res PT4KHLK', ->
             it 'says incident was resolved', ->
               expect(hubotResponse())
               .to.eql 'Incident PT4KHLK resolved.'
@@ -1099,23 +1101,23 @@ describe 'pagerv2_commands', ->
           afterEach ->
             nock.cleanAll()
 
-          say 'pd res PT4KHLK,1234567', ->
+          say 'pager res PT4KHLK,1234567', ->
             it 'says incidents wer resolved', ->
               expect(hubotResponse())
               .to.eql 'Incidents PT4KHLK, 1234567 resolved.'
 
-          say 'pd res PT4KHLK 1234567', ->
+          say 'pager res PT4KHLK 1234567', ->
             it 'says incidents wer resolved', ->
               expect(hubotResponse())
               .to.eql 'Incidents PT4KHLK, 1234567 resolved.'
 
-          say 'pd res PT4KHLK, 1234567', ->
+          say 'pager res PT4KHLK, 1234567', ->
             it 'says incidents wer resolved', ->
               expect(hubotResponse())
               .to.eql 'Incidents PT4KHLK, 1234567 resolved.'
 
     # ----------------------------------------------------------------------------------------------
-    describe '".pd assign all to me"', ->
+    describe '".pager assign all to me"', ->
       context 'when something goes wrong,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -1138,7 +1140,7 @@ describe 'pagerv2_commands', ->
           room.robot.brain.data.pagerv2 = { }
           nock.cleanAll()
 
-        say 'pd assign all to me', ->
+        say 'pager assign all to me', ->
           it 'returns the error message', ->
             expect(hubotResponse())
             .to.eql "503 it's all broken!"
@@ -1168,7 +1170,7 @@ describe 'pagerv2_commands', ->
           afterEach ->
             nock.cleanAll()
 
-          say 'pd assign all to me', ->
+          say 'pager assign all to me', ->
             it 'says incident was assigned', ->
               expect(hubotResponse())
               .to.eql 'Incident PT4KHLK assigned to momo.'
@@ -1197,7 +1199,7 @@ describe 'pagerv2_commands', ->
           afterEach ->
             nock.cleanAll()
 
-          say 'pd assign all to me', ->
+          say 'pager assign all to me', ->
             it 'says incident was assigned', ->
               expect(hubotResponse())
               .to.eql 'Incidents PT4KHLK, 1234567 assigned to momo.'
@@ -1223,13 +1225,13 @@ describe 'pagerv2_commands', ->
         afterEach ->
           nock.cleanAll()
 
-        say 'pd assign all to me', ->
+        say 'pager assign all to me', ->
           it 'says there are no incidents', ->
             expect(hubotResponse())
             .to.eql 'There is no incidents at the moment.'
 
     # ----------------------------------------------------------------------------------------------
-    describe '".pd assign PT4KHLK to me"', ->
+    describe '".pager assign PT4KHLK to me"', ->
       context 'when something goes wrong,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -1239,7 +1241,7 @@ describe 'pagerv2_commands', ->
           room.robot.brain.data.pagerv2 = { }
           nock.cleanAll()
 
-        say 'pd assign PT4KHLK to me', ->
+        say 'pager assign PT4KHLK to me', ->
           it 'returns the error message', ->
             expect(hubotResponse())
             .to.eql "503 it's all broken!"
@@ -1253,7 +1255,7 @@ describe 'pagerv2_commands', ->
           afterEach ->
             nock.cleanAll()
 
-          say 'pd assign PT4KHLK to me', ->
+          say 'pager assign PT4KHLK to me', ->
             it 'says incident was assigned', ->
               expect(hubotResponse())
               .to.eql 'Incident PT4KHLK assigned to momo.'
@@ -1266,23 +1268,23 @@ describe 'pagerv2_commands', ->
           afterEach ->
             nock.cleanAll()
 
-          say 'pd assign PT4KHLK,1234567 to me', ->
+          say 'pager assign PT4KHLK,1234567 to me', ->
             it 'says incident was assigned', ->
               expect(hubotResponse())
               .to.eql 'Incidents PT4KHLK, 1234567 assigned to momo.'
 
-          say 'pd assign PT4KHLK 1234567 to me', ->
+          say 'pager assign PT4KHLK 1234567 to me', ->
             it 'says incident was assigned', ->
               expect(hubotResponse())
               .to.eql 'Incidents PT4KHLK, 1234567 assigned to momo.'
 
-          say 'pd assign PT4KHLK, 1234567 to me', ->
+          say 'pager assign PT4KHLK, 1234567 to me', ->
             it 'says incident was assigned', ->
               expect(hubotResponse())
               .to.eql 'Incidents PT4KHLK, 1234567 assigned to momo.'
 
     # ----------------------------------------------------------------------------------------------
-    describe '".pd snooze all"', ->
+    describe '".pager snooze all"', ->
       context 'when something goes wrong,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -1305,7 +1307,7 @@ describe 'pagerv2_commands', ->
           room.robot.brain.data.pagerv2 = { }
           nock.cleanAll()
 
-        say 'pd snooze all', ->
+        say 'pager snooze all', ->
           it 'returns the error message', ->
             expect(hubotResponse())
             .to.eql "503 it's all broken!"
@@ -1335,7 +1337,7 @@ describe 'pagerv2_commands', ->
           afterEach ->
             nock.cleanAll()
 
-          say 'pd snooze all', ->
+          say 'pager snooze all', ->
             it 'says all incidents have been snoozed', ->
               expect(hubotResponse())
               .to.eql 'Incident PT4KHLK snoozed.'
@@ -1366,7 +1368,7 @@ describe 'pagerv2_commands', ->
           afterEach ->
             nock.cleanAll()
 
-          say 'pd snooze all', ->
+          say 'pager snooze all', ->
             it 'says all incidents have been snoozed', ->
               expect(hubotResponse())
               .to.eql 'Incidents PT4KHLK, 1234567 snoozed.'
@@ -1392,13 +1394,13 @@ describe 'pagerv2_commands', ->
         afterEach ->
           nock.cleanAll()
 
-        say 'pd snooze all', ->
+        say 'pager snooze all', ->
           it 'says there are no incidents', ->
             expect(hubotResponse())
             .to.eql 'There is no open incidents at the moment.'
 
     # ----------------------------------------------------------------------------------------------
-    describe '".pd snooze PT4KHLK"', ->
+    describe '".pager snooze PT4KHLK"', ->
       context 'when something goes wrong,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -1408,7 +1410,7 @@ describe 'pagerv2_commands', ->
           room.robot.brain.data.pagerv2 = { }
           nock.cleanAll()
 
-        say 'pd snooze PT4KHLK', ->
+        say 'pager snooze PT4KHLK', ->
           it 'returns the error message', ->
             expect(hubotResponse())
             .to.eql "503 it's all broken!"
@@ -1422,7 +1424,7 @@ describe 'pagerv2_commands', ->
           afterEach ->
             nock.cleanAll()
 
-          say 'pd snooze PT4KHLK', ->
+          say 'pager snooze PT4KHLK', ->
             it 'says incident have been snoozed', ->
               expect(hubotResponse())
               .to.eql 'Incident PT4KHLK snoozed.'
@@ -1437,23 +1439,23 @@ describe 'pagerv2_commands', ->
           afterEach ->
             nock.cleanAll()
 
-          say 'pd snooze PT4KHLK 1234567', ->
+          say 'pager snooze PT4KHLK 1234567', ->
             it 'says incident have been snoozed', ->
               expect(hubotResponse())
               .to.eql 'Incidents PT4KHLK, 1234567 snoozed.'
 
-          say 'pd snooze PT4KHLK,1234567', ->
+          say 'pager snooze PT4KHLK,1234567', ->
             it 'says incident have been snoozed', ->
               expect(hubotResponse())
               .to.eql 'Incidents PT4KHLK, 1234567 snoozed.'
 
-          say 'pd snooze PT4KHLK, 1234567', ->
+          say 'pager snooze PT4KHLK, 1234567', ->
             it 'says incident have been snoozed', ->
               expect(hubotResponse())
               .to.eql 'Incidents PT4KHLK, 1234567 snoozed.'
 
     # ----------------------------------------------------------------------------------------------
-    describe '".pd note PT4KHLK some note"', ->
+    describe '".pager note PT4KHLK some note"', ->
       context 'when something goes wrong,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -1463,7 +1465,7 @@ describe 'pagerv2_commands', ->
           room.robot.brain.data.pagerv2 = { }
           nock.cleanAll()
 
-        say 'pd note PT4KHLK some note', ->
+        say 'pager note PT4KHLK some note', ->
           it 'returns the error message', ->
             expect(hubotResponse())
             .to.eql "503 it's all broken!"
@@ -1476,13 +1478,13 @@ describe 'pagerv2_commands', ->
         afterEach ->
           nock.cleanAll()
 
-        say 'pd note PT4KHLK some note', ->
+        say 'pager note PT4KHLK some note', ->
           it 'says note has been added', ->
             expect(hubotResponse())
             .to.eql 'Note added to PT4KHLK: some note.'
 
     # ----------------------------------------------------------------------------------------------
-    describe '".pd notes PT4KHLK"', ->
+    describe '".pager notes PT4KHLK"', ->
       context 'when something goes wrong,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -1492,7 +1494,7 @@ describe 'pagerv2_commands', ->
           room.robot.brain.data.pagerv2 = { }
           nock.cleanAll()
 
-        say 'pd notes PT4KHLK', ->
+        say 'pager notes PT4KHLK', ->
           it 'returns the error message', ->
             expect(hubotResponse())
             .to.eql "503 it's all broken!"
@@ -1505,7 +1507,7 @@ describe 'pagerv2_commands', ->
         afterEach ->
           nock.cleanAll()
 
-        say 'pd notes PT4KHLK', ->
+        say 'pager notes PT4KHLK', ->
           it 'returns a message warning that there is no notes', ->
             expect(hubotResponse())
             .to.eql 'PT4KHLK has no notes.'
@@ -1518,14 +1520,14 @@ describe 'pagerv2_commands', ->
         afterEach ->
           nock.cleanAll()
 
-        say 'pd notes PT4KHLK', ->
+        say 'pager notes PT4KHLK', ->
           it 'returns notes for the incident', ->
             expect(hubotResponse())
             .to.eql 'PT4KHLK - Firefighters are on the scene.'
 
 
     # ----------------------------------------------------------------------------------------------
-    describe '".pd maintenances"', ->
+    describe '".pager maintenances"', ->
       context 'when something goes wrong,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -1538,7 +1540,7 @@ describe 'pagerv2_commands', ->
           room.robot.brain.data.pagerv2 = { }
           nock.cleanAll()
 
-        say 'pd maintenances', ->
+        say 'pager maintenances', ->
           it 'returns the error message', ->
             expect(hubotResponse())
             .to.eql "503 it's all broken!"
@@ -1554,13 +1556,13 @@ describe 'pagerv2_commands', ->
         afterEach ->
           nock.cleanAll()
 
-        say 'pd maintenances', ->
+        say 'pager maintenances', ->
           it 'returns ongoing maintenances', ->
             expect(hubotResponse())
             .to.eql 'PW98YIO - Immanentizing the eschaton (until 03:00 UTC)'
 
     # ----------------------------------------------------------------------------------------------
-    describe '".pd stfu"', ->
+    describe '".pager stfu"', ->
 
       context 'when something goes wrong,', ->
         beforeEach ->
@@ -1580,7 +1582,7 @@ describe 'pagerv2_commands', ->
         afterEach ->
           nock.cleanAll()
 
-        say 'pd stfu', ->
+        say 'pager stfu', ->
           it 'returns the error message', ->
             expect(hubotResponse())
             .to.eql "503 it's all broken!"
@@ -1603,13 +1605,13 @@ describe 'pagerv2_commands', ->
         afterEach ->
           nock.cleanAll()
 
-        say 'pd stfu', ->
+        say 'pager stfu', ->
           it 'returns ongoing maintenances', ->
             expect(hubotResponse())
             .to.eql 'Maintenance created for all services until 03:00 UTC (id PW98YIO).'
 
     # ----------------------------------------------------------------------------------------------
-    describe '".pd end PW98YIO"', ->
+    describe '".pager end PW98YIO"', ->
       context 'when something goes wrong,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -1619,7 +1621,7 @@ describe 'pagerv2_commands', ->
           room.robot.brain.data.pagerv2 = { }
           nock.cleanAll()
 
-        say 'pd end PW98YIO', ->
+        say 'pager end PW98YIO', ->
           it 'returns the error message', ->
             expect(hubotResponse())
             .to.eql "503 it's all broken!"
@@ -1632,7 +1634,7 @@ describe 'pagerv2_commands', ->
         afterEach ->
           nock.cleanAll()
 
-        say 'pd end PW98YIO', ->
+        say 'pager end PW98YIO', ->
           it 'responds that the maintenance is now cancelled', ->
             expect(hubotResponse())
             .to.eql 'Maintenance ended.'
@@ -1652,34 +1654,34 @@ describe 'pagerv2_commands', ->
         name: 'admin_user',
         id: 'admin_user',
         email: 'toto@example.com',
-        pdid: '11111111'
+        pagerid: '11111111'
       }
       room.robot.brain.userForId 'pager_admin', {
         id: 'pager_admin',
         name: 'pager_admin',
         phid: 'PHID-USER-123456789',
         roles: [
-          'pdadmin'
+          'pageradmin'
         ]
       }
       room.robot.brain.data.pagerv2.users.pager_admin = {
         name: 'pager_admin',
         id: 'pager_admin',
         email: 'toto@example.com',
-        pdid: '87654321'
+        pagerid: '87654321'
       }
       room.robot.brain.userForId 'pager_user', {
         id: 'pager_user',
         name: 'pager_user',
         roles: [
-          'pduser'
+          'pageruser'
         ]
       }
       room.robot.brain.data.pagerv2.users.pager_user = {
         name: 'pager_user',
         id: 'pager_user',
         email: 'toto@example.com',
-        pdid: '12345678'
+        pagerid: '12345678'
       }
       room.robot.brain.userForId 'non_pager_user', {
         id: 'non_pager_user',
@@ -1709,25 +1711,25 @@ describe 'pagerv2_commands', ->
         nock.cleanAll()
 
       context 'and user is admin', ->
-        hubot 'pd res PT4KHLK', 'admin_user'
+        hubot 'pager res PT4KHLK', 'admin_user'
         it 'says incident was resolved', ->
           expect(hubotResponse())
           .to.eql 'Incident PT4KHLK resolved.'
 
       context 'and user is pager_admin', ->
-        hubot 'pd res PT4KHLK', 'pager_admin'
+        hubot 'pager res PT4KHLK', 'pager_admin'
         it 'says incident was resolved', ->
           expect(hubotResponse())
           .to.eql 'Incident PT4KHLK resolved.'
 
       context 'and user is pager_user', ->
-        hubot 'pd res PT4KHLK', 'pager_user'
+        hubot 'pager res PT4KHLK', 'pager_user'
         it 'says incident was resolved', ->
           expect(hubotResponse())
           .to.eql 'Incident PT4KHLK resolved.'
 
       context 'and user is not in pager_user', ->
-        hubot 'pd res PT4KHLK', 'non_pager_user'
+        hubot 'pager res PT4KHLK', 'non_pager_user'
         it 'warns the user that he has no permission to use that command', ->
           expect(hubotResponse()).to.eql 'You don\'t have permission to do that.'
 
