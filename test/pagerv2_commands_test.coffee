@@ -735,7 +735,7 @@ describe 'pagerv2_commands', ->
           say 'pager sup', ->
             it 'returns list of incidents', ->
               expect(hubotResponse())
-              .to.eql 'PT4KHLK The server is on fire. - resolved (Earline Greenholt)'
+              .to.eql '[My Mail Service] PT4KHLK The server is on fire. - resolved (Earline Greenholt)'
 
         context 'and we want incidents for the past 2 hours', ->
           beforeEach ->
@@ -763,7 +763,7 @@ describe 'pagerv2_commands', ->
           say 'pager sup 2', ->
             it 'returns list of incidents', ->
               expect(hubotResponse())
-              .to.eql 'PT4KHLK The server is on fire. - resolved (Earline Greenholt)'
+              .to.eql '[My Mail Service] PT4KHLK The server is on fire. - resolved (Earline Greenholt)'
 
         context 'and we want incidents since 8 hours ago for 4 hours', ->
           beforeEach ->
@@ -791,7 +791,7 @@ describe 'pagerv2_commands', ->
           say 'pager sup 8 4', ->
             it 'returns list of incidents', ->
               expect(hubotResponse())
-              .to.eql 'PT4KHLK The server is on fire. - resolved (Earline Greenholt)'
+              .to.eql '[My Mail Service] PT4KHLK The server is on fire. - resolved (Earline Greenholt)'
 
     # ----------------------------------------------------------------------------------------------
     describe '".pager ack"', ->
