@@ -196,7 +196,14 @@ module.exports = (robot) ->
         for inc in data.incidents
           assigned = inc.assignments.map (i) ->
             i.assignee.summary
-          res.send "#{inc.id} #{inc.summary} - #{inc.status} (#{assigned.join(', ')})"
+          impacted = inc.impacted_services.map (i) ->
+            i.summary
+          origin = pagerv2.colorer(
+            robot.adapterName,
+            inc.status,
+            "[#{impacted.join(', ')}] "
+            )
+          res.send "#{origin}#{inc.id} #{inc.summary} - #{inc.status} (#{assigned.join(', ')})"
       else
         res.send 'There are no open incidents for now.'
     .catch (e) ->

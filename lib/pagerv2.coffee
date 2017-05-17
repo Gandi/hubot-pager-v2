@@ -486,7 +486,26 @@ class Pagerv2
               else
                 process.env.PAGERV2_DEFAULT_RESOLVER or 'nagios'
         id = message.data.incident.id
-        "#{origin} #{id} - #{description} - #{level} (#{who})"
+        number = message.data.incident.incident_number
+        "#{origin} #{id} [##{number}] #{description} - #{level} (#{who})"
+
+  colorer: (adapter, level, text) ->
+    colors = {
+      trigger: 'red',
+      triggered: 'red',
+      unacknowledge: 'red',
+      unacknowledged: 'red',
+      acknowledge: 'yellow',
+      acknowledged: 'yellow',
+      resolve: 'green',
+      resolved: 'green',
+      assign: 'blue',
+      escalate: 'blue'
+    }
+    if @coloring[adapter]?
+      @coloring[adapter](text, colors[level])
+    else
+      @coloring.generic(text, colors[level])
 
   logError: (message, payload) ->
     if @errorlog?
