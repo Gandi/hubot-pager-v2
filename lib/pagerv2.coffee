@@ -54,9 +54,10 @@ class Pagerv2
     return new Promise (res, err) ->
       if process.env.PAGERV2_API_KEY?
         auth = "Token token=#{process.env.PAGERV2_API_KEY}"
-        body = querystring.stringify(query)
-        if method is 'GET' and body isnt ''
-          endpoint += "?#{body}"
+        body = JSON.stringify(query)
+        console.log body
+        if method is 'GET' and query isnt ''
+          endpoint += "?#{querystring.stringify(query)}"
         options = {
           hostname: 'api.pagerduty.com'
           port: 443
@@ -64,7 +65,8 @@ class Pagerv2
           path: endpoint
           headers: {
             Authorization: "#{auth}",
-            Accept: 'application/vnd.pagerduty+json;version=2'
+            Accept: 'application/vnd.pagerduty+json;version=2',
+            'Content-Type': 'application/json'
           }
         }
         if from?
@@ -219,19 +221,19 @@ class Pagerv2
             @id = id
             @getOncall()
           .then (data) =>
-            query  = {
-              'start': moment().format(),
-              'user': {
-                'id': @id,
-                'type': 'user_reference'
-              }
-            }
+            query = { override: { } }
+            query.override.start = moment().utc().format()
             if duration?
               duration = parseInt duration
-              query.end = moment().add(duration, 'minutes').format()
+              query.override.end = moment().utc().add(duration, 'minutes').format()
             else
-              query.end = moment(data.end)
+              query.override.end = moment(data.end).utc().format()
+            query.override.user = {
+                'id': "#{@id}",
+                'type': 'user_reference'
+              }
             # TODO - with user on call, res a relevant message
+            console.log query
             @request('POST', "/schedules/#{schedule_id}/overrides", query)
             .then (body) ->
               body.override.over = {
