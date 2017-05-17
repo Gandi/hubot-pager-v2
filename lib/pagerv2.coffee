@@ -55,9 +55,10 @@ class Pagerv2
       if process.env.PAGERV2_API_KEY?
         auth = "Token token=#{process.env.PAGERV2_API_KEY}"
         body = JSON.stringify(query)
-        console.log body
-        if method is 'GET' and query isnt ''
-          endpoint += "?#{querystring.stringify(query)}"
+        if method is 'GET'
+          qs = querystring.stringify(query)
+          if qs isnt ''
+            endpoint += "?#{qs}"
         options = {
           hostname: 'api.pagerduty.com'
           port: 443
@@ -233,7 +234,6 @@ class Pagerv2
                 'type': 'user_reference'
               }
             # TODO - with user on call, res a relevant message
-            console.log query
             @request('POST', "/schedules/#{schedule_id}/overrides", query)
             .then (body) ->
               body.override.over = {
