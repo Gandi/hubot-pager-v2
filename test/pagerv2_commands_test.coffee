@@ -294,7 +294,7 @@ describe 'pagerv2_commands', ->
       say 'pager oncall doing stuff', ->
         it 'returns name of who is on call', ->
           expect(hubotResponse())
-          .to.eql 'I\'ll notify Tim Wright'
+          .to.eql 'Ok, I\'ll notify Tim Wright.'
 
   # ------------------------------------------------------------------------------------------------
   describe '".pager oncall"', ->

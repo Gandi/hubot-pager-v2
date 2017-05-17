@@ -105,39 +105,6 @@ module.exports = (robot) ->
       res.send e
     res.finish()
 
-#   hubot pager oncall <message> - cc oncall and send <message> to alerting channel
-  robot.respond /(?:pager )?on ?call\s(.+)/, 'pager_msg_oncall', (res) ->
-    [ _, msg ] = res.match
-    alertchan = process.env.PAGERV2_ANNOUNCE_ROOM
-    pagerv2.getOncall()
-    .then (data) ->
-      if res.envelope.room is res.envelope.user.room
-        res.send "I'll notify #{data.user.summary}"
-      else
-        res.send "cc #{data.user.summary}"
-      if alertchan isnt res.envelope.room
-        origin = if res.envelope.room then "on #{res.envelope.room}" else ''
-        robot.messageRoom alertchan,
-            "#{data.user.summary} : #{msg} - #{res.envelope.user.name} #{origin}"
-    .catch (e) ->
-      res.send e
-    res.finish()
-
-#   hubot pager [who is] oncall - returns who is on call
-  robot.respond /(?:pager )?(?:who(?: is|'s) )?on ?call\s*$/, 'pager_oncall', (res) ->
-    pagerv2.getOncall()
-    .then (data) ->
-      nowDate = moment().utc()
-      endDate = moment(data.end).utc()
-      if nowDate.isSame(endDate, 'day')
-        endDate = endDate.format('HH:mm')
-      else
-        endDate = endDate.format('dddd HH:mm')
-      res.send "#{data.user.summary} is on call until #{endDate} (utc)."
-    .catch (e) ->
-      res.send e
-    res.finish()
-
 #   hubot pager [who is] next [oncall] - tells who is next on call
   robot.respond (
     /(?:pager )?(?:who(?: is|'s) )?(next on ?call|on ?call next)\s*$/
@@ -162,6 +129,40 @@ module.exports = (robot) ->
     .catch (e) ->
       res.send e
     res.finish()
+
+#   hubot pager oncall <message> - cc oncall and send <message> to alerting channel
+  robot.respond /(?:pager )?on ?call\s(.+)/, 'pager_msg_oncall', (res) ->
+    [ _, msg ] = res.match
+    alertchan = process.env.PAGERV2_ANNOUNCE_ROOM
+    pagerv2.getOncall()
+    .then (data) ->
+      if res.envelope.room?
+        res.send "cc #{data.user.summary}"
+      else
+        res.send "Ok, I'll notify #{data.user.summary}."
+      if alertchan isnt res.envelope.room
+        origin = if res.envelope.room then " on #{res.envelope.room}" else ''
+        robot.messageRoom alertchan,
+            "#{data.user.summary}: #{msg} (from #{res.envelope.user.name}#{origin})"
+    .catch (e) ->
+      res.send e
+    res.finish()
+
+#   hubot pager [who is] oncall - returns who is on call
+  robot.respond /(?:pager )?(?:who(?: is|'s) )?on ?call\s*$/, 'pager_oncall', (res) ->
+    pagerv2.getOncall()
+    .then (data) ->
+      nowDate = moment().utc()
+      endDate = moment(data.end).utc()
+      if nowDate.isSame(endDate, 'day')
+        endDate = endDate.format('HH:mm')
+      else
+        endDate = endDate.format('dddd HH:mm')
+      res.send "#{data.user.summary} is on call until #{endDate} (utc)."
+    .catch (e) ->
+      res.send e
+    res.finish()
+
 
 #   hubot pager incident <#> - gives more information about incident number <number>
   robot.respond /pager (?:inc |incident )#?(\d+|[A-Z0-9]{7})\s*$/, 'pager_incident', (res) ->
