@@ -375,10 +375,11 @@ class Pagerv2
       @from = email
       @listIncidents incidents
     .then (data) =>
+      console.log data
       if data.incidents.length > 0
         incidentsDone = Promise.map data.incidents, (inc) =>
           payload = {
-            duration: duration
+            duration: +duration * 60
           }
           @request('POST', "/incidents/#{inc.id}/snooze", payload, @from)
         Promise.all incidentsDone
