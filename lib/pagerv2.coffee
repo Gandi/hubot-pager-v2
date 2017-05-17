@@ -351,16 +351,19 @@ class Pagerv2
           incidents: []
         }
         for inc in data.incidents
+          assignments = []
+          for a in @assignees
+            assignments.push {
+              assignee: {
+                id: a,
+                type: 'user_reference'
+              }
+            }
           payload.incidents.push {
             id: inc.id,
             type: 'incident_reference',
-            assignments: []
+            assignments: assignments
           }
-          for a in @assignees
-            payload.incidents.push {
-              id: a,
-              type: 'user_reference'
-            }
         @request('PUT', '/incidents', payload, @from)
       else
         throw { message: 'There is no incidents at the moment.' }

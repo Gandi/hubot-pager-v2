@@ -209,7 +209,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pager ack [all]         - acknowledges any unack incidents
-  robot.respond /pager ack(?: all)?\s*$/, 'pager_ack_all', (res) ->
+  robot.respond /(?:pager )?ack(?: all)?\s*$/, 'pager_ack_all', (res) ->
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
       pagerv2.upagerateIncidents(res.envelope.user)
