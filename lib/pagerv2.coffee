@@ -403,7 +403,7 @@ class Pagerv2
     query = {
       filter: 'ongoing'
     }
-    @request('GET', '/maintenance windows', query)
+    @request('GET', '/maintenance_windows', query)
 
   addMaintenance: (user, duration, description) ->
     @getUserEmail(user, user)
@@ -428,10 +428,10 @@ class Pagerv2
           id: service,
           type: 'service_reference'
         }
-      @request('POST', '/maintenance windows', payload, @email)
+      @request('POST', '/maintenance_windows', payload, @email)
 
   endMaintenance: (user, id) ->
-    @request('DELETE', "/maintenance windows/#{id}", { })
+    @request('DELETE', "/maintenance_windows/#{id}", { })
 
   coloring: {
     irc: (text, color) ->

@@ -372,9 +372,12 @@ module.exports = (robot) ->
     .then ->
       pagerv2.listMaintenances()
     .then (data) ->
-      for maintenance in data.maintenance_windows
-        end = moment(maintenance.end_time).utc().format('HH:mm')
-        res.send "#{maintenance.id} - #{maintenance.summary} (until #{end} UTC)"
+      if data.maintenance_windows.length > 0
+        for maintenance in data.maintenance_windows
+          end = moment(maintenance.end_time).utc().format('HH:mm')
+          res.send "#{maintenance.id} - #{maintenance.summary} (until #{end} UTC)"
+      else
+        res.send 'There is no ongoing maintenance at the moment.'
     .catch (e) ->
       res.send e
     res.finish()
