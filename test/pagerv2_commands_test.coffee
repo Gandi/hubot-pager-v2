@@ -1439,17 +1439,7 @@ describe 'pagerv2_commands', ->
           afterEach ->
             nock.cleanAll()
 
-          say 'pager snooze PT4KHLK 1234567', ->
-            it 'says incident have been snoozed', ->
-              expect(hubotResponse())
-              .to.eql 'Incidents PT4KHLK, 1234567 snoozed.'
-
           say 'pager snooze PT4KHLK,1234567', ->
-            it 'says incident have been snoozed', ->
-              expect(hubotResponse())
-              .to.eql 'Incidents PT4KHLK, 1234567 snoozed.'
-
-          say 'pager snooze PT4KHLK, 1234567', ->
             it 'says incident have been snoozed', ->
               expect(hubotResponse())
               .to.eql 'Incidents PT4KHLK, 1234567 snoozed.'
@@ -1531,7 +1521,7 @@ describe 'pagerv2_commands', ->
       context 'when something goes wrong,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .get('/maintenance windows')
+          .get('/maintenance_windows')
           .query({
             filter: 'ongoing'
           })
@@ -1548,7 +1538,7 @@ describe 'pagerv2_commands', ->
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .get('/maintenance windows')
+          .get('/maintenance_windows')
           .query({
             filter: 'ongoing'
           })
@@ -1577,7 +1567,7 @@ describe 'pagerv2_commands', ->
             query: 'Other Service'
           })
           .reply(200, require('./fixtures/services_list2-ok.json'))
-          .post('/maintenance windows')
+          .post('/maintenance_windows')
           .reply 503, { error: { code: 503, message: "it's all broken!" } }
         afterEach ->
           nock.cleanAll()
@@ -1600,7 +1590,7 @@ describe 'pagerv2_commands', ->
             query: 'Other Service'
           })
           .reply(200, require('./fixtures/services_list2-ok.json'))
-          .post('/maintenance windows')
+          .post('/maintenance_windows')
           .reply(200, require('./fixtures/maintenance_create-ok.json'))
         afterEach ->
           nock.cleanAll()
@@ -1615,7 +1605,7 @@ describe 'pagerv2_commands', ->
       context 'when something goes wrong,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .delete('/maintenance windows/PW98YIO')
+          .delete('/maintenance_windows/PW98YIO')
           .reply 503, { error: { code: 503, message: "it's all broken!" } }
         afterEach ->
           room.robot.brain.data.pagerv2 = { }
@@ -1629,7 +1619,7 @@ describe 'pagerv2_commands', ->
       context 'when everything goes right,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
-          .delete('/maintenance windows/PW98YIO')
+          .delete('/maintenance_windows/PW98YIO')
           .reply(200, { })
         afterEach ->
           nock.cleanAll()
