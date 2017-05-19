@@ -173,13 +173,15 @@ module.exports = (robot) ->
     .then (data) ->
       assigned = data.incident.assignments.map (i) ->
         i.assignee.summary
+      if assigned.length > 0
+        assigned = " (#{assigned.join(', ')})"
       origin = pagerv2.colorer(
         robot.adapterName,
         data.incident.status,
         "[#{data.incident.service.summary}] "
         )
-      res.send "#{origin}#{data.incident.id} #{data.incident.summary} - #{data.incident.status} " +
-               "(#{assigned.join(', ')})"
+      res.send "#{origin}#{data.incident.id} #{data.incident.summary} - #{data.incident.status}" +
+               "#{assigned}"
     .catch (e) ->
       res.send e
     res.finish()
