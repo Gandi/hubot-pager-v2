@@ -295,22 +295,34 @@ class Pagerv2
     else
       query = {
         time_zone: 'UTC',
-        'include[]': 'first_trigger_log_entry'
+        'include[]': 'first_trigger_log_entry',
+        'urgencies[]': 'high',
+        sort_by: 'created_at'
       }
       if date_since?
         unless date_until?
           date_until = moment().utc()
-        query['date_since'] = moment(date_since).format()
-        query['date_until'] = moment(date_until).format()
+        query['since'] = moment(date_since).utc().format()
+        query['until'] = moment(date_until).utc().format()
       else
         query['date_range'] = 'all'
       if statuses?
         query['statuses[]'] = statuses.split /,/
       query['limit'] = limit
       query['total'] = 'true'
+      console.log query
       @request('GET', '/incidents', query)
       .then (data) ->
         data
+
+  listIncidentsWithNotes: (
+    incidents = '',
+    statuses = 'triggered,acknowledged',
+    date_since = null,
+    date_until = null,
+    limit = 100
+  ) ->
+    @listIncidents(incidents, statuses, date_since, date_until, limit)
 
   upagerateIncidents: (user, incidents = '', which = 'triggered', status = 'acknowledged') ->
     @getUserEmail(user, user)
