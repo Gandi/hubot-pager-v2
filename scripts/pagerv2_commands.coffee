@@ -165,7 +165,7 @@ module.exports = (robot) ->
 
 
 #   hubot pager incident <#> - gives more information about incident number <number>
-  robot.respond /pager (?:inc |incident )#?(\d+|[A-Z0-9]{7})\s*$/, 'pager_incident', (res) ->
+  robot.respond /pager (?:inc |incident )#?(\d+|[A-Z0-9]+)\s*$/, 'pager_incident', (res) ->
     [ _, incident ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
@@ -173,7 +173,12 @@ module.exports = (robot) ->
     .then (data) ->
       assigned = data.incident.assignments.map (i) ->
         i.assignee.summary
-      res.send "#{data.incident.id} #{data.incident.summary} - #{data.incident.status} " +
+      origin = pagerv2.colorer(
+        robot.adapterName,
+        data.incident.status,
+        "[#{data.incident.service.summary}] "
+        )
+      res.send "#{origin}#{data.incident.id} #{data.incident.summary} - #{data.incident.status} " +
                "(#{assigned.join(', ')})"
     .catch (e) ->
       res.send e
@@ -196,12 +201,14 @@ module.exports = (robot) ->
         for inc in data.incidents
           assigned = inc.assignments.map (i) ->
             i.assignee.summary
+          if assigned.length > 0
+            assigned = " (#{assigned.join(', ')})"
           origin = pagerv2.colorer(
             robot.adapterName,
             inc.status,
             "[#{inc.service.summary}] "
             )
-          res.send "#{origin}#{inc.id} #{inc.summary} - #{inc.status} (#{assigned.join(', ')})"
+          res.send "#{origin}#{inc.id} #{inc.summary} - #{inc.status}#{assigned}"
       else
         res.send 'There are no open incidents for now.'
     .catch (e) ->

@@ -483,7 +483,7 @@ class Pagerv2
           "[#{message.data.incident.service.name}]",
           colors[level]
         )
-        description = message.data.incident.trigger_summary_data.subject
+        description = message.data.incident.trigger_summary_data.subject.replace(' (CRITICAL)', '')
         who = if message.type is 'incident.resolve' and message.data.incident.resolved_by_user?
                 message.data.incident.resolved_by_user.name
               else if message.data.incident.assigned_to_user?
