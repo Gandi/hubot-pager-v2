@@ -652,7 +652,7 @@ describe 'pagerv2_commands', ->
         say 'pager incident 1234', ->
           it 'returns details on the incident', ->
             expect(hubotResponse())
-            .to.eql 'PT4KHLK The server is on fire. - resolved (Earline Greenholt)'
+            .to.eql '[My Mail Service] PT4KHLK The server is on fire. - resolved (Earline Greenholt)'
 
     # ----------------------------------------------------------------------------------------------
     describe '".pager sup"', ->
