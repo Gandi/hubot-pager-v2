@@ -309,9 +309,21 @@ class Pagerv2
         query['statuses[]'] = statuses.split /,/
       query['limit'] = limit
       query['total'] = 'true'
+      console.log query
       @request('GET', '/incidents', query)
-      .then (data) ->
-        data
+      .then (data) =>
+        if data.total > 100
+          pages = Math.ceil(data.total / 100)
+          Promise.each [1..pages], (offset) =>
+            query['offset'] =  offset * 100
+            console.log query
+            @request('GET', '/incidents', query)
+            .then (page) ->
+              data.incidents = data.incidents.concat(page.incidents)
+          .then ->
+            data
+        else
+          data
 
   listIncidentsWithNotes: (
     incidents = '',
@@ -321,6 +333,12 @@ class Pagerv2
     limit = 100
   ) ->
     @listIncidents(incidents, statuses, date_since, date_until, limit)
+    # .map (incident) ->
+    #   incident.notes = [ ]
+      # @listNotes(incident.id)
+      # .then (notes) ->
+      #   incident.notes = notes
+      #   incident
 
   upagerateIncidents: (user, incidents = '', which = 'triggered', status = 'acknowledged') ->
     @getUserEmail(user, user)
