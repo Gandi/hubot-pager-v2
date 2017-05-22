@@ -439,7 +439,6 @@ module.exports = (robot) ->
       pagerv2.dropOverride(res.envelope.user, who)
     .then (data) ->
       if data
-        console.log data
         res.send "Ok, #{res.envelope.user.name}! " +
                  "#{data.overrides[0].user.summary} override is cancelled."
       else
