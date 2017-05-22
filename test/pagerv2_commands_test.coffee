@@ -663,9 +663,10 @@ describe 'pagerv2_commands', ->
           .get('/incidents')
           .query({
             time_zone: 'UTC',
-            include: [
-              'first_trigger_log_entry'
+            urgencies: [
+              'high'
             ],
+            sort_by: 'created_at',
             date_range: 'all',
             statuses: [
               'triggered',
@@ -691,9 +692,10 @@ describe 'pagerv2_commands', ->
             .get('/incidents')
             .query({
               time_zone: 'UTC',
-              include: [
-                'first_trigger_log_entry'
+              urgencies: [
+                'high'
               ],
+              sort_by: 'created_at',
               date_range: 'all',
               statuses: [
                 'triggered',
@@ -717,9 +719,10 @@ describe 'pagerv2_commands', ->
             .get('/incidents')
             .query({
               time_zone: 'UTC',
-              include: [
-                'first_trigger_log_entry'
+              urgencies: [
+                'high'
               ],
+              sort_by: 'created_at',
               date_range: 'all',
               statuses: [
                 'triggered',
@@ -743,11 +746,12 @@ describe 'pagerv2_commands', ->
             .get('/incidents')
             .query({
               time_zone: 'UTC',
-              include: [
-                'first_trigger_log_entry'
+              urgencies: [
+                'high'
               ],
-              date_since: '2017-02-02T00:02:00Z',
-              date_until: '2017-02-02T02:02:00Z',
+              sort_by: 'created_at',
+              since: '2017-02-02T00:02:00Z',
+              until: '2017-02-02T02:02:00Z',
               statuses: [
                 'triggered',
                 'acknowledged',
@@ -771,11 +775,12 @@ describe 'pagerv2_commands', ->
             .get('/incidents')
             .query({
               time_zone: 'UTC',
-              include: [
-                'first_trigger_log_entry'
+              urgencies: [
+                'high'
               ],
-              date_since: '2017-02-01T18:02:00Z',
-              date_until: '2017-02-01T22:02:00Z',
+              sort_by: 'created_at',
+              since: '2017-02-01T18:02:00Z',
+              until: '2017-02-01T22:02:00Z',
               statuses: [
                 'triggered',
                 'acknowledged',
@@ -801,9 +806,10 @@ describe 'pagerv2_commands', ->
           .get('/incidents')
           .query({
             time_zone: 'UTC',
-            include: [
-              'first_trigger_log_entry'
+            urgencies: [
+              'high'
             ],
+            sort_by: 'created_at',
             date_range: 'all',
             statuses: [
               'triggered'
@@ -828,9 +834,10 @@ describe 'pagerv2_commands', ->
             .get('/incidents')
             .query({
               time_zone: 'UTC',
-              include: [
-                'first_trigger_log_entry'
+              urgencies: [
+                'high'
               ],
+              sort_by: 'created_at',
               date_range: 'all',
               statuses: [
                 'triggered'
@@ -854,9 +861,10 @@ describe 'pagerv2_commands', ->
             .get('/incidents')
             .query({
               time_zone: 'UTC',
-              include: [
-                'first_trigger_log_entry'
+              urgencies: [
+                'high'
               ],
+              sort_by: 'created_at',
               date_range: 'all',
               statuses: [
                 'triggered'
@@ -881,9 +889,10 @@ describe 'pagerv2_commands', ->
           .get('/incidents')
           .query({
             time_zone: 'UTC',
-            include: [
-              'first_trigger_log_entry'
+            urgencies: [
+              'high'
             ],
+            sort_by: 'created_at',
             date_range: 'all',
             statuses: [
               'triggered'
@@ -961,9 +970,10 @@ describe 'pagerv2_commands', ->
           .get('/incidents')
           .query({
             time_zone: 'UTC',
-            include: [
-              'first_trigger_log_entry'
+            urgencies: [
+              'high'
             ],
+            sort_by: 'created_at',
             date_range: 'all',
             statuses: [
               'acknowledged'
@@ -988,9 +998,10 @@ describe 'pagerv2_commands', ->
             .get('/incidents')
             .query({
               time_zone: 'UTC',
-              include: [
-                'first_trigger_log_entry'
+              urgencies: [
+                'high'
               ],
+              sort_by: 'created_at',
               date_range: 'all',
               statuses: [
                 'acknowledged'
@@ -1016,9 +1027,10 @@ describe 'pagerv2_commands', ->
             .get('/incidents')
             .query({
               time_zone: 'UTC',
-              include: [
-                'first_trigger_log_entry'
+              urgencies: [
+                'high'
               ],
+              sort_by: 'created_at',
               date_range: 'all',
               statuses: [
                 'acknowledged'
@@ -1044,9 +1056,10 @@ describe 'pagerv2_commands', ->
           .get('/incidents')
           .query({
             time_zone: 'UTC',
-            include: [
-              'first_trigger_log_entry'
+            urgencies: [
+              'high'
             ],
+            sort_by: 'created_at',
             date_range: 'all',
             statuses: [
               'acknowledged'
@@ -1124,9 +1137,10 @@ describe 'pagerv2_commands', ->
           .get('/incidents')
           .query({
             time_zone: 'UTC',
-            include: [
-              'first_trigger_log_entry'
+            urgencies: [
+              'high'
             ],
+            sort_by: 'created_at',
             date_range: 'all',
             statuses: [
               'triggered',
@@ -1152,9 +1166,10 @@ describe 'pagerv2_commands', ->
             .get('/incidents')
             .query({
               time_zone: 'UTC',
-              include: [
-                'first_trigger_log_entry'
+              urgencies: [
+                'high'
               ],
+              sort_by: 'created_at',
               date_range: 'all',
               statuses: [
                 'triggered',
@@ -1181,9 +1196,10 @@ describe 'pagerv2_commands', ->
             .get('/incidents')
             .query({
               time_zone: 'UTC',
-              include: [
-                'first_trigger_log_entry'
+              urgencies: [
+                'high'
               ],
+              sort_by: 'created_at',
               date_range: 'all',
               statuses: [
                 'triggered',
@@ -1210,9 +1226,10 @@ describe 'pagerv2_commands', ->
           .get('/incidents')
           .query({
             time_zone: 'UTC',
-            include: [
-              'first_trigger_log_entry'
+            urgencies: [
+              'high'
             ],
+            sort_by: 'created_at',
             date_range: 'all',
             statuses: [
               'triggered',
@@ -1291,9 +1308,10 @@ describe 'pagerv2_commands', ->
           .get('/incidents')
           .query({
             time_zone: 'UTC',
-            include: [
-              'first_trigger_log_entry'
+            urgencies: [
+              'high'
             ],
+            sort_by: 'created_at',
             date_range: 'all',
             statuses: [
               'triggered',
@@ -1319,9 +1337,10 @@ describe 'pagerv2_commands', ->
             .get('/incidents')
             .query({
               time_zone: 'UTC',
-              include: [
-                'first_trigger_log_entry'
+              urgencies: [
+                'high'
               ],
+              sort_by: 'created_at',
               date_range: 'all',
               statuses: [
                 'triggered',
@@ -1348,9 +1367,10 @@ describe 'pagerv2_commands', ->
             .get('/incidents')
             .query({
               time_zone: 'UTC',
-              include: [
-                'first_trigger_log_entry'
+              urgencies: [
+                'high'
               ],
+              sort_by: 'created_at',
               date_range: 'all',
               statuses: [
                 'triggered',
@@ -1379,9 +1399,10 @@ describe 'pagerv2_commands', ->
           .get('/incidents')
           .query({
             time_zone: 'UTC',
-            include: [
-              'first_trigger_log_entry'
+            urgencies: [
+              'high'
             ],
+            sort_by: 'created_at',
             date_range: 'all',
             statuses: [
               'triggered',

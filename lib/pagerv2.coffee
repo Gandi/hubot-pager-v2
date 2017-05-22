@@ -309,7 +309,6 @@ class Pagerv2
         query['statuses[]'] = statuses.split /,/
       query['limit'] = limit
       query['total'] = 'true'
-      console.log query
       @request('GET', '/incidents', query)
       .then (data) =>
         if data.total > 100
