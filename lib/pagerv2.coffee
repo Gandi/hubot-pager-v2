@@ -210,7 +210,7 @@ class Pagerv2
         if not who? or who is 'me'
           who = { name: from.name }
         else
-          if overriders and who not in overriders
+          if overriders? and who not in overriders
             unless @robot.auth? and
                (@robot.auth.hasRole(from, ['pageradmin']) or @robot.auth.isAdmin(from))
               who = null
@@ -251,7 +251,8 @@ class Pagerv2
       if not who? or who is 'me'
         who = { name: from.name }
       else
-        if overriders and who not in overriders
+        overriders = process.env.PAGERV2_OVERRIDERS?.split(',')
+        if overriders? and who not in overriders
           unless @robot.auth? and
              (@robot.auth.hasRole(from, ['pageradmin']) or @robot.auth.isAdmin(from))
             who = null
@@ -263,16 +264,19 @@ class Pagerv2
           @id = id
           @getOverride()
         .then (data) =>
-          todo = null
-          for over in data
-            if over.user.id is @id
-              todo = over.id
-          if todo?
-            @request('DELETE', "/schedules/#{schedule_id}/overrides/#{todo}")
-            .then (data) ->
-              res data
-            .catch (e) ->
-              err e
+          if data
+            todo = null
+            for over in data
+              if over.user.id is @id
+                todo = over.id
+            if todo?
+              @request('DELETE', "/schedules/#{schedule_id}/overrides/#{todo}")
+              .then (data) ->
+                res data
+              .catch (e) ->
+                err e
+            else
+              res null
           else
             res null
 
