@@ -312,7 +312,7 @@ class Pagerv2
       @request('GET', '/incidents', query)
       .then (data) =>
         if data.total > 100
-          pages = Math.ceil(data.total / 100)
+          pages = Math.floor(data.total / 100)
           Promise.each [1..pages], (offset) =>
             query['offset'] =  offset * 100
             @request('GET', '/incidents', query)
@@ -331,12 +331,15 @@ class Pagerv2
     limit = 100
   ) ->
     @listIncidents(incidents, statuses, date_since, date_until, limit)
-    # .map (incident) ->
-    #   incident.notes = [ ]
-      # @listNotes(incident.id)
-      # .then (notes) ->
-      #   incident.notes = notes
-      #   incident
+    .then (data) =>
+      alldata = Promise.map data.incidents, (incident) =>
+        @listNotes(incident.id)
+        .then (payload) ->
+          incident.notes = payload.notes
+          incident
+      Promise.all(alldata)
+      .then (incidents) ->
+        { incidents: incidents }
 
   upagerateIncidents: (user, incidents = '', which = 'triggered', status = 'acknowledged') ->
     @getUserEmail(user, user)
