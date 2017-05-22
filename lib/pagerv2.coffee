@@ -315,7 +315,6 @@ class Pagerv2
           pages = Math.ceil(data.total / 100)
           Promise.each [1..pages], (offset) =>
             query['offset'] =  offset * 100
-            console.log query
             @request('GET', '/incidents', query)
             .then (page) ->
               data.incidents = data.incidents.concat(page.incidents)
