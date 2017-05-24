@@ -525,7 +525,7 @@ class Pagerv2
                 process.env.PAGERV2_DEFAULT_RESOLVER or 'nagios'
         id = message.data.incident.id
         number = message.data.incident.incident_number
-        "#{origin} #{id} [##{number}] #{description} - #{level} (#{who})"
+        "#{origin} #{id} - #{description} - #{level} (#{who})"
 
   colorer: (adapter, level, text) ->
     colors = {

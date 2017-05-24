@@ -65,7 +65,7 @@ describe 'pagerv2_hook module', ->
 
     it 'should react', ->
       expected = [
-        '[Production XDB Cluster] PRORDTY [#2126] CPU Load High on xdb_production_echo - ' +
+        '[Production XDB Cluster] PRORDTY - CPU Load High on xdb_production_echo - ' +
         'trigger (Laura Haley)'
       ]
       pagerv2 = new Pagerv2 room.robot
@@ -85,7 +85,7 @@ describe 'pagerv2_hook module', ->
 
       it 'should react', ->
         expected = [
-          '[Production XDB Cluster] PRORDTY [#2126] CPU Load High on xdb_production_echo - ' +
+          '[Production XDB Cluster] PRORDTY - CPU Load High on xdb_production_echo - ' +
           'trigger (monit system)'
         ]
         pagerv2 = new Pagerv2 room.robot
@@ -100,7 +100,7 @@ describe 'pagerv2_hook module', ->
     context 'and no default resolver is set', ->
       it 'should react', ->
         expected = [
-          '[Production XDB Cluster] PRORDTY [#2126] CPU Load High on xdb_production_echo - ' +
+          '[Production XDB Cluster] PRORDTY - CPU Load High on xdb_production_echo - ' +
           'trigger (nagios)'
         ]
         pagerv2 = new Pagerv2 room.robot
@@ -115,7 +115,7 @@ describe 'pagerv2_hook module', ->
 
     it 'should react', ->
       expected = [
-        '[Production XDB Cluster] PRORDTY [#2126] CPU Load High on xdb_production_echo - ' +
+        '[Production XDB Cluster] PRORDTY - CPU Load High on xdb_production_echo - ' +
         'resolve (Wiley Jacobson)'
       ]
       pagerv2 = new Pagerv2 room.robot
@@ -130,7 +130,7 @@ describe 'pagerv2_hook module', ->
 
     it 'should react', ->
       expected = [
-        '*[Production XDB Cluster]* PRORDTY [#2126] CPU Load High on xdb_production_echo - ' +
+        '*[Production XDB Cluster]* PRORDTY - CPU Load High on xdb_production_echo - ' +
         'resolve (Wiley Jacobson)'
       ]
       pagerv2 = new Pagerv2 room.robot
@@ -145,7 +145,7 @@ describe 'pagerv2_hook module', ->
 
     it 'should react', ->
       expected = [
-        '\u000303\u0002\u0002[Production XDB Cluster]\u0003 PRORDTY [#2126] CPU Load High on ' +
+        '\u000303\u0002\u0002[Production XDB Cluster]\u0003 PRORDTY - CPU Load High on ' +
         'xdb_production_echo - resolve (Wiley Jacobson)'
       ]
       pagerv2 = new Pagerv2 room.robot
@@ -160,7 +160,7 @@ describe 'pagerv2_hook module', ->
 
     it 'should react', ->
       expected = [
-        '[Production XDB Cluster] PRORDTY [#2126] CPU Load High on xdb_production_echo - plouf (nagios)'
+        '[Production XDB Cluster] PRORDTY - CPU Load High on xdb_production_echo - plouf (nagios)'
       ]
       pagerv2 = new Pagerv2 room.robot
       msg = require('./fixtures/webhook_resolve.json').messages
