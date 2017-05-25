@@ -426,7 +426,7 @@ module.exports = (robot) ->
     .then ->
       pagerv2.setOverride(res.envelope.user, who)
     .then (data) ->
-      res.send "Rejoice #{data.user.summary}! #{data.over.name} is now on call."
+      res.send "Rejoice #{data.over.from}! #{data.over.name} is now on call."
     .catch (e) ->
       res.send e
     res.finish()
@@ -439,8 +439,9 @@ module.exports = (robot) ->
       pagerv2.dropOverride(res.envelope.user, who)
     .then (data) ->
       if data
-        res.send "Ok, #{res.envelope.user.name}! " +
-                 "#{data.overrides[0].user.summary} override is cancelled."
+        if who is 'me'
+          who = 'your'
+        res.send "Ok, #{res.envelope.user.name}! #{who} override is cancelled."
       else
         res.send "Sorry there is no overrides by '#{who}' at the moment."
     .catch (e) ->
@@ -454,7 +455,7 @@ module.exports = (robot) ->
     .then ->
       pagerv2.setOverride(res.envelope.user, who, duration)
     .then (data) ->
-      res.send "Rejoice #{data.user.summary}! #{data.over.name} is now on call."
+      res.send "Rejoice #{data.over.from}! #{data.over.name} is now on call."
     .catch (e) ->
       res.send e
     res.finish()

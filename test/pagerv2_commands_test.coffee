@@ -530,7 +530,7 @@ describe 'pagerv2_commands', ->
         say 'pager 120', ->
           it 'says override is done', ->
             expect(hubotResponse())
-            .to.eql 'Rejoice Aurelio Rice! momo is now on call.'
+            .to.eql 'Rejoice Tim Wright! momo is now on call.'
 
     # ----------------------------------------------------------------------------------------------
     describe '".pager not me"', ->
@@ -581,7 +581,7 @@ describe 'pagerv2_commands', ->
         say 'pager not me', ->
           it 'returns name of who is on call', ->
             expect(hubotResponse())
-            .to.eql 'Ok, momo! Aurelio Rice override is cancelled.'
+            .to.eql 'Ok, momo! your override is cancelled.'
 
     # ----------------------------------------------------------------------------------------------
     describe '".pager me now"', ->
@@ -622,7 +622,7 @@ describe 'pagerv2_commands', ->
         say 'pager me now', ->
           it 'returns name of who is on call', ->
             expect(hubotResponse())
-            .to.eql 'Rejoice Aurelio Rice! momo is now on call.'
+            .to.eql 'Rejoice Tim Wright! momo is now on call.'
 
     # ----------------------------------------------------------------------------------------------
     describe '".pager incident 1234"', ->

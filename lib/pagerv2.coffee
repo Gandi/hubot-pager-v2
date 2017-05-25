@@ -237,7 +237,8 @@ class Pagerv2
             @request('POST', "/schedules/#{schedule_id}/overrides", query)
             .then (body) ->
               body.override.over = {
-                name: who.name
+                name: who.name,
+                from: data.user.summary
               }
               res body.override
             .catch (error) ->
