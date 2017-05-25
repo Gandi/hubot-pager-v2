@@ -332,7 +332,7 @@ module.exports = (robot) ->
 
 #   hubot pager snooze <#,#,#> [for] [<duration>] [min] - snoozes incident <number> for [<duration>] (default 120m)
   robot.respond (
-    /pager snooze #?([^ ]+)(?: (?:for )(\d+)(?: min(?:utes)?)?)?\s*$/
+    /pager snooze #?([^ ]+)(?: (?:for )?(\d+)(?: min(?:utes)?)?)?\s*$/
   ), 'pager_snooze_one', (res) ->
     [ _, incidents, duration ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
