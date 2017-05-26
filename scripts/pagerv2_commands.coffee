@@ -55,6 +55,8 @@ Pagerv2 = require '../lib/pagerv2'
 moment = require 'moment'
 path = require 'path'
 
+inspect = (data) -> console.log(require('util').inspect(data, false, 7, true))
+
 module.exports = (robot) ->
 
   robot.brain.data.pagerv2 ?= { users: { } }
@@ -162,7 +164,6 @@ module.exports = (robot) ->
     .catch (e) ->
       res.send e
     res.finish()
-
 
 #   hubot pager incident <#> - gives more information about incident number <number>
   robot.respond /pager (?:inc |incident )#?(\d+|[A-Z0-9]+)\s*$/, 'pager_incident', (res) ->

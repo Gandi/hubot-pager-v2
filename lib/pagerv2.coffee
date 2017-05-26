@@ -21,6 +21,7 @@ moment = require 'moment'
 Promise = require 'bluebird'
 querystring = require 'querystring'
 
+inspect = (data) -> console.log(require('util').inspect(data, false, 7, true))
 
 class Pagerv2
 
@@ -206,7 +207,8 @@ class Pagerv2
         err 'Sorry you cannot set an override of more than 1 day.'
       else
         schedule_id = process.env.PAGERV2_SCHEDULE_ID
-        overriders = process.env.PAGERV2_OVERRIDERS?.split(',')
+        if process.env.PAGERV2_OVERRIDERS isnt ''
+          overriders = process.env.PAGERV2_OVERRIDERS?.split(',')
         if not who? or who is 'me'
           who = { name: from.name }
         else
@@ -237,7 +239,7 @@ class Pagerv2
             @request('POST', "/schedules/#{schedule_id}/overrides", query)
             .then (body) ->
               body.override.over = {
-                name: who.name,
+                name: who.name or who,
                 from: data.user.summary
               }
               res body.override
@@ -252,7 +254,8 @@ class Pagerv2
       if not who? or who is 'me'
         who = { name: from.name }
       else
-        overriders = process.env.PAGERV2_OVERRIDERS?.split(',')
+        if process.env.PAGERV2_OVERRIDERS isnt ''
+          overriders = process.env.PAGERV2_OVERRIDERS?.split(',')
         if overriders? and who not in overriders
           unless @robot.auth? and
              (@robot.auth.hasRole(from, ['pageradmin']) or @robot.auth.isAdmin(from))
