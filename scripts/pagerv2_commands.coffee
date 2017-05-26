@@ -425,7 +425,7 @@ module.exports = (robot) ->
     [ _, who ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
-      pagerv2.setOverride(res.envelope.user, who)
+      pagerv2.setOverride(res.envelope.user, { name: who })
     .then (data) ->
       res.send "Rejoice #{data.over.from}! #{data.over.name} is now on call."
     .catch (e) ->
@@ -437,7 +437,7 @@ module.exports = (robot) ->
     [ _, who ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
-      pagerv2.dropOverride(res.envelope.user, who)
+      pagerv2.dropOverride(res.envelope.user, { name: who })
     .then (data) ->
       if data
         if who is 'me'
@@ -454,7 +454,7 @@ module.exports = (robot) ->
     [ _, who, duration ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
-      pagerv2.setOverride(res.envelope.user, who, duration)
+      pagerv2.setOverride(res.envelope.user, { name: who }, duration)
     .then (data) ->
       res.send "Rejoice #{data.over.from}! #{data.over.name} is now on call."
     .catch (e) ->
