@@ -209,7 +209,7 @@ class Pagerv2
         schedule_id = process.env.PAGERV2_SCHEDULE_ID
         if process.env.PAGERV2_OVERRIDERS isnt ''
           overriders = process.env.PAGERV2_OVERRIDERS?.split(',')
-        if not who? or who is 'me'
+        if not who? or not who.name? or who.name is 'me'
           who = { name: from.name }
         else
           if overriders? and who not in overriders
@@ -251,7 +251,7 @@ class Pagerv2
   dropOverride: (from, who) ->
     return new Promise (res, err) =>
       schedule_id = process.env.PAGERV2_SCHEDULE_ID
-      if not who? or who is 'me'
+      if not who? or not who.name? or who.name is 'me'
         who = { name: from.name }
       else
         if process.env.PAGERV2_OVERRIDERS isnt ''
