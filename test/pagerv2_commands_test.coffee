@@ -533,6 +533,105 @@ describe 'pagerv2_commands', ->
             .to.eql 'Rejoice Tim Wright! momo is now on call.'
 
     # ----------------------------------------------------------------------------------------------
+    describe '".pager me next"', ->
+      context 'when something goes wrong,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/oncalls')
+          .query({
+            time_zone: 'UTC',
+            schedule_ids: [ 42 ],
+            earliest: true
+          })
+          .reply(200, require('./fixtures/oncall_list-ok.json'))
+          .filteringPath( (path) ->
+            path.replace /(since|until)=[^&]*/g, '$1=x'
+          )
+          .get('/oncalls')
+          .query({
+            time_zone: 'UTC',
+            schedule_ids: [ 42 ],
+            earliest: true,
+            since: 'x',
+            until: 'x'
+          })
+          .reply(200, require('./fixtures/oncall_list_next-ok.json'))
+          .post('/schedules/42/overrides')
+          .reply(503, { error: { code: 503, message: "it's all broken!" } })
+        afterEach ->
+          nock.cleanAll()
+        
+        say 'pager me next ', ->
+          it 'returns the error message', ->
+            expect(hubotResponse())
+            .to.eql "503 it's all broken!"
+ 
+      context 'when someone override itself', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .filteringPath( (path) ->
+            path.replace /(since|until)=[^&]*/g, '$1=x'
+          )
+          .get('/oncalls')
+          .query({
+            time_zone: 'UTC',
+            schedule_ids: [ 42 ],
+            earliest: true
+          })
+          .reply(200, require('./fixtures/oncall_list-ok.json'))
+          .filteringPath( (path) ->
+            path.replace /(since|until)=[^&]*/g, '$1=x'
+          )
+          .get('/oncalls')
+          .query({
+            time_zone: 'UTC',
+            schedule_ids: [ 42 ],
+            earliest: true,
+            since: 'x',
+            until: 'x'
+          })
+          .reply(200, require('./fixtures/oncall_list-next-dup.json'))
+        afterEach ->
+          nock.cleanAll()
+         
+        say 'pager me next ', ->
+          it 'returns the error message', ->
+            expect(hubotResponse())
+            .to.eql "Sorry, you can't override yourself"
+    
+      context 'when everything goes right,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/oncalls')
+          .query({
+            time_zone: 'UTC',
+            schedule_ids: [ 42 ],
+            earliest: true
+          })
+          .reply(200, require('./fixtures/oncall_list-ok.json'))
+          .filteringPath( (path) ->
+            path.replace /(since|until)=[^&]*/g, '$1=x'
+          )
+          .get('/oncalls')
+          .query({
+            time_zone: 'UTC',
+            schedule_ids: [ 42 ],
+            earliest: true,
+            since: 'x',
+            until: 'x'
+          })
+          .reply(200, require('./fixtures/oncall_list_next-ok.json'))
+          .post('/schedules/42/overrides')
+          .reply(200, require('./fixtures/override_create-ok.json'))
+        afterEach ->
+          nock.cleanAll()
+        say 'pager me next ', ->
+          it 'says override is done', ->
+            expect(hubotResponse())
+            .to.eql 'Rejoice Bea Blala! momo will be on call from Thursday 02:07 to Thursday 02:12 (utc)'
+
+        
+    # ----------------------------------------------------------------------------------------------
     describe '".pager not me"', ->
       context 'when something goes wrong,', ->
         beforeEach ->
@@ -603,6 +702,7 @@ describe 'pagerv2_commands', ->
           it 'returns the error message', ->
             expect(hubotResponse())
             .to.eql "503 it's all broken!"
+        
 
       context 'when everything goes right,', ->
         beforeEach ->

@@ -45,6 +45,7 @@
 #   hubot pager up|end|back <maintenance> - ends <maintenance>
 #
 #   hubot pager me <duration>       - creates an override for <duration> minutes
+#   hubot pager me next             - creates an override for the next scheduled
 #   hubot pager me now              - creates an override until the end of current oncall
 #   hubot pager not me              - cancels an override if any
 #
@@ -459,4 +460,21 @@ module.exports = (robot) ->
       res.send "Rejoice #{data.over.from}! #{data.over.name} is now on call."
     .catch (e) ->
       res.send e
+    res.finish()
+
+#   hubot pager me next - creates an override for the next scheduled
+  robot.respond /pager me next/, 'pager_override_next', (res) ->
+    [ _, who] = res.match
+    pagerv2.getPermission(res.envelope.user, 'pageruser')
+    .then ->
+      pagerv2.getOncall()
+    .then (data) ->
+      startDate = moment(data.end).utc()
+      pagerv2.setOverride(res.envelope.user, { name: who }, 0, startDate)
+    .then (data) ->
+      endDate = moment(data.over.end).utc().format('dddd HH:mm')
+      startDate = moment(data.over.start).utc().format('dddd HH:mm')
+      res.send "Rejoice #{data.over.from}! #{data.over.name} will be on call from #{startDate} to #{endDate} (utc)"
+    .catch (e) ->
+      res.send(e)
     res.finish()

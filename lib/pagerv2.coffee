@@ -201,7 +201,7 @@ class Pagerv2
     .then (body) ->
       body.oncalls[0]
 
-  setOverride: (from, who, duration = null) ->
+  setOverride: (from, who, duration = null, start = null) ->
     return new Promise (res, err) =>
       if duration? and duration > 1440
         err 'Sorry you cannot set an override of more than 1 day.'
@@ -222,29 +222,36 @@ class Pagerv2
           .bind({ id: null })
           .then (id) =>
             @id = id
-            @getOncall()
+            @getOncall(start)
           .then (data) =>
             query = { override: { } }
-            query.override.start = moment().utc().format()
-            if duration?
-              duration = parseInt duration
-              query.override.end = moment().utc().add(duration, 'minutes').format()
+            if @id is data.user.id
+              err "Sorry, you can't override yourself"
             else
-              query.override.end = moment(data.end).utc().format()
-            query.override.user = {
+              if start?
+                momentStart = moment(start).utc()
+                data.start = start
+              else
+                momentStart = moment().utc()
+              query.override.start = momentStart.format()
+              if not start and duration?
+                duration = parseInt duration
+                query.override.end = momentStart.add(duration, 'minutes').format()
+              else
+                query.override.end = moment(data.end).utc().format()
+              query.override.user = {
                 'id': "#{@id}",
                 'type': 'user_reference'
               }
-            # TODO - with user on call, res a relevant message
-            @request('POST', "/schedules/#{schedule_id}/overrides", query)
-            .then (body) ->
-              body.override.over = {
-                name: who.name or who,
-                from: data.user.summary
-              }
-              res body.override
-            .catch (error) ->
-              err error
+              @request('POST', "/schedules/#{schedule_id}/overrides", query)
+              .then (body) ->
+                body.override.over = {
+                  name: who.name or who,
+                  from: data.user.summary,
+                  start: data.start,
+                  end: data.end
+                }
+                res body.override
           .catch (error) ->
             err error
 
@@ -521,9 +528,9 @@ class Pagerv2
           colors[level]
         )
         if message.data.incident.trigger_summary_data.subject?
-            description = message.data.incident.trigger_summary_data.subject.replace(' (CRITICAL)', '')
+          description = message.data.incident.trigger_summary_data.subject.replace(' (CRITICAL)', '')
         else
-            description = "(no subject)"
+          description = '(no subject)'
         who = if message.type is 'incident.resolve' and message.data.incident.resolved_by_user?
                 message.data.incident.resolved_by_user.name
               else if message.data.incident.assigned_to_user?
