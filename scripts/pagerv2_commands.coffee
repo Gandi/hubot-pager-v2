@@ -450,20 +450,8 @@ module.exports = (robot) ->
       res.send e
     res.finish()
 
-#   hubot pager me <duration>     - creates an override for <duration> minutes
-  robot.respond /pager (?:([^ ]+) )?(?:for )?(\d+)(?: min(?:utes)?)?\s*$/, 'pager_override', (res) ->
-    [ _, who, duration ] = res.match
-    pagerv2.getPermission(res.envelope.user, 'pageruser')
-    .then ->
-      pagerv2.setOverride(res.envelope.user, { name: who }, duration)
-    .then (data) ->
-      res.send "Rejoice #{data.over.from}! #{data.over.name} is now on call."
-    .catch (e) ->
-      res.send e
-    res.finish()
-
 #   hubot pager me next - creates an override for the next scheduled
-  robot.respond /pager me next/, 'pager_override_next', (res) ->
+  robot.respond /pager ([^ ]+) next\s*$/, 'pager_override_next', (res) ->
     [ _, who] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
@@ -477,4 +465,16 @@ module.exports = (robot) ->
       res.send "Rejoice #{data.over.from}! #{data.over.name} will be on call from #{startDate} to #{endDate} (utc)"
     .catch (e) ->
       res.send(e)
+    res.finish()
+
+#   hubot pager me <duration>     - creates an override for <duration> minutes
+  robot.respond /pager (?:([^ ]+) )?(?:for )?(\d+)(?: min(?:utes)?)?\s*$/, 'pager_override', (res) ->
+    [ _, who, duration ] = res.match
+    pagerv2.getPermission(res.envelope.user, 'pageruser')
+    .then ->
+      pagerv2.setOverride(res.envelope.user, { name: who }, duration)
+    .then (data) ->
+      res.send "Rejoice #{data.over.from}! #{data.over.name} is now on call."
+    .catch (e) ->
+      res.send e
     res.finish()
