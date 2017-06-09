@@ -1670,8 +1670,58 @@ describe 'pagerv2_commands', ->
         say 'pager maintenances', ->
           it 'returns ongoing maintenances', ->
             expect(hubotResponse())
-            .to.eql 'PW98YIO - Immanentizing the eschaton (until 03:00 UTC)'
+            .to.eql 'PW98YIO - Immanentizing the eschaton (until 03:00 UTC) on My Mail Service'
 
+
+    # ----------------------------------------------------------------------------------------------
+    describe '".pager stfu services"', ->
+
+      context 'when something goes wrong,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/services')
+          .query({
+            query: 'My Application Service'
+          })
+          .reply(200, require('./fixtures/services_list1-ok.json'))
+          .get('/services')
+          .query({
+            query: 'Other Service'
+          })
+          .reply(200, require('./fixtures/services_list2-ok.json'))
+          .post('/maintenance_windows')
+          .reply 503, { error: { code: 503, message: "it's all broken!" } }
+        afterEach ->
+          nock.cleanAll()
+
+        say 'pager stfu Other Service for 10 m', ->
+          it 'returns the error message', ->
+            expect(hubotResponse())
+            .to.eql "503 it's all broken!"
+
+      context 'when everything goes right,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/services')
+          .query({
+            query: 'My Application Service'
+          })
+          .reply(200, require('./fixtures/services_list1-ok.json'))
+          .get('/services')
+          .query({
+            query: 'Other Service'
+          })
+          .reply(200, require('./fixtures/services_list2-ok.json'))
+          .post('/maintenance_windows')
+          .reply(200, require('./fixtures/maintenance_create-ok.json'))
+        afterEach ->
+          nock.cleanAll()
+
+        say 'pager stfu My Application Service for 60 minutes', ->
+          it 'returns ongoing maintenances', ->
+            expect(hubotResponse())
+            .to.eql 'Maintenance created for My Application Service until Tu 03:00 UTC (id PW98YIO).'
+    
     # ----------------------------------------------------------------------------------------------
     describe '".pager stfu"', ->
 
@@ -1719,7 +1769,7 @@ describe 'pagerv2_commands', ->
         say 'pager stfu', ->
           it 'returns ongoing maintenances', ->
             expect(hubotResponse())
-            .to.eql 'Maintenance created for all services until 03:00 UTC (id PW98YIO).'
+            .to.eql 'Maintenance created for all services until Tu 03:00 UTC (id PW98YIO).'
 
     # ----------------------------------------------------------------------------------------------
     describe '".pager end PW98YIO"', ->

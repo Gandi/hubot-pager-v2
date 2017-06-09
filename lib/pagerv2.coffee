@@ -30,6 +30,7 @@ class Pagerv2
       users: { },
       services: { }
     }
+    #@robot.brain.data.pagerv2.services ?= {}
     @pagerServices = [ ]
     if process.env.PAGERV2_SERVICES?
       for service in process.env.PAGERV2_SERVICES.split(',')
@@ -78,11 +79,14 @@ class Pagerv2
           response.on 'data', (chunk) ->
             data.push chunk
           response.on 'end', ->
-            json_data = JSON.parse(data.join(''))
-            if json_data.error?
-              err "#{json_data.error.code} #{json_data.error.message}"
+            if data.length > 0
+              json_data = JSON.parse(data.join(''))
+              if json_data.error?
+                err "#{json_data.error.code} #{json_data.error.message}"
+              else
+                res json_data
             else
-              res json_data
+              res { }
         req.on 'error', (error) ->
           err "#{error.code} #{error.message}"
         if method is 'PUT' or method is 'POST'
@@ -448,12 +452,14 @@ class Pagerv2
     }
     @request('GET', '/maintenance_windows', query)
 
-  addMaintenance: (user, duration, description) ->
+  addMaintenance: (user, duration = 60, description, services = []) ->
     @getUserEmail(user, user)
     .bind(@email)
     .then (email) =>
       @email = email
-      service_ids = Promise.map @pagerServices, (service) =>
+      if services.length is 0
+        services = @pagerServices
+      service_ids = Promise.map services, (service) =>
         @serviceId(service)
       Promise.all(service_ids)
     .then (service_ids) =>

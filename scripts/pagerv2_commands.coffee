@@ -42,7 +42,8 @@
 #
 #   hubot pager maintenances           - lists currently active maintenances
 #   hubot pager stfu|down [for] <duration> [because <reason>] - creates a maintenance
-#   hubot pager up|end|back <maintenance> - ends <maintenance>
+#   hubot pager stdu|down <service,service,service> for <duration> [because <reason>] - creates a maintenance per service
+#   hubot pager end <maintenance> - ends <maintenance>
 #
 #   hubot pager me <duration>       - creates an override for <duration> minutes
 #   hubot pager me next             - creates an override for the next scheduled
@@ -386,31 +387,57 @@ module.exports = (robot) ->
       if data.maintenance_windows.length > 0
         for maintenance in data.maintenance_windows
           end = moment(maintenance.end_time).utc().format('HH:mm')
-          res.send "#{maintenance.id} - #{maintenance.summary} (until #{end} UTC)"
+          services = ''
+          for service in maintenance.services
+            services += service.summary + ', '
+          services = services.substring(0, services.length - 2)
+          res.send "#{maintenance.id} - #{maintenance.summary} (until #{end} UTC) on #{services}"
       else
         res.send 'There is no ongoing maintenance at the moment.'
     .catch (e) ->
       res.send e
     res.finish()
 
-#   hubot pager stfu|down [for] <duration> [because <reason>] - creates a maintenance
+
+#   hubot pager stdu|down <service,service,service> for <duration> [because <reason>]
   robot.respond (
-    /pager (?:stfu|down)(?: for)?\s*([0-9]+)?(?: min(?:utes)?)?(?: because (.+))?\s*$/
+    /pager (?:stfu|down) (.+)(?: for)( [0-9]+)(?: )?(?:m(?:in(?:ute(?:s)?)?)?)?(?: )?(?:because ?(.+))?\s*$/
+  ), 'pager_set_maintenance_per_service', (res) ->
+    [_, services, duration, description ] = res.match
+    if services in ['*', 'all']
+      services_list = []
+    else
+      services_list = services.split(',')
+        
+    pagerv2.getPermission(res.envelope.user, 'pageruser')
+    .then ->
+      pagerv2.addMaintenance(res.envelope.user, duration, description, services_list)
+    .then (data) ->
+      end_time = moment(data.maintenance_window.end_time).utc().format('dd HH:mm')
+      res.send "Maintenance created for #{services} until #{end_time} UTC " +
+               "(id #{data.maintenance_window.id})."
+    .catch (e) ->
+      res.send e
+    res.finish()
+
+#   hubot pager stfu|down [for] [duration=60] [because <reason>] - creates a maintenance
+  robot.respond (
+    /pager (?:stfu|down)(?: for)?\s*([0-9]+)?(?: )?(?:m(?:in(?:utes)?)?)?(?: because (.+))?\s*$/
   ), 'pager_set_maintenance', (res) ->
     [ _, duration, description ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
       pagerv2.addMaintenance(res.envelope.user, duration, description)
     .then (data) ->
-      end_time = moment(data.maintenance_window.end_time).utc().format('HH:mm')
+      end_time = moment(data.maintenance_window.end_time).utc().format('dd HH:mm')
       res.send "Maintenance created for all services until #{end_time} UTC " +
                "(id #{data.maintenance_window.id})."
     .catch (e) ->
       res.send e
     res.finish()
 
-#   hubot pager up|end|back <maintenance> - ends <maintenance>
-  robot.respond /pager (?:up|back|end) ([A-Z0-9]+)\s*$/, 'pager_end_maintenance', (res) ->
+#   hubot pager end[s] <maintenance> - ends <maintenance>
+  robot.respond /pager (?:end(?:s)?) ([A-Z0-9]+)\s*$/, 'pager_end_maintenance', (res) ->
     [ _, maintenance ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
