@@ -42,7 +42,7 @@
 #
 #   hubot pager maintenances           - lists currently active maintenances
 #   hubot pager stfu|down [for] <duration> [because <reason>] - creates a maintenance
-#   hubot pager stdu|down <service,service,service> for <duration> [because <reason>] - creates a maintenance per service
+#   hubot pager stfu|down <service,service,service> for <duration> [because <reason>] - creates a maintenance per service
 #   hubot pager end <maintenance> - ends <maintenance>
 #
 #   hubot pager me <duration>       - creates an override for <duration> minutes
@@ -399,7 +399,7 @@ module.exports = (robot) ->
     res.finish()
 
 
-#   hubot pager stdu|down <service,service,service> for <duration> [because <reason>]
+#   hubot pager stfu|down <service,service,service> for <duration> [because <reason>]
   robot.respond (
     /pager (?:stfu|down) (.+)(?: for)( [0-9]+)(?: )?(?:m(?:in(?:ute(?:s)?)?)?)?(?: )?(?:because ?(.+))?\s*$/
   ), 'pager_set_maintenance_per_service', (res) ->
