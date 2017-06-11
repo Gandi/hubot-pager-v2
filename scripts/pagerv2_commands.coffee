@@ -190,7 +190,9 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pager sup|inc|incidents - lists currently unresolved incidents
-  robot.respond /(?:pager )?(?:sup|inc(?:idents))\s*(\d+)?(?: (\d+))?(?: (\d+))?\s*$/, 'pager_incidents', (res) ->
+  robot.respond (
+    /(?:pager )?(?:sup|inc(?:idents))\s*(\d+)?(?: (\d+))?(?: (\d+))?\s*$/
+  ), 'pager_incidents', (res) ->
     [ _, from, duration, limit ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
@@ -401,19 +403,18 @@ module.exports = (robot) ->
 
 #   hubot pager stfu|down <service,service,service> for <duration> [because <reason>]
   robot.respond (
-    /pager (?:stfu|down) (.+)(?: for)( [0-9]+)(?: )?(?:m(?:in(?:ute(?:s)?)?)?)?(?: )?(?:because ?(.+))?\s*$/
+    /pager (?:stfu|down) (.+) for ([0-9]+)(?:\s?m(?:in(?:utes?)?)?)?(?: because (.+))?\s*$/
   ), 'pager_set_maintenance_per_service', (res) ->
     [_, services, duration, description ] = res.match
     if services in ['*', 'all']
       services_list = []
     else
       services_list = services.split(',')
-        
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
       pagerv2.addMaintenance(res.envelope.user, duration, description, services_list)
     .then (data) ->
-      end_time = moment(data.maintenance_window.end_time).utc().format('dd HH:mm')
+      end_time = moment(data.maintenance_window.end_time).utc().format('ddd HH:mm')
       res.send "Maintenance created for #{services} until #{end_time} UTC " +
                "(id #{data.maintenance_window.id})."
     .catch (e) ->
@@ -422,14 +423,14 @@ module.exports = (robot) ->
 
 #   hubot pager stfu|down [for] [duration=60] [because <reason>] - creates a maintenance
   robot.respond (
-    /pager (?:stfu|down)(?: for)?\s*([0-9]+)?(?: )?(?:m(?:in(?:utes)?)?)?(?: because (.+))?\s*$/
+    /pager (?:stfu|down)(?: for)?\s*([0-9]+)?(?:\s?m(?:in(?:utes?)?)?)?(?: because (.+))?\s*$/
   ), 'pager_set_maintenance', (res) ->
     [ _, duration, description ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
       pagerv2.addMaintenance(res.envelope.user, duration, description)
     .then (data) ->
-      end_time = moment(data.maintenance_window.end_time).utc().format('dd HH:mm')
+      end_time = moment(data.maintenance_window.end_time).utc().format('ddd HH:mm')
       res.send "Maintenance created for all services until #{end_time} UTC " +
                "(id #{data.maintenance_window.id})."
     .catch (e) ->
@@ -489,13 +490,16 @@ module.exports = (robot) ->
     .then (data) ->
       endDate = moment(data.over.end).utc().format('dddd HH:mm')
       startDate = moment(data.over.start).utc().format('dddd HH:mm')
-      res.send "Rejoice #{data.over.from}! #{data.over.name} will be on call from #{startDate} to #{endDate} (utc)"
+      res.send "Rejoice #{data.over.from}! #{data.over.name} " +
+               "will be on call from #{startDate} to #{endDate} (utc)"
     .catch (e) ->
       res.send(e)
     res.finish()
 
 #   hubot pager me <duration>     - creates an override for <duration> minutes
-  robot.respond /pager (?:([^ ]+) )?(?:for )?(\d+)(?: min(?:utes)?)?\s*$/, 'pager_override', (res) ->
+  robot.respond (
+    /pager (?:([^ ]+) )?(?:for )?(\d+)(?: min(?:utes?)?)?\s*$/
+  ), 'pager_override', (res) ->
     [ _, who, duration ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->

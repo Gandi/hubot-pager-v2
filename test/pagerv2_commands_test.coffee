@@ -57,7 +57,7 @@ describe 'pagerv2_commands', ->
       email_address: 'user@example.com'
     }
     moment.now = ->
-      +new Date("February 2, 2017 02:02:00 UTC")
+      +new Date('February 2, 2017 02:02:00 UTC')
 
     room.receive = (userName, message) ->
       new Promise (resolve) =>
@@ -195,7 +195,7 @@ describe 'pagerv2_commands', ->
         .query({
           query: 'toto@example.com'
         })
-        .replyWithError({ message: "server error", code: 500 })
+        .replyWithError({ message: 'server error', code: 500 })
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
@@ -628,7 +628,8 @@ describe 'pagerv2_commands', ->
         say 'pager me next ', ->
           it 'says override is done', ->
             expect(hubotResponse())
-            .to.eql 'Rejoice Bea Blala! momo will be on call from Thursday 02:07 to Thursday 02:12 (utc)'
+            .to.eql 'Rejoice Bea Blala! momo will be on call ' +
+                    'from Thursday 02:07 to Thursday 02:12 (utc)'
 
         
     # ----------------------------------------------------------------------------------------------
@@ -752,7 +753,8 @@ describe 'pagerv2_commands', ->
         say 'pager incident 1234', ->
           it 'returns details on the incident', ->
             expect(hubotResponse())
-            .to.eql '[My Mail Service] PT4KHLK The server is on fire. - resolved (Earline Greenholt)'
+            .to.eql '[My Mail Service] PT4KHLK The server is on fire. - ' +
+                    'resolved (Earline Greenholt)'
 
     # ----------------------------------------------------------------------------------------------
     describe '".pager sup"', ->
@@ -838,7 +840,8 @@ describe 'pagerv2_commands', ->
           say 'pager sup', ->
             it 'returns list of incidents', ->
               expect(hubotResponse())
-              .to.eql '[My Mail Service] PT4KHLK The server is on fire. - resolved (Earline Greenholt)'
+              .to.eql '[My Mail Service] PT4KHLK The server is on fire. - ' +
+                      'resolved (Earline Greenholt)'
 
         context 'and we want incidents for the past 2 hours', ->
           beforeEach ->
@@ -867,7 +870,8 @@ describe 'pagerv2_commands', ->
           say 'pager sup 2', ->
             it 'returns list of incidents', ->
               expect(hubotResponse())
-              .to.eql '[My Mail Service] PT4KHLK The server is on fire. - resolved (Earline Greenholt)'
+              .to.eql '[My Mail Service] PT4KHLK The server is on fire. - ' +
+                      'resolved (Earline Greenholt)'
 
         context 'and we want incidents since 8 hours ago for 4 hours', ->
           beforeEach ->
@@ -896,7 +900,8 @@ describe 'pagerv2_commands', ->
           say 'pager sup 8 4', ->
             it 'returns list of incidents', ->
               expect(hubotResponse())
-              .to.eql '[My Mail Service] PT4KHLK The server is on fire. - resolved (Earline Greenholt)'
+              .to.eql '[My Mail Service] PT4KHLK The server is on fire. - ' +
+                      'resolved (Earline Greenholt)'
 
     # ----------------------------------------------------------------------------------------------
     describe '".pager ack"', ->
@@ -1720,7 +1725,8 @@ describe 'pagerv2_commands', ->
         say 'pager stfu My Application Service for 60 minutes', ->
           it 'returns ongoing maintenances', ->
             expect(hubotResponse())
-            .to.eql 'Maintenance created for My Application Service until Tu 03:00 UTC (id PW98YIO).'
+            .to.eql 'Maintenance created for My Application Service until ' +
+                    'Tue 03:00 UTC (id PW98YIO).'
     
     # ----------------------------------------------------------------------------------------------
     describe '".pager stfu"', ->
@@ -1769,7 +1775,7 @@ describe 'pagerv2_commands', ->
         say 'pager stfu', ->
           it 'returns ongoing maintenances', ->
             expect(hubotResponse())
-            .to.eql 'Maintenance created for all services until Tu 03:00 UTC (id PW98YIO).'
+            .to.eql 'Maintenance created for all services until Tue 03:00 UTC (id PW98YIO).'
 
     # ----------------------------------------------------------------------------------------------
     describe '".pager end PW98YIO"', ->
