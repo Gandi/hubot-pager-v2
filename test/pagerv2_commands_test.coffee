@@ -148,6 +148,81 @@ describe 'pagerv2_commands', ->
           expect(hubotResponse())
           .to.eql 'Oh I know you, you are AAAAA42.'
 
+# ------------------------------------------------------------------------------------------------
+  describe '".pager who is momo"', ->
+    context 'with a first time user,', ->
+      say 'pager who is momo', ->
+        it 'asks to declare email', ->
+          expect(hubotResponse())
+          .to.eql "Sorry, I can't figure out your email address :( " +
+                  'Can you tell me with `.pager me as <email>`?'
+
+    context 'with a user that has unknown email,', ->
+      beforeEach ->
+        nock('https://api.pagerduty.com')
+        .get('/users')
+        .reply 200, require('./fixtures/users_list-nomatch.json')
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pager who is momo', ->
+        it 'asks to declare email', ->
+          expect(hubotResponse())
+          .to.eql "Sorry, I can't figure out your email address :( " +
+                  'Can you tell me with `.pager me as <email>`?'
+
+    context 'with a user that has a known email,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = {
+          users: {
+            momo: {
+              id: 'momo',
+              name: 'momo',
+              email: 'momo@example.com'
+            }
+          }
+        }
+        nock('https://api.pagerduty.com')
+        .get('/users')
+        .query({
+          query: 'momo@example.com'
+        })
+        .reply 200, require('./fixtures/users_list-match.json')
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pager who is momo', ->
+        it 'gets user information from pager', ->
+          expect(hubotResponse())
+          .to.eql 'Oh I know momo, momo is PXPGF42.'
+        it 'records pagerid in brain', ->
+          expect(room.robot.brain.data.pagerv2.users['momo'].pagerid)
+          .to.eql 'PXPGF42'
+
+    context 'with a user that already has a pagerid,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = {
+          users: {
+            momo: {
+              id: 'momo',
+              name: 'momo',
+              email: 'momo@example.com',
+              pagerid: 'AAAAA42'
+            }
+          }
+        }
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+
+      say 'pager who is momo', ->
+        it 'returns information from brain', ->
+          expect(hubotResponse())
+          .to.eql 'Oh I know momo, momo is AAAAA42.'
+
+  #
+
   # ------------------------------------------------------------------------------------------------
   describe '".pager me as <email>"', ->
     context 'with an unknown email,', ->

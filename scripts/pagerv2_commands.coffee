@@ -11,6 +11,7 @@
 #   hubot pager me                  - check if the caller is known by pagerduty plugin
 #   hubot pager me as <email>       - declare what email should be use to find caller pagerduty id
 #   hubot pager <user> as <email>   - declare what email should be use to find <user> pagerduty id
+#   hubot pager who is <user>       - check if the caller is known by pagerduty plugin
 #
 #   hubot pager noc <duration>      - creates an override for <duration> minutes with the noc account
 #   hubot pager noc now             - creates a noc override until the end of current oncall
@@ -101,7 +102,7 @@ module.exports = (robot) ->
     [ _, who, email ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageradmin')
     .then ->
-      pagerv2.setUser(who, email)
+      pagerv2.setUser( { name: who }, email)
     .bind(who)
     .then (data) ->
       res.send "Ok now I know #{who} is #{data}."
@@ -134,6 +135,7 @@ module.exports = (robot) ->
       res.send e
     res.finish()
 
+
 #   hubot pager oncall <message> - cc oncall and send <message> to alerting channel
   robot.respond /(?:pager )?on ?call\s(.+)/, 'pager_msg_oncall', (res) ->
     [ _, msg ] = res.match
@@ -163,6 +165,18 @@ module.exports = (robot) ->
       else
         endDate = endDate.format('dddd HH:mm')
       res.send "#{data.user.summary} is on call until #{endDate} (utc)."
+    .catch (e) ->
+      res.send e
+    res.finish()
+
+#   hubot pager who is <user> - check if the caller is known by pagerduty plugin
+  robot.respond /pager who(?: is|'s)? ([^\s]+)$/, (res) ->
+    [_, who] = res.match
+    pagerv2.getPermission(res.envelope.user, 'pageradmin')
+    .then ->
+      pagerv2.getUser( { name: who }, { name: who })
+    .then (data) ->
+      res.send "Oh I know #{who}, #{who} is #{data}."
     .catch (e) ->
       res.send e
     res.finish()
