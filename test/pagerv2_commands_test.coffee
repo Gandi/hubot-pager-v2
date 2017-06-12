@@ -733,6 +733,30 @@ describe 'pagerv2_commands', ->
           it 'returns the error message', ->
             expect(hubotResponse())
             .to.eql "503 it's all broken!"
+      context 'when there is no override,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+            .filteringPath( (path) ->
+              path.replace /(since|until)=[^&]*/g, '$1=x'
+          )
+          .get('/schedules/42/overrides')
+          .query({
+            since: 'x',
+            until: 'x',
+            editable: true,
+            overflow: true
+          })
+          .reply(200, require('./fixtures/override_get-empty.json'))
+        afterEach ->
+          nock.cleanAll()
+
+        say 'pager not me', ->
+          it 'returns name of who is on call', ->
+            expect(hubotResponse())
+            .to.eql "Sorry there is no overrides for 'you' at the moment."
+
+
+
 
       context 'when everything goes right,', ->
         beforeEach ->
@@ -1751,6 +1775,23 @@ describe 'pagerv2_commands', ->
           it 'returns ongoing maintenances', ->
             expect(hubotResponse())
             .to.eql 'PW98YIO - Immanentizing the eschaton (until 03:00 UTC) on My Mail Service'
+      
+      context 'when there is no maintenance', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/maintenance_windows')
+          .query({
+            filter: 'ongoing'
+          })
+          .reply(200, require('./fixtures/maintenance_list-empty.json'))
+        afterEach ->
+          nock.cleanAll()
+
+        say 'pager maintenances', ->
+          it 'returns ongoing maintenances', ->
+            expect(hubotResponse())
+            .to.eql 'There is no ongoing maintenance at the moment.'
+
 
 
     # ----------------------------------------------------------------------------------------------
@@ -1802,7 +1843,10 @@ describe 'pagerv2_commands', ->
             expect(hubotResponse())
             .to.eql 'Maintenance created for My Application Service until ' +
                     'Tue 03:00 UTC (id PW98YIO).'
-    
+        say 'pager stfu * for 60 minutes', ->
+          it 'returns ongoing maintenances', ->
+            expect(hubotResponse())
+            .to.eql 'Maintenance created for * until Tue 03:00 UTC (id PW98YIO).'
     # ----------------------------------------------------------------------------------------------
     describe '".pager stfu"', ->
 

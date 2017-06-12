@@ -487,7 +487,9 @@ module.exports = (robot) ->
           who = 'your'
         res.send "Ok, #{res.envelope.user.name}! #{who} override is cancelled."
       else
-        res.send "Sorry there is no overrides by '#{who}' at the moment."
+        if who is 'me'
+          who = "you"
+        res.send "Sorry there is no overrides for '#{who}' at the moment."
     .catch (e) ->
       res.send e
     res.finish()
