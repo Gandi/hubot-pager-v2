@@ -151,8 +151,6 @@ class Pagerv2
         err e
 
   _ask_for_email: (from, user) ->
-    #this is not testable, every single call are made with (user,user)
-    #the if is therefore not testable without a direct call to this lib
     if from.name is user.name
       "Sorry, I can't figure out your email address :( " +
       'Can you tell me with `.pager me as <email>`?'

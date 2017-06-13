@@ -1523,6 +1523,13 @@ describe 'pagerv2_commands', ->
               expect(hubotResponse())
               .to.eql 'Incidents PT4KHLK, 1234567 assigned to momo.'
 
+          say 'pager assign all to toto', ->
+            it 'says toto is unknown', ->
+              expect(hubotResponse())
+              .to.eql 'Sorry, I can\'t figure toto email address. ' +
+                      'Can you ask them to `.pager me as <email>`?'
+
+
       context 'when there are no incidents,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -2117,5 +2124,29 @@ describe 'pagerv2_commands', ->
         hubot 'pager res PT4KHLK', 'non_pager_user'
         it 'warns the user that he has no permission to use that command', ->
           expect(hubotResponse()).to.eql 'You don\'t have permission to do that.'
+
+
+    describe '".pager <user> as <email>"', ->
+      context 'by an unauthorized user,', ->
+        beforeEach ->
+          room.robot.brain.data.pagerv2 = { users: { } }
+          nock('https://api.pagerduty.com')
+          .get('/users')
+          .query({
+            query: 'toto@example.com'
+          })
+          .reply 200, require('./fixtures/users_list-match.json')
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        context 'pager who is toto', ->
+          hubot 'pager who is toto', 'admin_user'
+          it 'returns information from pager', ->
+            expect(hubotResponse())
+            .to.eql 'Sorry, I can\'t figure toto email address. ' +
+                    'Can you help me with `.pager toto as <email>`?'
+
+
 
 # --------------------------------------------------------------------------------------------------
