@@ -2147,6 +2147,13 @@ describe 'pagerv2_commands', ->
             .to.eql 'Sorry, I can\'t figure toto email address. ' +
                     'Can you help me with `.pager toto as <email>`?'
 
+        context 'pager who is toto', ->
+          hubot 'pager who is toto', 'pager_admin'
+          it 'returns information from pager', ->
+            expect(hubotResponse())
+            .to.eql 'Sorry, I can\'t figure toto email address. ' +
+                    'Can you help me with `.pager toto as <email>`?'
+
 
 
 # --------------------------------------------------------------------------------------------------
