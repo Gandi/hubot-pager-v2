@@ -1,5 +1,8 @@
 Hubot-pager-v2 Changelog
 ==========================
+### 0.1.3 - 2017-06-13
+- add who is
+- better coverage
 
 ### 0.1.2 - wip
 - add maintenance commands
