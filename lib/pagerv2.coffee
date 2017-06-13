@@ -21,8 +21,6 @@ moment = require 'moment'
 Promise = require 'bluebird'
 querystring = require 'querystring'
 
-inspect = (data) -> console.log(require('util').inspect(data, false, 7, true))
-
 class Pagerv2
 
   constructor: (@robot) ->
@@ -153,6 +151,8 @@ class Pagerv2
         err e
 
   _ask_for_email: (from, user) ->
+    #this is not testable, every single call are made with (user,user)
+    #the if is therefore not testable without a direct call to this lib
     if from.name is user.name
       "Sorry, I can't figure out your email address :( " +
       'Can you tell me with `.pager me as <email>`?'
@@ -211,6 +211,8 @@ class Pagerv2
         err 'Sorry you cannot set an override of more than 1 day.'
       else
         schedule_id = process.env.PAGERV2_SCHEDULE_ID
+        #how to test this? I tried setting the env var to '' and the robot.auth to null
+        #didn't work..
         if process.env.PAGERV2_OVERRIDERS isnt ''
           overriders = process.env.PAGERV2_OVERRIDERS?.split(',')
         if not who? or not who.name? or who.name is 'me'

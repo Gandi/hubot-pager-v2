@@ -48,6 +48,7 @@ describe 'pagerv2_commands', ->
     process.env.PAGERV2_API_KEY = 'xxx'
     process.env.PAGERV2_SCHEDULE_ID = '42'
     process.env.PAGERV2_SERVICES = 'My Application Service,Other Service'
+    process.env.PAGERV2_LOG_PATH = 'test/'
     room = helper.createRoom { httpd: false }
     room.robot.brain.userForId 'user', {
       name: 'user'
@@ -98,6 +99,27 @@ describe 'pagerv2_commands', ->
           expect(hubotResponse())
           .to.eql "Sorry, I can't figure out your email address :( " +
                   'Can you tell me with `.pager me as <email>`?'
+ 
+    context 'with a faulty user input', ->
+      beforeEach ->
+        nock('https://api.pagerduty.com')
+        .get('/users')
+        .reply 200, require('./fixtures/users_list-nomatch.json')
+        room.receive = (userName, message) ->
+          new Promise (resolve) =>
+            @messages.push [userName, message]
+            user = { name: userName }
+            @robot.receive(new Hubot.TextMessage(user, message), resolve)
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pager me', ->
+        it 'asks to declare email', ->
+          expect(hubotResponse())
+          .to.eql "Sorry, I can't figure out your email address :( " +
+                  'Can you tell me with `.pager me as <email>`?'
+
 
     context 'with a user that has a known email,', ->
       beforeEach ->
@@ -328,6 +350,25 @@ describe 'pagerv2_commands', ->
         it 'returns information from pager', ->
           expect(hubotResponse())
           .to.eql 'Ok now I know toto is PXPGF42.'
+    
+    context 'by an unauthorized user,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = { users: { } }
+        nock('https://api.pagerduty.com')
+        .get('/users')
+        .query({
+          query: 'toto@example.com'
+        })
+        .reply 200, require('./fixtures/users_list-match.json')
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pager toto as toto@example.com', ->
+        it 'returns information from pager', ->
+          expect(hubotResponse())
+          .to.eql 'Ok now I know toto is PXPGF42.'
+
 
   # ------------------------------------------------------------------------------------------------
   describe '".pager oncall <msg>"', ->
@@ -559,6 +600,64 @@ describe 'pagerv2_commands', ->
         it 'returns the error message', ->
           expect(hubotResponse())
           .to.eql 'Sorry, I cannot find momo@example.com'
+    
+    context 'when the user mail is faulty,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = {
+          users: {
+            momo: {
+              id: 'momo',
+              name: 'momo',
+            }
+          }
+        }
+        nock('https://api.pagerduty.com')
+        .get('/users')
+        .query({
+          query: 'momo@example.com'
+        })
+        .reply(200, require('./fixtures/users_list-nomatch.json'))
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pager assign all to me', ->
+        it 'returns the error message', ->
+          expect(hubotResponse())
+          .to.eql "Sorry, I can't figure out your email address :( " +
+          'Can you tell me with `.pager me as <email>`?'
+     
+    context 'when the user is faulty,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = {
+          users: {
+            momo: {
+              id: 'momo',
+              name: 'momo',
+              email: 'momo@example.com'
+            }
+          }
+        }
+        nock('https://api.pagerduty.com')
+        .get('/users')
+        .query({
+          query: 'momo@example.com'
+        })
+        .reply(200, require('./fixtures/users_list-nomatch.json'))
+        room.receive = (userName, message) ->
+          new Promise (resolve) =>
+            @messages.push [userName, message]
+            user = { name: userName }
+            @robot.receive(new Hubot.TextMessage(user, message), resolve)
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pager assign all to me', ->
+        it 'returns the error message', ->
+          expect(hubotResponse())
+          .to.eql 'Sorry, I cannot find momo@example.com'
+     
 
   # ================================================================================================
   context 'caller is known', ->
@@ -640,7 +739,7 @@ describe 'pagerv2_commands', ->
           it 'returns the error message', ->
             expect(hubotResponse())
             .to.eql "503 it's all broken!"
- 
+
       context 'when someone override itself', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -1916,7 +2015,7 @@ describe 'pagerv2_commands', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
           .delete('/maintenance_windows/PW98YIO')
-          .reply(200, { })
+          .reply(200, '')
         afterEach ->
           nock.cleanAll()
 

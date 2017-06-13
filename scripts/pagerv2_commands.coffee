@@ -174,7 +174,7 @@ module.exports = (robot) ->
     [_, who] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageradmin')
     .then ->
-      pagerv2.getUser( { name: who }, { name: who })
+      pagerv2.getUser( res.envelope.user, { name: who })
     .then (data) ->
       res.send "Oh I know #{who}, #{who} is #{data}."
     .catch (e) ->
@@ -296,7 +296,7 @@ module.exports = (robot) ->
 
 #   hubot pager assign [all] to me       - assigns all open incidents to caller
 #   hubot pager assign [all] to <user>   - assigns all open incidents to user
-  robot.respond /pager assign(?: all) to (me|[^ ]+)\s*$/, 'pager_assign_all', (res) ->
+  robot.respond /pager (?:re)?assign(?: all) to (me|[^ ]+)\s*$/, 'pager_assign_all', (res) ->
     [ _, who ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
@@ -488,7 +488,7 @@ module.exports = (robot) ->
         res.send "Ok, #{res.envelope.user.name}! #{who} override is cancelled."
       else
         if who is 'me'
-          who = "you"
+          who = 'you'
         res.send "Sorry there is no overrides for '#{who}' at the moment."
     .catch (e) ->
       res.send e
