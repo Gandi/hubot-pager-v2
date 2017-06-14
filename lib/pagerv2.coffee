@@ -209,18 +209,8 @@ class Pagerv2
         err 'Sorry you cannot set an override of more than 1 day.'
       else
         schedule_id = process.env.PAGERV2_SCHEDULE_ID
-        #how to test this? I tried setting the env var to '' and the robot.auth to null
-        #didn't work..
-        if process.env.PAGERV2_OVERRIDERS isnt ''
-          overriders = process.env.PAGERV2_OVERRIDERS?.split(',')
         if not who? or not who.name? or who.name is 'me'
           who = { name: from.name }
-        else
-          if overriders? and who not in overriders
-            unless @robot.auth? and
-               (@robot.auth.hasRole(from, ['pageradmin']) or @robot.auth.isAdmin(from))
-              who = null
-              err "You cannot force #{who.name} to take the override."
         if who?
           @getUser(from, who)
           .bind({ id: null })
@@ -264,14 +254,6 @@ class Pagerv2
       schedule_id = process.env.PAGERV2_SCHEDULE_ID
       if not who? or not who.name? or who.name is 'me'
         who = { name: from.name }
-      else
-        if process.env.PAGERV2_OVERRIDERS isnt ''
-          overriders = process.env.PAGERV2_OVERRIDERS?.split(',')
-        if overriders? and who not in overriders
-          unless @robot.auth? and
-             (@robot.auth.hasRole(from, ['pageradmin']) or @robot.auth.isAdmin(from))
-            who = null
-            err "You cannot force #{who.name} to take the override."
       if who?
         @getUser(from, who)
         .bind({ id: null })
