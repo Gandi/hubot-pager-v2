@@ -832,6 +832,7 @@ describe 'pagerv2_commands', ->
           it 'returns the error message', ->
             expect(hubotResponse())
             .to.eql "503 it's all broken!"
+
       context 'when there is no override,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -853,9 +854,6 @@ describe 'pagerv2_commands', ->
           it 'returns name of who is on call', ->
             expect(hubotResponse())
             .to.eql "Sorry there is no overrides for 'you' at the moment."
-
-
-
 
       context 'when everything goes right,', ->
         beforeEach ->
@@ -2079,6 +2077,12 @@ describe 'pagerv2_commands', ->
         id: 'non_pager_user',
         name: 'non_pager_user'
       }
+      room.receive = (userName, message) ->
+        new Promise (resolve) =>
+          @messages.push [userName, message]
+          user = @robot.brain.userForName(userName)
+          @robot.receive(new Hubot.TextMessage(user, message), resolve)
+
 
     afterEach ->
       delete process.env.HUBOT_AUTH_ADMIN
@@ -2088,12 +2092,6 @@ describe 'pagerv2_commands', ->
 
     context 'user wants to resolve an alert', ->
       beforeEach ->
-        room.receive = (userName, message) ->
-          new Promise (resolve) =>
-            @messages.push [userName, message]
-            user = @robot.brain.userForName(userName)
-            @robot.receive(new Hubot.TextMessage(user, message), resolve)
-
         do nock.disableNetConnect
         nock('https://api.pagerduty.com')
         .put('/incidents')
@@ -2129,7 +2127,6 @@ describe 'pagerv2_commands', ->
     describe '".pager <user> as <email>"', ->
       context 'by an unauthorized user,', ->
         beforeEach ->
-          room.robot.brain.data.pagerv2 = { users: { } }
           nock('https://api.pagerduty.com')
           .get('/users')
           .query({

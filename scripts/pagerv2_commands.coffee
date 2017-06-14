@@ -205,7 +205,7 @@ module.exports = (robot) ->
 
 #   hubot pager sup|inc|incidents - lists currently unresolved incidents
   robot.respond (
-    /(?:pager )?(?:sup|inc(?:idents))\s*(\d+)?(?: (\d+))?(?: (\d+))?\s*$/
+    /(?:pager )?(?:supo?|inc(?:idents))\s*(\d+)?(?: (\d+))?(?: (\d+))?\s*$/
   ), 'pager_incidents', (res) ->
     [ _, from, duration, limit ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
@@ -237,7 +237,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pager ack [all]         - acknowledges any unack incidents
-  robot.respond /(?:pager )?ack(?: all)?\s*$/, 'pager_ack_all', (res) ->
+  robot.respond /(?:pager )?(?:a|A)ck(?: all)?\s*$/, 'pager_ack_all', (res) ->
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
       pagerv2.upagerateIncidents(res.envelope.user)
