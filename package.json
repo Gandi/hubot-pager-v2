@@ -1,12 +1,19 @@
 {
   "name": "hubot-pager-v2",
   "description": "A hubot plugin for Pagerduty API v2.",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "author": {
     "name": "mose",
-    "email": "mose@gandi.net",
+    "email": "mose@mose.com",
     "url": "https://github.com/mose"
   },
+  "contributors": [
+      {
+          "name": "kolo",
+          "email": "kolo@kolo.fr",
+          "url" : "https://github.com/kolo"
+      }
+  ],
   "license": "MIT",
   "keywords": [
     "hubot",

@@ -7,7 +7,7 @@ Hubot-pager-v2
 [![Dependency Status](https://gemnasium.com/Gandi/hubot-pager-v2.svg)](https://gemnasium.com/Gandi/hubot-pager-v2)
 [![Coverage Status](http://img.shields.io/codeclimate/coverage/github/Gandi/hubot-pager-v2.svg)](https://codeclimate.com/github/Gandi/hubot-pager-v2/coverage)
 
-Work in progress, very early stage
+This is the first release.
 
 This plugin is based on the usage we have in Gandi of Pagerduty. It may, in its first instance, not match your setup, so please verify that first.
 
@@ -21,7 +21,6 @@ Configuration
     # pager v2 configuration vars
     export PAGERV2_API_KEY=""
     export PAGERV2_SCHEDULE_ID=""
-    export PAGERV2_OVERRIDERS=""
     export PAGERV2_SERVICES="name1,name2"
     export PAGERV2_DEFAULT_RESOLVER="nagios"
     export PAGERV2_ENDPOINT="/hook"
@@ -73,7 +72,8 @@ Attribution
 
 ### Authors
 
-- [@mose](https://github.com/mose) - author and maintainer
+- [@mose](https://github.com/mose) - author
+- [@baptistem](https://github.com/baptistem) - author and maintainer
 
 ### License
 
