@@ -7,8 +7,6 @@ Hubot-pager-v2
 [![Dependency Status](https://gemnasium.com/Gandi/hubot-pager-v2.svg)](https://gemnasium.com/Gandi/hubot-pager-v2)
 [![Coverage Status](http://img.shields.io/codeclimate/coverage/github/Gandi/hubot-pager-v2.svg)](https://codeclimate.com/github/Gandi/hubot-pager-v2/coverage)
 
-This is the first release.
-
 This plugin is based on the usage we have in Gandi of Pagerduty. It may, in its first instance, not match your setup, so please verify that first.
 
 - we have on main schedule that is for the general alert dispatch (`PAGERV2_SCHEDULE_ID`)
@@ -27,6 +25,15 @@ Configuration
     export PAGERV2_ANNOUNCE_ROOM="#dev"
     export PAGERV2_NEED_GROUP_AUTH="0"
     export PAGERV2_LOG_PATH="/tmp"
+
+TODO: explain what each configuration variable is meant for.
+
+Usage
+--------
+
+TODO: list all commands here for reference.
+
+In the while, `hubot help pager` should list you all available commands.
 
 Development
 --------------
