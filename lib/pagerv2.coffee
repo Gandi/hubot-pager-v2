@@ -547,7 +547,7 @@ class Pagerv2
       @coloring[adapter](text, colors[level])
     else
       @coloring.generic(text, colors[level])
-
+ 
   logError: (message, payload) ->
     if @errorlog?
       fs.appendFileSync @errorlog, '\n---------------------\n'

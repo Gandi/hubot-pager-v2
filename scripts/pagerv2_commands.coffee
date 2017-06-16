@@ -58,8 +58,6 @@ Pagerv2 = require '../lib/pagerv2'
 moment = require 'moment'
 path = require 'path'
 
-inspect = (data) -> console.log(require('util').inspect(data, false, 7, true))
-
 module.exports = (robot) ->
 
   robot.brain.data.pagerv2 ?= { users: { } }

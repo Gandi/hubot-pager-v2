@@ -74,6 +74,21 @@ describe 'pagerv2_hook module', ->
         require('./fixtures/webhook_trigger.json').messages
       ).then (announce) ->
         expect(announce).to.eql expected
+# -------------------------------------------------------------------------------------------------
+  context 'it is a trigger message with empty subject', ->
+
+    it 'should react', ->
+      expected = [
+        '[Production XDB Cluster] PRORDTY - (no subject) - ' +
+        'trigger (Laura Haley)'
+      ]
+      pagerv2 = new Pagerv2 room.robot
+      pagerv2.parseWebhook(
+        'console',
+        require('./fixtures/webhook_trigger-no_subject.json').messages
+      ).then (announce) ->
+        expect(announce).to.eql expected
+
 
 # -------------------------------------------------------------------------------------------------
   context 'it is a trigger message without assigned user', ->

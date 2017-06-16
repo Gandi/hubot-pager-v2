@@ -392,7 +392,7 @@ describe 'pagerv2_commands', ->
           expect(hubotResponse())
           .to.eql "503 it's all broken!"
 
-    context 'when everything goes right,', ->
+    context 'when in a different channel,', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }
         nock('https://api.pagerduty.com')
@@ -411,6 +411,63 @@ describe 'pagerv2_commands', ->
         it 'returns name of who is on call', ->
           expect(hubotResponse())
           .to.eql 'Ok, I\'ll notify Tim Wright.'
+    
+    context 'when in a different channel', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = { users: { } }
+        room.receive = (userName, message) ->
+          new Promise (resolve) =>
+            @messages.push [userName, message]
+            user = { name: userName }
+            textMessage = new Hubot.TextMessage(user, message)
+            textMessage.room = 'somewhereelse'
+            @robot.receive(textMessage, resolve)
+
+        nock('https://api.pagerduty.com')
+        .get('/oncalls')
+        .query({
+          time_zone: 'UTC',
+          schedule_ids: [ 42 ],
+          earliest: true
+        })
+        .reply 200, require('./fixtures/oncall_list-ok.json')
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pager oncall doing stuff somewhere else', ->
+        it 'send a message to the right channel', ->
+          expect(hubotResponse())
+              .to.eql 'Tim Wright: doing stuff somewhere else (from momo on somewhereelse)'
+    context 'when in a query', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = { users: { } }
+        room.receive = (userName, message) ->
+          new Promise (resolve) =>
+            @messages.push [userName, message]
+            user = { name: userName }
+            textMessage = new Hubot.TextMessage(user, message)
+            textMessage.room = false
+            @robot.receive(textMessage, resolve)
+
+        nock('https://api.pagerduty.com')
+        .get('/oncalls')
+        .query({
+          time_zone: 'UTC',
+          schedule_ids: [ 42 ],
+          earliest: true
+        })
+        .reply 200, require('./fixtures/oncall_list-ok.json')
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pager oncall doing stuff somewhere else', ->
+        it 'send a message to the right channel', ->
+          expect(hubotResponse())
+              .to.eql 'Tim Wright: doing stuff somewhere else (from momo)'
+
+
 
   # ------------------------------------------------------------------------------------------------
   describe '".pager oncall"', ->
@@ -854,6 +911,28 @@ describe 'pagerv2_commands', ->
           it 'returns name of who is on call', ->
             expect(hubotResponse())
             .to.eql "Sorry there is no overrides for 'you' at the moment."
+      context 'when there is no data returned,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+            .filteringPath( (path) ->
+              path.replace /(since|until)=[^&]*/g, '$1=x'
+          )
+          .get('/schedules/42/overrides')
+          .query({
+            since: 'x',
+            until: 'x',
+            editable: true,
+            overflow: true
+          })
+          .reply(200, '')
+        afterEach ->
+          nock.cleanAll()
+
+        say 'pager not me', ->
+          it 'returns name of who is on call', ->
+            expect(hubotResponse())
+            .to.eql "Sorry there is no overrides for 'you' at the moment."
+
 
       context 'when everything goes right,', ->
         beforeEach ->
@@ -1098,7 +1177,56 @@ describe 'pagerv2_commands', ->
               expect(hubotResponse())
               .to.eql '[My Mail Service] PT4KHLK The server is on fire. - ' +
                       'resolved (Earline Greenholt)'
+         
+        context 'and there more than 100 incidents', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .get('/incidents')
+            .query({
+              time_zone: 'UTC',
+              urgencies: [
+                'high'
+              ],
+              sort_by: 'created_at',
+              since: '2017-02-01T18:02:00Z',
+              until: '2017-02-01T22:02:00Z',
+              statuses: [
+                'triggered',
+                'acknowledged',
+                'resolved'
+              ],
+              limit: 100,
+              total: 'true'
+            })
+            .reply(200, require('./fixtures/incident_biglist-ok.json'))
+            .get('/incidents')
+            .query({
+              time_zone: 'UTC',
+              urgencies: [
+                'high'
+              ],
+              sort_by: 'created_at',
+              since: '2017-02-01T18:02:00Z',
+              until: '2017-02-01T22:02:00Z',
+              statuses: [
+                'triggered',
+                'acknowledged',
+                'resolved'
+              ],
+              limit: 100,
+              offset: 100,
+              total: 'true'
+            })
+            .reply(200, require('./fixtures/incident_list-ok.json'))
+          
+          afterEach ->
+            nock.cleanAll()
 
+          say 'pager sup 8 4', ->
+            it 'returns list of incidents', ->
+              expect(hubotResponse())
+              .to.eql '[My Mail Service] PT4KHLK The server is on fire. - ' +
+                      'resolved (Earline Greenholt)'
     # ----------------------------------------------------------------------------------------------
     describe '".pager ack"', ->
       context 'when something goes wrong,', ->
@@ -1926,6 +2054,7 @@ describe 'pagerv2_commands', ->
 
       context 'when everything goes right,', ->
         beforeEach ->
+          room.robot.brain.data.pagerv2.services['My Application Service'] = 'PIJ90N7'
           nock('https://api.pagerduty.com')
           .get('/services')
           .query({
