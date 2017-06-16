@@ -6,6 +6,5 @@ coverage/
 test/
 Makefile
 coffeelint.json
-columns.py
 npm-debug.log
 coffee-coverage.js
