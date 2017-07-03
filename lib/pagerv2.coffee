@@ -515,10 +515,13 @@ class Pagerv2
           "[#{message.data.incident.service.name}]",
           colors[level]
         )
-        if message.data.incident.trigger_summary_data.subject?
-          description = message.data.incident.trigger_summary_data.subject.
-                        replace(' (CRITICAL)', '')
-        else
+        if message.data.incident.trigger_summary_data?
+          if message.data.incident.trigger_summary_data.subject?
+            description = message.data.incident.trigger_summary_data.subject.
+                          replace(' (CRITICAL)', '')
+          else if message.data.incident.trigger_summary_data.description?
+            description = message.data.incident.trigger_summary_data.description
+        if not description?
           description = '(no subject)'
         who = if message.type is 'incident.resolve' and message.data.incident.resolved_by_user?
                 message.data.incident.resolved_by_user.name
