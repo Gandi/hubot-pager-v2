@@ -330,7 +330,8 @@ module.exports = (robot) ->
       res.send e.message or e
     res.finish()
 
-#   hubot pager snooze [all] [for] [<duration>] [min]  - snoozes all incidents for [<duration>] (default 120m)
+#   hubot pager snooze [all] [for] [<duration>] [min]
+#   - snoozes all incidents for [<duration>] (default 120m)
   robot.respond (
     /pager snooze(?: all)?(?: (?:for )(\d+)(?: min(?:utes)?)?)?\s*$/
   ), 'pager_snooze_all', (res) ->
@@ -347,7 +348,8 @@ module.exports = (robot) ->
       res.send e.message or e
     res.finish()
 
-#   hubot pager snooze <#,#,#> [for] [<duration>] [min] - snoozes incident <number> for [<duration>] (default 120m)
+#   hubot pager snooze <#,#,#> [for] [<duration>] [min]
+#   - snoozes incident <number> for [<duration>] (default 120m)
   robot.respond (
     /pager snooze #?([^ ]+)(?: (?:for )?(\d+)(?: min(?:utes)?)?)?\s*$/
   ), 'pager_snooze_one', (res) ->

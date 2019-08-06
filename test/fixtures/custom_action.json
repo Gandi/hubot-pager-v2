@@ -1,0 +1,6 @@
+{
+  "aaa" : {
+	"action" : "pager_maintenance",
+	"args" : "message=test"
+  }
+}

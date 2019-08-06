@@ -29,9 +29,11 @@ module.exports = (robot) ->
   # console.log robot.adapterName
   if pagerAnnounceRoom?
     robot.router.post pagerEndpoint, (req, res) ->
-      if req.body? and req.body.messages? and req.body.messages[0].type?
+      if req.body? and req.body.messages? and
+              (req.body.messages[0].type? or req.body.messages[0].event?)
         robot.logger.debug req.body
-        if /^incident.*$/.test(req.body.messages[0].type)
+        if (/^incident.*$/.test(req.body.messages[0].type)) or
+                /^incident.*$/.test(req.body.messages[0].event)
           pagerv2.parseWebhook(robot.adapterName, req.body.messages)
           .then (messages) ->
             for message in messages

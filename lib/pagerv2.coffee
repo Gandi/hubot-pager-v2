@@ -10,9 +10,12 @@
 #  PAGERV2_SERVICES          # list of services that are concerned by massive maintenance
 #  PAGERV2_DEFAULT_RESOLVER  # name of the default user for resolution (ex. nagios)
 #  PAGERV2_LOG_PATH          # dir where are saved error logs
+#  PAGERV2_CUSTOM_ACTION     # listen for custom action (see README.md)
+#
 #
 # Author:
 #   mose
+#   kolo
 
 fs = require 'fs'
 path = require 'path'
@@ -26,14 +29,20 @@ class Pagerv2
   constructor: (@robot) ->
     @robot.brain.data.pagerv2 ?= {
       users: { },
-      services: { }
+      services: { },
+      custom: { }
     }
-    #@robot.brain.data.pagerv2.services ?= {}
+    @robot.brain.data.pagerv2.custom ?= { }
+    @robot.brain.data.pagerv2.services ?= { }
+    @robot.brain.data.pagerv2.users ?= { }
     @pagerServices = [ ]
     if process.env.PAGERV2_SERVICES?
       for service in process.env.PAGERV2_SERVICES.split(',')
         @pagerServices.push(service)
     @logger = @robot.logger
+    if process.env.PAGERV2_CUSTOM_ACTION_FILE?
+      content = fs.readFileSync(process.env.PAGERV2_CUSTOM_ACTION_FILE)
+      @robot.brain.data.pagerv2.custom = JSON.parse(content)
     @logger.debug 'Pagerv2 Loaded'
     if process.env.PAGERV2_LOG_PATH?
       @errorlog = path.join process.env.PAGERV2_LOG_PATH, 'pagerv2-error.log'
@@ -495,43 +504,63 @@ class Pagerv2
           @robot.brain.data.pagerv2.services[name] = payload.services[0].id
           res @robot.brain.data.pagerv2.services[name]
 
-  parseWebhook: (adapter, messages) ->
-    new Promise (res, err) =>
-      colors = {
-        trigger: 'red',
-        unacknowledge: 'red',
-        acknowledge: 'yellow',
-        resolve: 'green',
-        assign: 'blue',
-        escalate: 'blue'
-      }
+  parseWebhook: (adapter, messages) =>
+    return new Promise (res, err) =>
       res messages.map (message) =>
-        level = message.type.substring(message.type.indexOf('.') + 1)
-        if @coloring[adapter]?
-          colorer = @coloring[adapter]
-        else
-          colorer = @coloring.generic
-        origin = colorer(
-          "[#{message.data.incident.service.name}]",
-          colors[level]
-        )
-        if message.data.incident.trigger_summary_data?
-          if message.data.incident.trigger_summary_data.subject?
-            description = message.data.incident.trigger_summary_data.subject.
-                          replace(' (CRITICAL)', '')
-          else if message.data.incident.trigger_summary_data.description?
-            description = message.data.incident.trigger_summary_data.description
-        if not description?
-          description = '(no subject)'
-        who = if message.type is 'incident.resolve' and message.data.incident.resolved_by_user?
-                message.data.incident.resolved_by_user.name
-              else if message.data.incident.assigned_to_user?
-                message.data.incident.assigned_to_user.name
-              else
-                process.env.PAGERV2_DEFAULT_RESOLVER or 'nagios'
-        id = message.data.incident.id
-        number = message.data.incident.incident_number
-        "#{origin} #{id} - #{description} - #{level} (#{who})"
+        try
+          incident = if message.type? then message.data.incident else message.incident
+          type = if message.type? then message.type else message.event
+          level = type.substring(type.indexOf('.') + 1)
+          if level is 'custom'
+            id = message.webhook.id
+            if @robot.brain.data.pagerv2.custom?[id]?
+              custom_action = @robot.brain.data.pagerv2.custom[id]
+              return @robot.emit custom_action.action, custom_action.args
+            else
+              return "unknown action for id #{id}"
+          else
+            return @printIncident(incident, type, adapter)
+        catch e
+          @robot.logger.error 'Message parsing fail'
+          @robot.logger.error message
+          @robot.logger.error e
+          return 'Message parsing failed'
+
+  printIncident: (incident, type, adapter) =>
+    colors = {
+      trigger: 'red',
+      unacknowledge: 'red',
+      acknowledge: 'yellow',
+      resolve: 'green',
+      assign: 'blue',
+      escalate: 'blue'
+    }
+    level = type.substring(type.indexOf('.') + 1)
+    if @coloring[adapter]?
+      colorer = @coloring[adapter]
+    else
+      colorer = @coloring.generic
+    origin = colorer(
+      "[#{incident.service.name}]",
+      colors[level]
+    )
+    if incident.trigger_summary_data?
+      if incident.trigger_summary_data.subject?
+        description = incident.trigger_summary_data.subject.
+                      replace(' (CRITICAL)', '')
+      else if incident.trigger_summary_data.description?
+        description = incident.trigger_summary_data.description
+    if not description?
+      description = '(no subject)'
+    who = if type is 'incident.resolve' and incident.resolved_by_user?
+            incident.resolved_by_user.name
+          else if incident.assigned_to_user?
+            incident.assigned_to_user.name
+          else
+            process.env.PAGERV2_DEFAULT_RESOLVER or 'nagios'
+    "#{origin} #{incident.id} - #{description} - #{level} (#{who})"
+
+   
 
   colorer: (adapter, level, text) ->
     colors = {

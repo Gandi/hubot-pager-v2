@@ -36,6 +36,7 @@ describe 'pagerv2_hook module', ->
     process.env.PAGERV2_SCHEDULE_ID = '42'
     process.env.PAGERV2_ANNOUNCE_ROOM = '#dev'
     process.env.PAGERV2_ENDPOINT = '/test_hook'
+    process.env.PAGERV2_CUSTOM_ACTION_FILE = 'test/fixtures/custom_action.json'
     process.env.PORT = 8089
     room = helper.createRoom()
     room.robot.adapterName = 'console'
@@ -58,6 +59,7 @@ describe 'pagerv2_hook module', ->
     delete process.env.PAGERV2_ANNOUNCE_ROOM
     delete process.env.PAGERV2_ENDPOINT
     delete process.env.PORT
+    delete process.env.PAGERV2_CUSTOM_ACTION_FILE
     room.destroy()
 
 # -------------------------------------------------------------------------------------------------
@@ -185,6 +187,45 @@ describe 'pagerv2_hook module', ->
         require('./fixtures/webhook_resolve.json').messages
       ).then (announce) ->
         expect(announce).to.eql expected
+# -------------------------------------------------------------------------------------------------
+  context 'it is a launch a custom action with an irc adapter', ->
+
+    it 'should react', ->
+      pagerv2 = new Pagerv2 room.robot
+      answer = null
+      room.robot.on 'pager_maintenance', (event) -> answer = event
+      pagerv2.parseWebhook(
+        'irc',
+        require('./fixtures/webhook_custom_action_ok.json').messages
+      ).then (announce) ->
+        expect(answer).to.eql 'message=test'
+
+# -------------------------------------------------------------------------------------------------
+  context 'it is fail to run a custom action because of an unknown id', ->
+
+    it 'should react', ->
+      pagerv2 = new Pagerv2 room.robot
+      expected = [ 'unknown action for id 123' ]
+      pagerv2.parseWebhook(
+        'irc',
+        require('./fixtures/webhook_custom_action_id_unknown.json').messages
+      ).then (announce) ->
+        expect(announce).to.eql expected
+
+# -------------------------------------------------------------------------------------------------
+  context 'it is fail to run a custom action because of bogus message', ->
+
+    it 'should not react', ->
+      pagerv2 = new Pagerv2 room.robot
+      expected = [ 'Message parsing failed' ]
+      pagerv2.parseWebhook(
+        'irc',
+        require('./fixtures/webhook_custom_action_ko.json').messages
+      ).then (announce) ->
+        expect(announce).to.eql expected
+
+
+
 
 # -------------------------------------------------------------------------------------------------
   context 'it is a resolve message with an irc adapter but unknown type', ->

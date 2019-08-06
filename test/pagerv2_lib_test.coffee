@@ -22,6 +22,7 @@ describe 'pagerv2_hook module', ->
     process.env.PAGERV2_SCHEDULE_ID = '42'
     process.env.PAGERV2_ANNOUNCE_ROOM = '#dev'
     process.env.PAGERV2_ENDPOINT = '/test_hook'
+    process.env.PAGERV2_CUSTOM_ACTION_FILE = './test/fixtures/custom_action.json'
     process.env.PORT = 8089
     room = helper.createRoom()
     room.robot.adapterName = 'console'
