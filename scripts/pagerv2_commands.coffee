@@ -46,6 +46,8 @@
 #   hubot pager stfu|down <service,service,service> for <duration> [because <reason>] - creates a maintenance per service
 #   hubot pager end <maintenance> - ends <maintenance>
 #
+#   hubot pager extensions [name] - list extensions matching name (or list all)
+#
 #   hubot pager me <duration>       - creates an override for <duration> minutes
 #   hubot pager me next             - creates an override for the next scheduled
 #   hubot pager me now              - creates an override until the end of current oncall
@@ -53,6 +55,7 @@
 #
 # Author:
 #   mose
+#   kolo
 
 Pagerv2 = require '../lib/pagerv2'
 moment = require 'moment'
