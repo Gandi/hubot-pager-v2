@@ -503,6 +503,14 @@ class Pagerv2
         .then (payload) =>
           @robot.brain.data.pagerv2.services[name] = payload.services[0].id
           res @robot.brain.data.pagerv2.services[name]
+  listExtensions: (name) ->
+    if name?
+      query = {
+        query: name
+      }
+    else
+      query = { }
+    @request('GET', '/extensions', query)
 
   parseWebhook: (adapter, messages) =>
     return new Promise (res, err) =>

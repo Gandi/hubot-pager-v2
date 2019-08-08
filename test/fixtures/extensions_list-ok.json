@@ -1,0 +1,32 @@
+{
+  "extensions": [
+    {
+      "endpoint_url": "http://domain.example/hook_v2",
+      "name": "something",
+      "config": {
+        "referer": "https://subdomain.pagerduty.com/configure_addons/custom_buttons"
+      },
+      "extension_schema": {
+        "id": "123",
+        "type": "extension_schema_reference",
+        "summary": "Custom Incident Action",
+        "self": "https://api.pagerduty.com/extension_schemas/123",
+        "html_url": null
+      },
+      "extension_objects": [
+        {
+          "id": "456",
+          "type": "service_reference",
+          "summary": "Tests-mose",
+          "self": "https://api.pagerduty.com/services/456",
+          "html_url": "https://subdomain.pagerduty.com/services/456"
+        }
+      ],
+      "id": "789",
+      "type": "webhook",
+      "summary": "magic button",
+      "self": "https://api.pagerduty.com/webhooks/789",
+      "html_url": null
+    }
+  ]
+}

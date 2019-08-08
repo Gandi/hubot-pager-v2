@@ -2024,6 +2024,56 @@ describe 'pagerv2_commands', ->
             expect(hubotResponse())
             .to.eql 'There is no ongoing maintenance at the moment.'
 
+    # ----------------------------------------------------------------------------------------------
+    describe '".pager extensions"', ->
+      context 'when something goes wrong,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/extensions')
+          .reply 503, { error: { code: 503, message: "it's all broken!" } }
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        say 'pager extensions', ->
+          it 'returns the error message', ->
+            expect(hubotResponse())
+            .to.eql "503 it's all broken!"
+
+      context 'when everything goes right,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/extensions')
+          .query({
+            query: 'magic'
+          })
+          .reply(200, require('./fixtures/extensions_list-ok.json'))
+        afterEach ->
+          nock.cleanAll()
+
+        say 'pager extensions magic', ->
+          it 'returns existing extension', ->
+            expect(hubotResponse())
+            .to.eql '[789] something: magic button - Custom Incident Action'
+      
+      context 'when there is no matching extensions', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/extensions')
+          .query({
+            query: 'magic'
+          })
+          .reply(200, require('./fixtures/extensions_list-empty.json'))
+        afterEach ->
+          nock.cleanAll()
+
+        say 'pager extensions magic', ->
+          it 'returns empty list', ->
+            expect(hubotResponse())
+            .to.eql 'No extension found'
+
+
+
 
 
     # ----------------------------------------------------------------------------------------------

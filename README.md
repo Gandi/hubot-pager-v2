@@ -25,8 +25,20 @@ Configuration
     export PAGERV2_ANNOUNCE_ROOM="#dev"
     export PAGERV2_NEED_GROUP_AUTH="0"
     export PAGERV2_LOG_PATH="/tmp"
+    export PAGERV2_CUSTOM_ACTION_FILE="file.json"
 
-TODO: explain what each configuration variable is meant for.
+
+PAGERV2_API_KEY contains the pagerduty api key for v2 api.
+PAGERV2_SCHEDULE_ID contains the default schedule for oncall and override
+PAGERV2_SERVICES contains the name of the service, separated by comma, of the service to monitor/interact with
+PAGERV2_DEFAULT_RESOLVER="nagios" in case no resolver is found, use this one
+PAGERV2_ENDPOINT="/hook" the path used to setup the webhook. be sure it is not already in use.
+PAGERV2_ANNOUNCE_ROOM="#dev" where to announce webhook message
+PAGERV2_NEED_GROUP_AUTH="0" if weither or not (0,1) you need authentication for interacting with pagerduty
+PAGERV2_LOG_PATH="/tmp" where to save the log of pager
+PAGERV2_CUSTOM_ACTION_FILE="file.json" this contains the custom action binding in the form { action_id : { action : 'action_name', args : {...} } } The action name refer to an available command from this module or another (will do a robot.emit action_id.action action_id.args)
+
+
 
 Usage
 --------
@@ -50,6 +62,7 @@ available commands are :
  .pager incident <#>        - gives more information about incident
  number <number>
  .pager maintenances           - lists currently active maintenances
+ .pager extensions [name]   - list extensions filtered by name. relevant for custom_action
  .pager me                  - check if the caller is known by
  pagerduty plugin
  .pager me <duration>       - creates an override for <duration>

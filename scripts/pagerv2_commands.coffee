@@ -414,6 +414,20 @@ module.exports = (robot) ->
       res.send e
     res.finish()
 
+#   hubot pager extensions [name] - list extensions matching name (or list all)
+  robot.respond /pager extensions? ?(.*)?$/, 'pager_extensions', (res) ->
+    [_, name] = res.match
+    pagerv2.getPermission(res.envelope.user, 'pageruser')
+    .then ->
+      pagerv2.listExtensions(name)
+      .then (data) ->
+        for ext in data.extensions
+          res.send "[#{ext.id}] #{ext.name}: #{ext.summary} - #{ext.extension_schema.summary}"
+        if data.extensions.length < 1
+          res.send 'No extension found'
+    .catch (e) ->
+      res.send e
+    res.finish()
 
 #   hubot pager stfu|down <service,service,service> for <duration> [because <reason>]
   robot.respond (
