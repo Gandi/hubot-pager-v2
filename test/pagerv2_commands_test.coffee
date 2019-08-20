@@ -49,6 +49,7 @@ describe 'pagerv2_commands', ->
     process.env.PAGERV2_SCHEDULE_ID = '42'
     process.env.PAGERV2_SERVICES = 'My Application Service,Other Service'
     process.env.PAGERV2_LOG_PATH = 'test/'
+    process.env.PAGERV2_CUSTOM_ACTION_FILE = './test/fixtures/custom_action.json'
     room = helper.createRoom { httpd: false }
     room.robot.brain.userForId 'user', {
       name: 'user'
@@ -719,17 +720,15 @@ describe 'pagerv2_commands', ->
   # ================================================================================================
   context 'caller is known', ->
     beforeEach ->
-      room.robot.brain.data.pagerv2 = {
-        users: {
-          momo: {
-            id: 'momo',
-            name: 'momo',
-            email: 'momo@example.com',
-            pagerid: 'PEYSGVF'
-          }
-        },
-        services: { }
+      room.robot.brain.data.pagerv2.users = {
+        momo: {
+          id: 'momo',
+          name: 'momo',
+          email: 'momo@example.com',
+          pagerid: 'PEYSGVF'
+        }
       }
+      room.robot.brain.data.pagerv2.services = { }
 
     afterEach ->
       room.robot.brain.data.pagerv2 = { }
@@ -2072,9 +2071,40 @@ describe 'pagerv2_commands', ->
             expect(hubotResponse())
             .to.eql 'No extension found'
 
-
-
-
+    # ----------------------------------------------------------------------------------------------
+    describe '".pager actions"', ->
+      context 'when everything is fine but there is no named action', ->
+        beforeEach ->
+          room.robot.brain.data.pagerv2.custom_name = { }
+        say 'pager actions', ->
+          it 'returns that there is no actions', ->
+            expect(hubotResponse())
+            .to.eql 'No named action available'
+      context 'when everything is fine and there are named actions', ->
+        say 'pager actions', ->
+          it 'returns existing extension', ->
+            expect(hubotResponse())
+            .to.eql '[maintenance] : pager_maintenance'
+        say 'pager actions maintenance', ->
+          it 'returns existing extension', ->
+            expect(hubotResponse())
+            .to.eql '[maintenance] : pager_maintenance'
+        say 'pager actions maintenance_txt', ->
+          it 'returns existing extension', ->
+            expect(hubotResponse())
+            .to.eql '[maintenance_txt] : create a maintenance'
+        
+    describe '".pager run"', ->
+      context 'when the action is unknown', ->
+        say 'pager run abc', ->
+          it 'returns an error message', ->
+            expect(hubotResponse())
+            .to.eql 'Unknown action for name abc'
+      context 'when the action i known', ->
+        say 'pager run maintenance', ->
+          it 'returns an acknowledgement', ->
+            expect(hubotResponse())
+            .to.eql 'Action "maintenance" sent'
 
     # ----------------------------------------------------------------------------------------------
     describe '".pager stfu services"', ->

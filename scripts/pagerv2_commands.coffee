@@ -48,10 +48,14 @@
 #
 #   hubot pager extensions [name] - list extensions matching name (or list all)
 #
+#   hubot pager run <action name>   - run a custom action
+#   hubot pager actions             - list available action
+#
 #   hubot pager me <duration>       - creates an override for <duration> minutes
 #   hubot pager me next             - creates an override for the next scheduled
 #   hubot pager me now              - creates an override until the end of current oncall
 #   hubot pager not me              - cancels an override if any
+#
 #
 # Author:
 #   mose
@@ -431,6 +435,20 @@ module.exports = (robot) ->
     .catch (e) ->
       res.send e
     res.finish()
+
+#   hubot actions - list custom action
+  robot.respond /pager actions ?(.*)?$/, 'pager_actions', (res) ->
+    [_, name] = res.match
+    for line in pagerv2.listActions(name)
+      res.send line
+    res.finish()
+
+#   hubot run action name - run a specific action
+  robot.respond /pager run (.*)$/, 'pager_run', (res) ->
+    [_, name] = res.match
+    res.send pagerv2.launchActionByName(name)
+    res.finish()
+
 
 #   hubot pager stfu|down <service,service,service> for <duration> [because <reason>]
   robot.respond (

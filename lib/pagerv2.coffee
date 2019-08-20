@@ -30,9 +30,11 @@ class Pagerv2
     @robot.brain.data.pagerv2 ?= {
       users: { },
       services: { },
-      custom: { }
+      custom: { },
+      custom_name: { }
     }
     @robot.brain.data.pagerv2.custom ?= { }
+    @robot.brain.data.pagerv2.custom_name ?= { }
     @robot.brain.data.pagerv2.services ?= { }
     @robot.brain.data.pagerv2.users ?= { }
     @pagerServices = [ ]
@@ -43,6 +45,9 @@ class Pagerv2
     if process.env.PAGERV2_CUSTOM_ACTION_FILE?
       content = fs.readFileSync(process.env.PAGERV2_CUSTOM_ACTION_FILE)
       @robot.brain.data.pagerv2.custom = JSON.parse(content)
+      for _, value of @robot.brain.data.pagerv2.custom
+        if value.name?
+          @robot.brain.data.pagerv2.custom_name[value.name] = value
     @logger.debug 'Pagerv2 Loaded'
     if process.env.PAGERV2_LOG_PATH?
       @errorlog = path.join process.env.PAGERV2_LOG_PATH, 'pagerv2-error.log'
@@ -60,7 +65,7 @@ class Pagerv2
         res()
 
   request: (method, endpoint, query, from = false) ->
-    return new Promise (res, err) ->
+    return new Promise (res, err) =>
       if process.env.PAGERV2_API_KEY?
         auth = "Token token=#{process.env.PAGERV2_API_KEY}"
         body = JSON.stringify(query)
@@ -81,17 +86,23 @@ class Pagerv2
         }
         if from?
           options.headers.From = from
-        req = https.request options, (response) ->
+        req = https.request options, (response) =>
           data = []
           response.on 'data', (chunk) ->
             data.push chunk
-          response.on 'end', ->
+          response.on 'end', =>
             if data.length > 0
-              json_data = JSON.parse(data.join(''))
-              if json_data.error?
-                err "#{json_data.error.code} #{json_data.error.message}"
-              else
-                res json_data
+              try
+                json_data = JSON.parse(data.join(''))
+                if json_data.error?
+                  err "#{json_data.error.code} #{json_data.error.message}"
+                else
+                  res json_data
+              catch e
+                @robot.logger.error 'unable to parse answer'
+                @robot.logger.error data.join('')
+                @robot.logger.error e
+                err new Error('Unable to read request output')
             else
               res { }
         req.on 'error', (error) ->
@@ -520,12 +531,7 @@ class Pagerv2
           type = if message.type? then message.type else message.event
           level = type.substring(type.indexOf('.') + 1)
           if level is 'custom'
-            id = message.webhook.id
-            if @robot.brain.data.pagerv2.custom?[id]?
-              custom_action = @robot.brain.data.pagerv2.custom[id]
-              return @robot.emit custom_action.action, custom_action.args
-            else
-              return "unknown action for id #{id}"
+            return @launchActionById(message.webhook.id)
           else
             return @printIncident(incident, type, adapter)
         catch e
@@ -533,6 +539,39 @@ class Pagerv2
           @robot.logger.error message
           @robot.logger.error e
           return 'Message parsing failed'
+
+  launchActionById: (action_id) =>
+    if @robot.brain.data.pagerv2.custom?[action_id]?
+      custom_action = @robot.brain.data.pagerv2.custom[action_id]
+      return @robot.emit(custom_action.action, custom_action.args)
+    else
+      return "Unknown action for id #{action_id}"
+
+  launchActionByName: (name) =>
+    if @robot.brain.data.pagerv2.custom_name?[name]?
+      custom_action = @robot.brain.data.pagerv2.custom_name[name]
+      @robot.emit(custom_action.action, custom_action.args)
+      "Action \"#{name}\" sent"
+    else
+      "Unknown action for name #{name}"
+
+  listActions: (name) =>
+    actions = new Array()
+    if @robot.brain.data.pagerv2.custom_name?[name]?
+      custom_action = @robot.brain.data.pagerv2.custom_name[name]
+      details = if custom_action.summary? then custom_action.summary else custom_action.action
+      actions.push("[#{name}] : #{details}")
+    else
+      if @robot.brain.data.pagerv2.custom_name?
+        for key, value of @robot.brain.data.pagerv2.custom_name
+          custom_action = @robot.brain.data.pagerv2.custom_name[key]
+          details = if custom_action.summary? then custom_action.summary else custom_action.action
+          actions.push("[#{key}] : #{details}")
+
+    if actions.length is 0
+      return ['No named action available']
+    else
+      return actions
 
   printIncident: (incident, type, adapter) =>
     colors = {

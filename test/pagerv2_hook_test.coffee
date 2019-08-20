@@ -205,7 +205,7 @@ describe 'pagerv2_hook module', ->
 
     it 'should react', ->
       pagerv2 = new Pagerv2 room.robot
-      expected = [ 'unknown action for id 123' ]
+      expected = [ 'Unknown action for id 123' ]
       pagerv2.parseWebhook(
         'irc',
         require('./fixtures/webhook_custom_action_id_unknown.json').messages

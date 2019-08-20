@@ -86,3 +86,15 @@ describe 'pagerv2_hook module', ->
       pagerv2 = new Pagerv2 room.robot
       result = pagerv2.colorer('irc', 'trigger', 'test')
       expect(result).to.eql '\u000304\u0002\u0002test\u0003'
+
+  context 'the request is broken', ->
+    before ->
+      nock('https://api.pagerduty.com')
+      .get('/bug')
+      .reply('200', 'this is not a json reply')
+    it 'should return the error', ->
+      pagerv2 = new Pagerv2 room.robot
+      
+      pagerv2.request('GET', '/bug', { })
+      .catch (e) ->
+        expect(e).to.eql new Error('Uunable to read request output')

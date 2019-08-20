@@ -1,6 +1,13 @@
 {
   "aaa" : {
+	"name" :"maintenance",
 	"action" : "pager_maintenance",
 	"args" : "message=test"
+  },
+  "bbb" : {
+	"name" :"maintenance_txt",
+	"action" : "pager_maintenance",
+	"args" : "message=test",
+	"summary": "create a maintenance"
   }
 }
