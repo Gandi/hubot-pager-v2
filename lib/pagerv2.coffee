@@ -100,6 +100,7 @@ class Pagerv2
                   res json_data
               catch e
                 @robot.logger.error 'unable to parse answer'
+                @robot.logger.error "query was : #{method} #{endpoint}"
                 @robot.logger.error data.join('')
                 @robot.logger.error e
                 err new Error('Unable to read request output')
