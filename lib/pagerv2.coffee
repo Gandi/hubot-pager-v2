@@ -64,7 +64,7 @@ class Pagerv2
       else
         res()
 
-  request: (method, endpoint, query, from = false) ->
+  request: (method, endpoint, query, from = false, retry_count) ->
     return new Promise (res, err) =>
       if process.env.PAGERV2_API_KEY?
         auth = "Token token=#{process.env.PAGERV2_API_KEY}"
@@ -95,15 +95,33 @@ class Pagerv2
               try
                 json_data = JSON.parse(data.join(''))
                 if json_data.error?
-                  err "#{json_data.error.code} #{json_data.error.message}"
+                  if json_data.error.code > 500 and retry_count > 0
+                    @robot.logger.warning "#{json_data.error.code} #{json_data.error.message}, retry remaining : #{retry_count}"
+                    retry_count--
+                    @request(method,endpoint, query, from, retry_count)
+                    .then (rdata) ->
+                      res rdata
+                    .catch (rdata) ->
+                      err rdata
+                  else
+                    err "#{json_data.error.code} #{json_data.error.message}"
                 else
                   res json_data
               catch e
                 @robot.logger.error 'unable to parse answer'
-                @robot.logger.error "query was : #{method} #{endpoint}"
+                @robot.logger.error "query was : #{method} #{req.path}"
                 @robot.logger.error data.join('')
                 @robot.logger.error e
-                err new Error('Unable to read request output')
+                if response.statusCode > 500 and retry_count > 0
+                  retry_count--
+                  @request(method,endpoint, query, from, retry_count)
+                  .then (rdata) ->
+                    res rdata
+                  .catch (rdata) ->
+                    err rdata
+
+                else
+                  err 'Unable to read request output'
             else
               res { }
         req.on 'error', (error) ->
@@ -447,7 +465,7 @@ class Pagerv2
       @request('POST', "/incidents/#{incident}/notes", payload, email)
 
   listNotes: (incident) ->
-    @request('GET', "/incidents/#{incident}/notes")
+    @request('GET', "/incidents/#{incident}/notes",undefined,undefined,1)
 
   listMaintenances: ->
     query = {

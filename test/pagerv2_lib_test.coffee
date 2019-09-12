@@ -59,7 +59,7 @@ describe 'pagerv2_hook module', ->
     )
     .reply(200, require('./fixtures/incident_list-ok.json'))
     .get('/incidents/PT4KHLK/notes')
-    .reply 200, require('./fixtures/notes_list-ok.json')
+    .reply(200, require('./fixtures/notes_list-ok.json'))
 
 
   afterEach ->
@@ -97,4 +97,4 @@ describe 'pagerv2_hook module', ->
       
       pagerv2.request('GET', '/bug', { })
       .catch (e) ->
-        expect(e).to.eql new Error('Uunable to read request output')
+        expect(e).to.eql 'Unable to read request output'

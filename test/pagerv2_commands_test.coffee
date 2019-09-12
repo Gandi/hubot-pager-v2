@@ -1931,19 +1931,70 @@ describe 'pagerv2_commands', ->
 
     # ----------------------------------------------------------------------------------------------
     describe '".pager notes PT4KHLK"', ->
-      context 'when something goes wrong,', ->
+      context 'when something goes wrong once,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
           .get('/incidents/PT4KHLK/notes')
-          .reply 503, { error: { code: 503, message: "it's all broken!" } }
+          .reply(503, { error: { code: 503, message: "it's all broken!" } })
+          .get('/incidents/PT4KHLK/notes')
+          .reply(200, require('./fixtures/notes_list-ok.json'))
         afterEach ->
           room.robot.brain.data.pagerv2 = { }
           nock.cleanAll()
 
         say 'pager notes PT4KHLK', ->
-          it 'returns the error message', ->
+          it 'silently retry and succeed', ->
             expect(hubotResponse())
-            .to.eql "503 it's all broken!"
+            .to.eql "PT4KHLK - Firefighters are on the scene."
+      context 'when something goes wrong twice,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/incidents/PT4KHLK/notes')
+          .reply(503, { error: { code: 503, message: "it's all broken!" } })
+          .get('/incidents/PT4KHLK/notes')
+          .reply(503, { error: { code: 503, message: "it's all broken!" } })
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        say 'pager notes PT4KHLK', ->
+          it 'silently retry and fail', ->
+            expect(hubotResponse())
+            .to.eql "503 it\'s all broken!"
+      
+      context 'when something goes wrong once with unexpected error,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/incidents/PT4KHLK/notes')
+          .reply(502, 'gatewaytimeout')
+          .get('/incidents/PT4KHLK/notes')
+          .reply(200, require('./fixtures/notes_list-ok.json'))
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        say 'pager notes PT4KHLK', ->
+          it 'silently retry and succeed', ->
+            expect(hubotResponse())
+            .to.eql "PT4KHLK - Firefighters are on the scene."
+
+      context 'when something goes wrong twice with unexpected error,', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/incidents/PT4KHLK/notes')
+          .reply(502, 'gatewaytimeout')
+          .get('/incidents/PT4KHLK/notes')
+          .reply(502, 'gatewaytimeout')
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        say 'pager notes PT4KHLK', ->
+          it 'silently retry and fail', ->
+            expect(hubotResponse())
+            .to.eql "Unable to read request output"
+
+
 
       context 'when there are no notes,', ->
         beforeEach ->

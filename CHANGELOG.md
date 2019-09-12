@@ -1,5 +1,11 @@
 Hubot-pager-v2 Changelog
 ==========================
+### 1.1.2 - 2019-09-12
+- add retry for failed requests
+
+### 1.1.0 - 2019-08-08
+- add custom action listening to webhook
+- add partial support for webhook v2
 
 ### 1.0.0 - 2017-06-18
 - full implementation of all commands
