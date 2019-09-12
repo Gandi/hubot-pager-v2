@@ -1945,7 +1945,7 @@ describe 'pagerv2_commands', ->
         say 'pager notes PT4KHLK', ->
           it 'silently retry and succeed', ->
             expect(hubotResponse())
-            .to.eql "PT4KHLK - Firefighters are on the scene."
+            .to.eql 'PT4KHLK - Firefighters are on the scene.'
       context 'when something goes wrong twice,', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
@@ -1976,7 +1976,7 @@ describe 'pagerv2_commands', ->
         say 'pager notes PT4KHLK', ->
           it 'silently retry and succeed', ->
             expect(hubotResponse())
-            .to.eql "PT4KHLK - Firefighters are on the scene."
+            .to.eql 'PT4KHLK - Firefighters are on the scene.'
 
       context 'when something goes wrong twice with unexpected error,', ->
         beforeEach ->
@@ -1992,7 +1992,7 @@ describe 'pagerv2_commands', ->
         say 'pager notes PT4KHLK', ->
           it 'silently retry and fail', ->
             expect(hubotResponse())
-            .to.eql "Unable to read request output"
+            .to.eql 'Unable to read request output'
 
 
 

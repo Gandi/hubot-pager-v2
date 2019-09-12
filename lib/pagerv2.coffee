@@ -96,9 +96,10 @@ class Pagerv2
                 json_data = JSON.parse(data.join(''))
                 if json_data.error?
                   if json_data.error.code > 500 and retry_count > 0
-                    @robot.logger.warning "#{json_data.error.code} #{json_data.error.message}, retry remaining : #{retry_count}"
+                    @robot.logger.warning("#{json_data.error.code}\
+                            #{json_data.error.message}, retry remaining : #{retry_count}")
                     retry_count--
-                    @request(method,endpoint, query, from, retry_count)
+                    @request(method, endpoint, query, from, retry_count)
                     .then (rdata) ->
                       res rdata
                     .catch (rdata) ->
@@ -114,7 +115,7 @@ class Pagerv2
                 @robot.logger.error e
                 if response.statusCode > 500 and retry_count > 0
                   retry_count--
-                  @request(method,endpoint, query, from, retry_count)
+                  @request(method, endpoint, query, from, retry_count)
                   .then (rdata) ->
                     res rdata
                   .catch (rdata) ->
@@ -465,7 +466,7 @@ class Pagerv2
       @request('POST', "/incidents/#{incident}/notes", payload, email)
 
   listNotes: (incident) ->
-    @request('GET', "/incidents/#{incident}/notes",undefined,undefined,1)
+    @request('GET', "/incidents/#{incident}/notes", undefined, undefined, 1)
 
   listMaintenances: ->
     query = {
