@@ -1,5 +1,8 @@
 Hubot-pager-v2 Changelog
 ==========================
+### 1.1.3   2019-11-04
+- fix custom action import issue 
+
 ### 1.1.2 - 2019-09-12
 - add retry for failed requests
 

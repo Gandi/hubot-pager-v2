@@ -45,6 +45,7 @@ class Pagerv2
     if process.env.PAGERV2_CUSTOM_ACTION_FILE?
       content = fs.readFileSync(process.env.PAGERV2_CUSTOM_ACTION_FILE)
       @robot.brain.data.pagerv2.custom = JSON.parse(content)
+      @robot.brain.data.pagerv2.custom_name = {}
       for _, value of @robot.brain.data.pagerv2.custom
         if value.name?
           @robot.brain.data.pagerv2.custom_name[value.name] = value
