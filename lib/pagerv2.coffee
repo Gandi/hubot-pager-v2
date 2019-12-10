@@ -626,7 +626,6 @@ class Pagerv2
     "#{origin} #{incident.id} - #{description} - #{level} (#{who})"
 
   get_assignee: (incident, type) =>
-    console.log incident
     if type? and type is 'incident.resolve' and incident.resolved_by_user?
       who = incident.resolved_by_user.name
     else if incident.assigned_to_user?
