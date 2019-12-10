@@ -76,6 +76,21 @@ describe 'pagerv2_hook module', ->
         require('./fixtures/webhook_trigger.json').messages
       ).then (announce) ->
         expect(announce).to.eql expected
+
+# --------------------------------------------------------------------------------------------------
+  context 'it is a trigger message with webhook v2', ->
+
+    it 'should react', ->
+      expected = [
+        '[Production XDB Cluster] PRORDTY - [#33] My new incident - ' +
+        'trigger (Laura Haley)'
+      ]
+      pagerv2 = new Pagerv2 room.robot
+      pagerv2.parseWebhook(
+        'console',
+        require('./fixtures/webhook_v2_trigger.json').messages
+      ).then (announce) ->
+        expect(announce).to.eql expected
 # -------------------------------------------------------------------------------------------------
   context 'it is a trigger message with empty subject but with a description', ->
 

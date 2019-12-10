@@ -45,7 +45,7 @@ class Pagerv2
     if process.env.PAGERV2_CUSTOM_ACTION_FILE?
       content = fs.readFileSync(process.env.PAGERV2_CUSTOM_ACTION_FILE)
       @robot.brain.data.pagerv2.custom = JSON.parse(content)
-      @robot.brain.data.pagerv2.custom_name = {}
+      @robot.brain.data.pagerv2.custom_name = { }
       for _, value of @robot.brain.data.pagerv2.custom
         if value.name?
           @robot.brain.data.pagerv2.custom_name[value.name] = value
@@ -556,9 +556,9 @@ class Pagerv2
           else
             return @printIncident(incident, type, adapter)
         catch e
-          @robot.logger.error 'Message parsing fail'
-          @robot.logger.error message
-          @robot.logger.error e
+          @robot.logger.error 'unable to parse message'
+          @robot.logger.debug message
+          @robot.logger.debug e
           return 'Message parsing failed'
 
   launchActionById: (action_id) =>
@@ -618,17 +618,29 @@ class Pagerv2
                       replace(' (CRITICAL)', '')
       else if incident.trigger_summary_data.description?
         description = incident.trigger_summary_data.description
+    if not description? and incident.summary?
+      description = incident.summary
     if not description?
       description = '(no subject)'
-    who = if type is 'incident.resolve' and incident.resolved_by_user?
-            incident.resolved_by_user.name
-          else if incident.assigned_to_user?
-            incident.assigned_to_user.name
-          else
-            process.env.PAGERV2_DEFAULT_RESOLVER or 'nagios'
+    who = @get_assignee(incident, type)
     "#{origin} #{incident.id} - #{description} - #{level} (#{who})"
 
-   
+  get_assignee: (incident, type) =>
+    console.log incident
+    if type? and type is 'incident.resolve' and incident.resolved_by_user?
+      who = incident.resolved_by_user.name
+    else if incident.assigned_to_user?
+      who = incident.assigned_to_user.name
+    else if incident.assignments?
+      who = []
+      for assignment in incident.assignments
+        who.push(assignment.assignee.summary)
+        who = who.join(',')
+    else
+      who = process.env.PAGERV2_DEFAULT_RESOLVER or 'nagios'
+      @robot.logger.warning("fallback parsing triggered for incident #{incident.id}")
+      @robot.logger.debug(incident)
+    return who
 
   colorer: (adapter, level, text) ->
     colors = {
