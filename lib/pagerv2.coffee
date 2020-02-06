@@ -96,7 +96,7 @@ class Pagerv2
               try
                 json_data = JSON.parse(data.join(''))
                 if json_data.error?
-                  if json_data.error.code > 500 and retry_count > 0
+                  if json_data.error.code >= 429 and retry_count > 0 # 429 is too many requests
                     @robot.logger.warning("#{json_data.error.code}\
                             #{json_data.error.message}, retry remaining : #{retry_count}")
                     retry_count--
@@ -114,9 +114,9 @@ class Pagerv2
                 @robot.logger.error "query was : #{method} #{req.path}"
                 @robot.logger.error data.join('')
                 @robot.logger.error e
-                if response.statusCode > 500 and retry_count > 0
+                if response.statusCode >= 429 and retry_count > 0 # 429 as "too many requests"
                   retry_count--
-                  @request(method, endpoint, query, from, retry_count)
+                  @request(method, endpoint, query, from, retry_count).delay(30)
                   .then (rdata) ->
                     res rdata
                   .catch (rdata) ->

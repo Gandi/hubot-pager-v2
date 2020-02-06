@@ -293,14 +293,14 @@ describe 'pagerv2_commands', ->
         .query({
           query: 'toto@example.com'
         })
-        .replyWithError({ message: 'server error', code: 500 })
+        .replyWithError({ message: 'server error', code: 429 })
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
 
       say 'pager me as toto@example.com', ->
-        it 'returns information from pager', ->
-          expect(hubotResponse()).to.eql '500 server error'
+        it 'returns information about the error', ->
+          expect(hubotResponse()).to.eql '429 server error'
 
     context 'but pagerduty api key is not set,', ->
       beforeEach ->
