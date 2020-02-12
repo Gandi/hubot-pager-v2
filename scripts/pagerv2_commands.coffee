@@ -202,8 +202,9 @@ module.exports = (robot) ->
         data.incident.status,
         "[#{data.incident.service.summary}] "
         )
-      res.send "#{origin}#{data.incident.id} #{data.incident.summary} - #{data.incident.status}" +
-               "#{assigned}"
+      res.send pagerv2.printIncident(data.incident,data.incident.status,robot.adapterName)
+      #"#{origin}#{data.incident.id} #{data.incident.summary} - #{data.incident.status}" +
+      #         "#{assigned}"
     .catch (e) ->
       res.send e
     res.finish()
@@ -234,7 +235,8 @@ module.exports = (robot) ->
             inc.status,
             "[#{inc.service.summary}] "
             )
-          res.send "#{origin}#{inc.id} #{inc.summary} - #{inc.status}#{assigned}"
+          res.send pagerv2.printIncident(inc,inc.status,robot.adapterName)
+          #"#{origin}#{inc.id} #{inc.summary} - #{inc.status}#{assigned}"
       else
         res.send 'There are no open incidents for now.'
     .catch (e) ->
@@ -374,7 +376,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pager note <#,#,#> <note> - create a note for incidents <#,#,#>
-  robot.respond /pager note #?([^\s]+) (.*)$/, 'pager_note', (res) ->
+  robot.respond /pager note (?:\s*)?#?([^\s]+) (.*)$/, 'pager_note', (res) ->
     [ _, incident, note ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
