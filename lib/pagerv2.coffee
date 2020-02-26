@@ -367,7 +367,7 @@ class Pagerv2
   ) ->
     @listIncidents(incidents, statuses, date_since, date_until, limit)
     .then (data) =>
-      alldata = Promise.map(data.incidents, @completeIncidentWithNotes, { concurrency: 1 })
+      alldata = Promise.map(data.incidents, @completeIncidentWithNotes, { concurrency: 2 })
       Promise.all(alldata)
       .then (incidents) ->
         { incidents: incidents }

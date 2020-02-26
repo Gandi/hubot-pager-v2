@@ -1,5 +1,16 @@
 Hubot-pager-v2 Changelog
 ==========================
+### 1.1.6   2020-02-26
+ - use the same code when printing Incident
+ - limit concurency for listing notes to 2
+
+### 1.1.5   2020-02-06
+ - retry when encountering a 429
+
+
+### 1.1.4   2019-12-10
+- improve webhook v2 support
+
 ### 1.1.3   2019-11-04
 - fix custom action import issue 
 
