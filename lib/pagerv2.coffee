@@ -96,32 +96,19 @@ class Pagerv2
               try
                 json_data = JSON.parse(data.join(''))
                 if json_data.error?
-                  if json_data.error.code >= 429 and retry_count > 0 # 429 is too many requests
-                    @robot.logger.warning("#{json_data.error.code}\
-                            #{json_data.error.message}, retry remaining : #{retry_count}")
-                    retry_count--
-                    @request(method, endpoint, query, from, retry_count)
-                    .then (rdata) ->
-                      res rdata
-                    .catch (rdata) ->
-                      err rdata
-                  else
-                    err "#{json_data.error.code} #{json_data.error.message}"
+                  err "#{json_data.error.code} #{json_data.error.message}"
                 else
                   res json_data
               catch e
                 @robot.logger.error 'unable to parse answer'
                 @robot.logger.error "query was : #{method} #{req.path}"
-                @robot.logger.error data.join('')
-                @robot.logger.error e
                 if response.statusCode >= 429 and retry_count > 0 # 429 as "too many requests"
                   retry_count--
-                  @request(method, endpoint, query, from, retry_count).delay(30)
+                  @request(method, endpoint, query, from, retry_count)
                   .then (rdata) ->
                     res rdata
                   .catch (rdata) ->
                     err rdata
-
                 else
                   err 'Unable to read request output'
             else
@@ -365,6 +352,12 @@ class Pagerv2
         else
           data
 
+  completeIncidentWithNotes: (incident) =>
+    @listNotes(incident.id)
+    .then (payload) ->
+      incident.notes = payload.notes
+      return incident
+
   listIncidentsWithNotes: (
     incidents = '',
     statuses = 'triggered,acknowledged',
@@ -374,11 +367,7 @@ class Pagerv2
   ) ->
     @listIncidents(incidents, statuses, date_since, date_until, limit)
     .then (data) =>
-      alldata = Promise.map data.incidents, (incident) =>
-        @listNotes(incident.id)
-        .then (payload) ->
-          incident.notes = payload.notes
-          incident
+      alldata = Promise.map(data.incidents, @completeIncidentWithNotes, { concurrency: 1 })
       Promise.all(alldata)
       .then (incidents) ->
         { incidents: incidents }
@@ -557,8 +546,8 @@ class Pagerv2
             return @printIncident(incident, type, adapter)
         catch e
           @robot.logger.error 'unable to parse message'
-          @robot.logger.debug message
-          @robot.logger.debug e
+          @robot.logger.error message
+          @robot.logger.error e
           return 'Message parsing failed'
 
   launchActionById: (action_id) =>
@@ -595,22 +584,15 @@ class Pagerv2
       return actions
 
   printIncident: (incident, type, adapter) =>
-    colors = {
-      trigger: 'red',
-      unacknowledge: 'red',
-      acknowledge: 'yellow',
-      resolve: 'green',
-      assign: 'blue',
-      escalate: 'blue'
-    }
-    level = type.substring(type.indexOf('.') + 1)
-    if @coloring[adapter]?
-      colorer = @coloring[adapter]
-    else
-      colorer = @coloring.generic
-    origin = colorer(
-      "[#{incident.service.name}]",
-      colors[level]
+    level = type.split('.')[type.split('.').length - 1]
+    service = 'unknown'
+    if incident.service.name?
+      service = incident.service.name
+    else if incident.service.summary?
+      service = incident.service.summary
+    origin = @colorer(adapter,
+      level,
+      "[#{service}]"
     )
     if incident.trigger_summary_data?
       if incident.trigger_summary_data.subject?

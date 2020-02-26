@@ -1027,7 +1027,7 @@ describe 'pagerv2_commands', ->
         say 'pager incident 1234', ->
           it 'returns details on the incident', ->
             expect(hubotResponse())
-            .to.eql '[My Mail Service] PT4KHLK The server is on fire. - ' +
+            .to.eql '[My Mail Service] PT4KHLK - The server is on fire. - ' +
                     'resolved (Earline Greenholt)'
 
     # ----------------------------------------------------------------------------------------------
@@ -1114,7 +1114,7 @@ describe 'pagerv2_commands', ->
           say 'pager sup', ->
             it 'returns list of incidents', ->
               expect(hubotResponse())
-              .to.eql '[My Mail Service] PT4KHLK The server is on fire. - ' +
+              .to.eql '[My Mail Service] PT4KHLK - The server is on fire. - ' +
                       'resolved (Earline Greenholt)'
 
         context 'and we want incidents for the past 2 hours', ->
@@ -1144,7 +1144,7 @@ describe 'pagerv2_commands', ->
           say 'pager sup 2', ->
             it 'returns list of incidents', ->
               expect(hubotResponse())
-              .to.eql '[My Mail Service] PT4KHLK The server is on fire. - ' +
+              .to.eql '[My Mail Service] PT4KHLK - The server is on fire. - ' +
                       'resolved (Earline Greenholt)'
 
         context 'and we want incidents since 8 hours ago for 4 hours', ->
@@ -1174,7 +1174,7 @@ describe 'pagerv2_commands', ->
           say 'pager sup 8 4', ->
             it 'returns list of incidents', ->
               expect(hubotResponse())
-              .to.eql '[My Mail Service] PT4KHLK The server is on fire. - ' +
+              .to.eql '[My Mail Service] PT4KHLK - The server is on fire. - ' +
                       'resolved (Earline Greenholt)'
          
         context 'and there more than 100 incidents', ->
@@ -1224,7 +1224,7 @@ describe 'pagerv2_commands', ->
           say 'pager sup 8 4', ->
             it 'returns list of incidents', ->
               expect(hubotResponse())
-              .to.eql '[My Mail Service] PT4KHLK The server is on fire. - ' +
+              .to.eql '[My Mail Service] PT4KHLK - The server is on fire. - ' +
                       'resolved (Earline Greenholt)'
     # ----------------------------------------------------------------------------------------------
     describe '".pager ack"', ->
@@ -1935,7 +1935,7 @@ describe 'pagerv2_commands', ->
         beforeEach ->
           nock('https://api.pagerduty.com')
           .get('/incidents/PT4KHLK/notes')
-          .reply(503, { error: { code: 503, message: "it's all broken!" } })
+          .reply(503, "503 it's all broken!")
           .get('/incidents/PT4KHLK/notes')
           .reply(200, require('./fixtures/notes_list-ok.json'))
         afterEach ->

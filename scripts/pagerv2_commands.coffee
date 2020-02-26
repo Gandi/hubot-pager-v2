@@ -193,16 +193,7 @@ module.exports = (robot) ->
     .then ->
       pagerv2.getIncident(incident)
     .then (data) ->
-      assigned = data.incident.assignments.map (i) ->
-        i.assignee.summary
-      if assigned.length > 0
-        assigned = " (#{assigned.join(', ')})"
-      origin = pagerv2.colorer(
-        robot.adapterName,
-        data.incident.status,
-        "[#{data.incident.service.summary}] "
-        )
-      res.send pagerv2.printIncident(data.incident,data.incident.status,robot.adapterName)
+      res.send pagerv2.printIncident(data.incident, data.incident.status, robot.adapterName)
       #"#{origin}#{data.incident.id} #{data.incident.summary} - #{data.incident.status}" +
       #         "#{assigned}"
     .catch (e) ->
@@ -226,16 +217,7 @@ module.exports = (robot) ->
     .then (data) ->
       if data.incidents.length > 0
         for inc in data.incidents
-          assigned = inc.assignments.map (i) ->
-            i.assignee.summary
-          if assigned.length > 0
-            assigned = " (#{assigned.join(', ')})"
-          origin = pagerv2.colorer(
-            robot.adapterName,
-            inc.status,
-            "[#{inc.service.summary}] "
-            )
-          res.send pagerv2.printIncident(inc,inc.status,robot.adapterName)
+          res.send pagerv2.printIncident(inc, inc.status, robot.adapterName)
           #"#{origin}#{inc.id} #{inc.summary} - #{inc.status}#{assigned}"
       else
         res.send 'There are no open incidents for now.'
