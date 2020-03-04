@@ -174,6 +174,29 @@ module.exports = (robot) ->
       res.send e
     res.finish()
 
+#   hubot pager sched[ule] [schedule_name] - returns who is on call
+  robot.respond /pager sched(?:ule)? (.*)\s*$/, 'pager_sched', (res) ->
+    [_, schedule_name] = res.match
+    pagerv2.getScheduleIdByNAme(schedule_name)
+    .then (schedule_id) ->
+      pagerv2.getOncall(schedule_id)
+      .then (data) ->
+        nowDate = moment().utc()
+        endDate = moment(data.end).utc()
+        if nowDate.isSame(endDate, 'day')
+          endDate = endDate.format('HH:mm')
+        else
+          endDate = endDate.format('dddd HH:mm')
+        if data.user?.summary?
+          res.send "#{data.user.summary} is on call until #{endDate} (utc)."
+        else
+          res.send "No one i currently on call on #{data.schedule.name} : #{data.schedule.summary}"
+    .catch (e) ->
+      res.send e
+
+    res.finish()
+
+
 #   hubot pager who is <user> - check if the caller is known by pagerduty plugin
   robot.respond /pager who(?: is|'s)? ([^\s]+)$/, (res) ->
     [_, who] = res.match

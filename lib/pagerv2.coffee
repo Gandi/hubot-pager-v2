@@ -36,6 +36,7 @@ class Pagerv2
     @robot.brain.data.pagerv2.custom ?= { }
     @robot.brain.data.pagerv2.custom_name ?= { }
     @robot.brain.data.pagerv2.services ?= { }
+    @robot.brain.data.pagerv2.schedules ?= { }
     @robot.brain.data.pagerv2.users ?= { }
     @pagerServices = [ ]
     if process.env.PAGERV2_SERVICES?
@@ -49,6 +50,9 @@ class Pagerv2
       for _, value of @robot.brain.data.pagerv2.custom
         if value.name?
           @robot.brain.data.pagerv2.custom_name[value.name] = value
+    if process.env.PAGERV2_SCHEDULE_FILE?
+      content = fs.readFileSync(process.env.PAGERV2_SCHEDULE_FILE)
+      @robot.brain.data.pagerv2.schedules = JSON.parse(content)
     @logger.debug 'Pagerv2 Loaded'
     if process.env.PAGERV2_LOG_PATH?
       @errorlog = path.join process.env.PAGERV2_LOG_PATH, 'pagerv2-error.log'
@@ -190,22 +194,26 @@ class Pagerv2
       else
         "Sorry, I can't figure #{user.name} email address. " +
         'Can you ask them to `.pager me as <email>`?'
+  
+  getScheduleByName: (name) ->
+    new Promise (res,err) ->
+      if @robot.brain.data.pagerv2.services[name]?
+      if @robot.brain.data.pagerv2.schedule[name]?
+        res @robot.brain.data.pagerv2.schedule[name]
+      else
+        @request('GET'),"/schedules")
+        .then (body) ->
+          for schedule in body.schedules
+            @robot.brain.data.pagerv2.schedule[schedule.name] = schedule.id
+            if schedule.name is name
+              res schedule.id
+              break
 
-  # getSchedule: (
-  #   filter = false,
-  #   fromtime = false,
-  #   totime = false,
-  #   schedule_id = process.env.PAGERV2_SCHEDULE_ID
-  # ) ->
-  #   query = {
-  #     since: fromtime or moment().utc().format(),
-  #     until: totime or moment().utc().add(1, 'minutes').format(),
-  #     time_zone: 'UTC'
-  #   }
-  #   @request('GET', "/schedules/#{schedule_id}", query)
-  #   .then (body) ->
-  #     # console.log body.schedule
-  #     body.schedule.final_schedule.rendered_schedule_entries[0]
+  
+  getSchedule: (schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
+    @request('GET', "/schedules/#{schedule_id}")
+    .then (body) ->
+      body.schedule
 
   getOverride: (schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
     query = {
@@ -218,6 +226,13 @@ class Pagerv2
     .then (body) ->
       body.overrides
 
+  getOnCallOrFallBack: (fromtime = null, schedule_id) ->
+    @getOnCall(fromtime,schedule_id)
+    .catch (error) ->
+      @robot.logger.debug "something went wrong getting the OnCAll #{error}"
+      return @getSchedule(schedule_id)
+      
+  
   getOncall: (fromtime = null, schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
     query = {
       time_zone: 'UTC',
@@ -231,12 +246,11 @@ class Pagerv2
     .then (body) ->
       body.oncalls[0]
 
-  setOverride: (from, who, duration = null, start = null) ->
+  setOverride: (from, who, duration = null, start = null, schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
     return new Promise (res, err) =>
       if duration? and duration > 1440
         err 'Sorry you cannot set an override of more than 1 day.'
       else
-        schedule_id = process.env.PAGERV2_SCHEDULE_ID
         if not who? or not who.name? or who.name is 'me'
           who = { name: from.name }
         if who?
