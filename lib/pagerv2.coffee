@@ -50,9 +50,6 @@ class Pagerv2
       for _, value of @robot.brain.data.pagerv2.custom
         if value.name?
           @robot.brain.data.pagerv2.custom_name[value.name] = value
-    if process.env.PAGERV2_SCHEDULE_FILE?
-      content = fs.readFileSync(process.env.PAGERV2_SCHEDULE_FILE)
-      @robot.brain.data.pagerv2.schedules = JSON.parse(content)
     @logger.debug 'Pagerv2 Loaded'
     if process.env.PAGERV2_LOG_PATH?
       @errorlog = path.join process.env.PAGERV2_LOG_PATH, 'pagerv2-error.log'
@@ -195,20 +192,18 @@ class Pagerv2
         "Sorry, I can't figure #{user.name} email address. " +
         'Can you ask them to `.pager me as <email>`?'
   
-  getScheduleByName: (name) ->
-    new Promise (res,err) ->
-      if @robot.brain.data.pagerv2.services[name]?
+  getScheduleIdByName: (name) ->
+    new Promise (res, err) ->
       if @robot.brain.data.pagerv2.schedule[name]?
         res @robot.brain.data.pagerv2.schedule[name]
       else
-        @request('GET'),"/schedules")
+        @request('GET', '/schedules')
         .then (body) ->
           for schedule in body.schedules
             @robot.brain.data.pagerv2.schedule[schedule.name] = schedule.id
             if schedule.name is name
               res schedule.id
-              break
-
+              return
   
   getSchedule: (schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
     @request('GET', "/schedules/#{schedule_id}")
@@ -227,7 +222,7 @@ class Pagerv2
       body.overrides
 
   getOnCallOrFallBack: (fromtime = null, schedule_id) ->
-    @getOnCall(fromtime,schedule_id)
+    @getOnCall(fromtime, schedule_id)
     .catch (error) ->
       @robot.logger.debug "something went wrong getting the OnCAll #{error}"
       return @getSchedule(schedule_id)
@@ -246,7 +241,11 @@ class Pagerv2
     .then (body) ->
       body.oncalls[0]
 
-  setOverride: (from, who, duration = null, start = null, schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
+  setOverride: (from,
+  who,
+  duration = null,
+  start = null,
+  schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
     return new Promise (res, err) =>
       if duration? and duration > 1440
         err 'Sorry you cannot set an override of more than 1 day.'
