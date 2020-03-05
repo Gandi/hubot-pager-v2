@@ -193,17 +193,20 @@ class Pagerv2
         'Can you ask them to `.pager me as <email>`?'
   
   getScheduleIdByName: (name) ->
-    new Promise (res, err) ->
-      if @robot.brain.data.pagerv2.schedule[name]?
-        res @robot.brain.data.pagerv2.schedule[name]
+    new Promise (res, err) =>
+      if @robot.brain.data.pagerv2.schedules[name]?
+        res @robot.brain.data.pagerv2.schedules[name]
       else
         @request('GET', '/schedules')
-        .then (body) ->
+        .then (body) =>
           for schedule in body.schedules
-            @robot.brain.data.pagerv2.schedule[schedule.name] = schedule.id
+            @robot.brain.data.pagerv2.schedules[schedule.name] = schedule.id
             if schedule.name is name
               res schedule.id
               return
+          throw new Error("no matching schedule found")
+        .catch (e) ->
+          err "#{e}"
   
   getSchedule: (schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
     @request('GET', "/schedules/#{schedule_id}")
@@ -220,14 +223,25 @@ class Pagerv2
     @request('GET', "/schedules/#{schedule_id}/overrides", query)
     .then (body) ->
       body.overrides
-
-  getOnCallOrFallBack: (fromtime = null, schedule_id) ->
-    @getOnCall(fromtime, schedule_id)
-    .catch (error) ->
-      @robot.logger.debug "something went wrong getting the OnCAll #{error}"
-      return @getSchedule(schedule_id)
       
-  
+  getFirstOncall: (fromtime = null, schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
+    @getOncall(fromtime,schedule_id)
+    .then (data) ->
+      return data[0]
+
+  printOncall: (oncall,schedule=false) ->
+    nowDate = moment().utc()
+    endDate = moment(oncall.end).utc()
+    if nowDate.isSame(endDate, 'day')
+      endDate = endDate.format('HH:mm')
+    else
+      endDate = endDate.format('dddd HH:mm')
+    if schedule
+      in_schedule = " in #{oncall.schedule.summary}."
+    else
+      in_schedule = '.'
+    return "#{oncall.user.summary} is on call until #{endDate} (utc)#{in_schedule}"
+
   getOncall: (fromtime = null, schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
     query = {
       time_zone: 'UTC',
@@ -239,7 +253,7 @@ class Pagerv2
       query['until'] = moment(fromtime).utc().add(2, 'minutes').format()
     @request('GET', '/oncalls', query)
     .then (body) ->
-      body.oncalls[0]
+      body.oncalls
 
   setOverride: (from,
   who,
@@ -257,7 +271,7 @@ class Pagerv2
           .bind({ id: null })
           .then (id) =>
             @id = id
-            @getOncall(start)
+            @getFirstOncall(start)
           .then (data) =>
             query = { override: { } }
             if @id is data.user.id

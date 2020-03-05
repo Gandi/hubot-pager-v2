@@ -119,10 +119,10 @@ module.exports = (robot) ->
   robot.respond (
     /(?:pager )?(?:who(?: is|'s) )?(next on ?call|on ?call next)\s*$/
   ), 'pager_next_oncall', (res) ->
-    pagerv2.getOncall()
+    pagerv2.getFirstOncall()
     .then (data) ->
       fromtime = moment(data.end).utc().add(1, 'minute').format()
-      pagerv2.getOncall(fromtime)
+      pagerv2.getFirstOncall(fromtime)
     .then (data) ->
       nowDate = moment().utc()
       startDate = moment(data.start).utc()
@@ -145,7 +145,7 @@ module.exports = (robot) ->
   robot.respond /(?:pager )?on ?call\s(.+)/, 'pager_msg_oncall', (res) ->
     [ _, msg ] = res.match
     alertchan = process.env.PAGERV2_ANNOUNCE_ROOM
-    pagerv2.getOncall()
+    pagerv2.getFirstOncall()
     .then (data) ->
       if res.envelope.room?
         res.send "cc #{data.user.summary}"
@@ -161,39 +161,42 @@ module.exports = (robot) ->
 
 #   hubot pager [who is] oncall - returns who is on call
   robot.respond /(?:pager )?(?:who(?: is|'s) )?on ?call\s*$/, 'pager_oncall', (res) ->
-    pagerv2.getOncall()
+    pagerv2.getFirstOncall()
     .then (data) ->
-      nowDate = moment().utc()
-      endDate = moment(data.end).utc()
-      if nowDate.isSame(endDate, 'day')
-        endDate = endDate.format('HH:mm')
-      else
-        endDate = endDate.format('dddd HH:mm')
-      res.send "#{data.user.summary} is on call until #{endDate} (utc)."
+      res.send pagerv2.printOncall(data)
     .catch (e) ->
       res.send e
     res.finish()
 
+  robot.on 'schedule', (params) ->
+    if params.room? and params.schedule_id?
+      pagerv2.getOncall(null,params.schedule_id)
+      .then (data) =>
+        if data.length? and data.length > 0
+          robot.messageRoom(params.room, pagerv2.printOncall(data[0],true))
+        else
+          pagerv2.getSchedule(params.schedule_id)
+          .then (data) ->
+            message = 'Nobody is oncall at the moment on the schedule' +
+                    " #{data.name} : #{data.description}"
+            robot.messageRoom(params.room, message)
+      .catch (e) =>
+        robot.messageRoom params.room, "Unable to get oncall : #{e}"
+        
+
 #   hubot pager sched[ule] [schedule_name] - returns who is on call
   robot.respond /pager sched(?:ule)? (.*)\s*$/, 'pager_sched', (res) ->
-    [_, schedule_name] = res.match
-    pagerv2.getScheduleIdByNAme(schedule_name)
-    .then (schedule_id) ->
-      pagerv2.getOncall(schedule_id)
-      .then (data) ->
-        nowDate = moment().utc()
-        endDate = moment(data.end).utc()
-        if nowDate.isSame(endDate, 'day')
-          endDate = endDate.format('HH:mm')
-        else
-          endDate = endDate.format('dddd HH:mm')
-        if data.user?.summary?
-          res.send "#{data.user.summary} is on call until #{endDate} (utc)."
-        else
-          res.send "No one i currently on call on #{data.schedule.name} : #{data.schedule.summary}"
+    [_, schedule_name,message] = res.match
+    pagerv2.getScheduleIdByName(schedule_name)
+    .then (schedule_id) =>
+      params = { }
+      params.schedule_id = schedule_id
+      params.room = res.envelope.room
+      if !params.room?
+        params.room = res.envelope.user
+      @robot.emit 'schedule', params
     .catch (e) ->
       res.send e
-
     res.finish()
 
 
@@ -541,7 +544,7 @@ module.exports = (robot) ->
     [ _, who] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
-      pagerv2.getOncall()
+      pagerv2.getFirstOncall()
     .then (data) ->
       startDate = moment(data.end).utc()
       pagerv2.setOverride(res.envelope.user, { name: who }, 0, startDate)
