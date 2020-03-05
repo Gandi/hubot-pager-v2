@@ -41,6 +41,9 @@
 #   hubot pager [who is] next [oncall] - tells who is next on call
 #   hubot pager oncall <message>       - cc oncall and send <message> to alerting channel
 #
+#   hubot pager sched[ule] [schedule_name] - returns who is on call
+#   hubot pager sched[ules] - list available schedules
+#
 #   hubot pager maintenances           - lists currently active maintenances
 #   hubot pager stfu|down [for] <duration> [because <reason>] - creates a maintenance
 #   hubot pager stfu|down <service,service,service> for <duration> [because <reason>] - creates a maintenance per service
@@ -183,14 +186,13 @@ module.exports = (robot) ->
       .catch (e) ->
         robot.messageRoom params.room, "Unable to get oncall : #{e}"
        
-
 #   hubot pager sched[ules] - list available schedules
   robot.respond /pager sched(?:ules)?\s*$/, 'pager_sched', (res) ->
     [_, schedule_name] = res.match
     pagerv2.getSchedules()
     .then (data) ->
       for schedule in data.schedules
-        res.send "#{schedule.name} : #{schedule.summary}"
+        res.send "[#{schedule.id}] #{schedule.name} : #{schedule.summary}"
     .catch (e) ->
       res.send e
     res.finish()
