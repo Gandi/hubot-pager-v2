@@ -566,7 +566,7 @@ describe 'pagerv2_commands', ->
       say 'pager schedules', ->
         it 'returns the available schedules', ->
           expect(hubotResponse())
-          .to.eql 'daily_rotation : Daily Engineering Rotation'
+          .to.eql '[PI7DH85] daily_rotation : Daily Engineering Rotation'
 
 
 

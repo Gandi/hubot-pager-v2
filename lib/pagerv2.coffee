@@ -205,7 +205,6 @@ class Pagerv2
           for schedule in body.schedules
             @robot.brain.data.pagerv2.schedules[schedule.name] = schedule.id
             if schedule.name is name
-              console.log schedule
               res schedule.id
               return
           throw new Error("no matching \"#{name}\" schedule found")
