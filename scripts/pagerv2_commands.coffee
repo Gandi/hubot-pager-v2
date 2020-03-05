@@ -170,29 +170,29 @@ module.exports = (robot) ->
 
   robot.on 'schedule', (params) ->
     if params.room? and params.schedule_id?
-      pagerv2.getOncall(null,params.schedule_id)
-      .then (data) =>
+      pagerv2.getOncall(null, params.schedule_id)
+      .then (data) ->
         if data.length? and data.length > 0
-          robot.messageRoom(params.room, pagerv2.printOncall(data[0],true))
+          robot.messageRoom(params.room, pagerv2.printOncall(data[0], true))
         else
           pagerv2.getSchedule(params.schedule_id)
           .then (data) ->
             message = 'Nobody is oncall at the moment on the schedule' +
                     " #{data.name} : #{data.description}"
             robot.messageRoom(params.room, message)
-      .catch (e) =>
+      .catch (e) ->
         robot.messageRoom params.room, "Unable to get oncall : #{e}"
         
 
 #   hubot pager sched[ule] [schedule_name] - returns who is on call
   robot.respond /pager sched(?:ule)? (.*)\s*$/, 'pager_sched', (res) ->
-    [_, schedule_name,message] = res.match
+    [_, schedule_name] = res.match
     pagerv2.getScheduleIdByName(schedule_name)
     .then (schedule_id) =>
       params = { }
       params.schedule_id = schedule_id
       params.room = res.envelope.room
-      if !params.room?
+      if not params.room?
         params.room = res.envelope.user
       @robot.emit 'schedule', params
     .catch (e) ->

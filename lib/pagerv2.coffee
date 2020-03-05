@@ -204,7 +204,7 @@ class Pagerv2
             if schedule.name is name
               res schedule.id
               return
-          throw new Error("no matching schedule found")
+          throw new Error('no matching schedule found')
         .catch (e) ->
           err "#{e}"
   
@@ -225,11 +225,11 @@ class Pagerv2
       body.overrides
       
   getFirstOncall: (fromtime = null, schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
-    @getOncall(fromtime,schedule_id)
+    @getOncall(fromtime, schedule_id)
     .then (data) ->
       return data[0]
 
-  printOncall: (oncall,schedule=false) ->
+  printOncall: (oncall, schedule = false) ->
     nowDate = moment().utc()
     endDate = moment(oncall.end).utc()
     if nowDate.isSame(endDate, 'day')

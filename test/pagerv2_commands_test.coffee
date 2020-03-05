@@ -559,8 +559,8 @@ describe 'pagerv2_commands', ->
         room.robot.brain.data.pagerv2 = { users: { } }
         room.robot.brain.data.pagerv2.schedules = { }
         payload = require('./fixtures/oncall_list-ok.json')
-        payload.oncalls[0].start = moment().utc().subtract(5,'minutes').format()
-        @end_date = moment.utc().add(1,'days')
+        payload.oncalls[0].start = moment().utc().subtract(5, 'minutes').format()
+        @end_date = moment.utc().add(1, 'days')
         payload.oncalls[0].end = @end_date.format()
         @end_date_format = @end_date.format('dddd HH:mm')
         nock('https://api.pagerduty.com')
@@ -582,7 +582,8 @@ describe 'pagerv2_commands', ->
       say 'pager schedule daily_rotation', ->
         it 'when it\'s not the same day', ->
           expect(hubotResponse())
-          .to.eql "Tim Wright is on call until #{@end_date_format} (utc) in Daily Engineering Rotation."
+          .to.eql("Tim Wright is on call until #{@end_date_format} " +
+                  '(utc) in Daily Engineering Rotation.')
 
     context 'when nobody is oncall', ->
       beforeEach ->
@@ -608,7 +609,8 @@ describe 'pagerv2_commands', ->
       say 'pager schedule daily_rotation', ->
         it 'when it\'s not the same day', ->
           expect(hubotResponse())
-          .to.eql "Nobody is oncall at the moment on the schedule Daily Engineering Rotation : Rotation schedule for engineering"
+          .to.eql('Nobody is oncall at the moment on the '+
+          'schedule Daily Engineering Rotation : Rotation schedule for engineering')
 
 
     context 'when someone is on call the same day,', ->
@@ -638,7 +640,8 @@ describe 'pagerv2_commands', ->
       say 'pager schedule daily_rotation', ->
         it 'returns name of who is on call', ->
           expect(hubotResponse())
-          .to.eql "Tim Wright is on call until #{@end_time.format('HH:mm')} (utc) in Daily Engineering Rotation."
+          .to.eql("Tim Wright is on call until #{@end_time.format('HH:mm')}" +
+                  ' (utc) in Daily Engineering Rotation.')
 
 
 
@@ -660,7 +663,7 @@ describe 'pagerv2_commands', ->
       say 'pager schedule no_matching', ->
         it 'returns name of who is on call', ->
           expect(hubotResponse())
-          .to.eql "Error: no matching schedule found"
+          .to.eql 'Error: no matching schedule found'
 
 
     context 'when there is an error with schedules', ->
@@ -670,7 +673,7 @@ describe 'pagerv2_commands', ->
         payload.oncalls[0].start = moment().utc().subtract(5, 'minutes').format()
         payload.oncalls[0].end = @end_time.format()
         room.robot.brain.data.pagerv2 = { users: { } }
-        room.robot.brain.data.pagerv2.schedules = {'daily_rotation':'PI7DH85' }
+        room.robot.brain.data.pagerv2.schedules = { 'daily_rotation': 'PI7DH85' }
         nock('https://api.pagerduty.com')
         .get('/schedules/PI7DH85')
         .reply(200, require('./fixtures/schedule_get-ok.json'))
