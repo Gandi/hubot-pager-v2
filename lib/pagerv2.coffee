@@ -36,6 +36,7 @@ class Pagerv2
     @robot.brain.data.pagerv2.custom ?= { }
     @robot.brain.data.pagerv2.custom_name ?= { }
     @robot.brain.data.pagerv2.services ?= { }
+    @robot.brain.data.pagerv2.schedules ?= { }
     @robot.brain.data.pagerv2.users ?= { }
     @pagerServices = [ ]
     if process.env.PAGERV2_SERVICES?
@@ -190,22 +191,30 @@ class Pagerv2
       else
         "Sorry, I can't figure #{user.name} email address. " +
         'Can you ask them to `.pager me as <email>`?'
+ 
+  getSchedules: ->
+    return @request('GET', '/schedules')
 
-  # getSchedule: (
-  #   filter = false,
-  #   fromtime = false,
-  #   totime = false,
-  #   schedule_id = process.env.PAGERV2_SCHEDULE_ID
-  # ) ->
-  #   query = {
-  #     since: fromtime or moment().utc().format(),
-  #     until: totime or moment().utc().add(1, 'minutes').format(),
-  #     time_zone: 'UTC'
-  #   }
-  #   @request('GET', "/schedules/#{schedule_id}", query)
-  #   .then (body) ->
-  #     # console.log body.schedule
-  #     body.schedule.final_schedule.rendered_schedule_entries[0]
+  getScheduleIdByName: (name) ->
+    new Promise (res, err) =>
+      if @robot.brain.data.pagerv2.schedules[name]?
+        res @robot.brain.data.pagerv2.schedules[name]
+      else
+        @request('GET', '/schedules')
+        .then (body) =>
+          for schedule in body.schedules
+            @robot.brain.data.pagerv2.schedules[schedule.name] = schedule.id
+            if schedule.name is name
+              res schedule.id
+              return
+          throw new Error("no matching \"#{name}\" schedule found")
+        .catch (e) ->
+          err "#{e}"
+  
+  getSchedule: (schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
+    @request('GET', "/schedules/#{schedule_id}")
+    .then (body) ->
+      body.schedule
 
   getOverride: (schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
     query = {
@@ -217,6 +226,24 @@ class Pagerv2
     @request('GET', "/schedules/#{schedule_id}/overrides", query)
     .then (body) ->
       body.overrides
+      
+  getFirstOncall: (fromtime = null, schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
+    @getOncall(fromtime, schedule_id)
+    .then (data) ->
+      return data[0]
+
+  printOncall: (oncall, schedule = false) ->
+    nowDate = moment().utc()
+    endDate = moment(oncall.end).utc()
+    if nowDate.isSame(endDate, 'day')
+      endDate = endDate.format('HH:mm')
+    else
+      endDate = endDate.format('dddd HH:mm')
+    if schedule
+      in_schedule = " in #{oncall.schedule.summary}."
+    else
+      in_schedule = '.'
+    return "#{oncall.user.summary} is on call until #{endDate} (utc)#{in_schedule}"
 
   getOncall: (fromtime = null, schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
     query = {
@@ -229,14 +256,17 @@ class Pagerv2
       query['until'] = moment(fromtime).utc().add(2, 'minutes').format()
     @request('GET', '/oncalls', query)
     .then (body) ->
-      body.oncalls[0]
+      body.oncalls
 
-  setOverride: (from, who, duration = null, start = null) ->
+  setOverride: (from,
+  who,
+  duration = null,
+  start = null,
+  schedule_id = process.env.PAGERV2_SCHEDULE_ID) ->
     return new Promise (res, err) =>
       if duration? and duration > 1440
         err 'Sorry you cannot set an override of more than 1 day.'
       else
-        schedule_id = process.env.PAGERV2_SCHEDULE_ID
         if not who? or not who.name? or who.name is 'me'
           who = { name: from.name }
         if who?
@@ -244,7 +274,7 @@ class Pagerv2
           .bind({ id: null })
           .then (id) =>
             @id = id
-            @getOncall(start)
+            @getFirstOncall(start)
           .then (data) =>
             query = { override: { } }
             if @id is data.user.id

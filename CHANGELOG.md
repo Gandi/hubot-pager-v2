@@ -1,12 +1,15 @@
 Hubot-pager-v2 Changelog
 ==========================
+### 1.1.7   2020-03-05
+ - pager schedules and schedule
+ - refactoring oncall code for cleaner code
+
 ### 1.1.6   2020-02-26
  - use the same code when printing Incident
  - limit concurency for listing notes to 2
 
 ### 1.1.5   2020-02-06
  - retry when encountering a 429
-
 
 ### 1.1.4   2019-12-10
 - improve webhook v2 support
