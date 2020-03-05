@@ -537,6 +537,40 @@ describe 'pagerv2_commands', ->
           .to.eql "Tim Wright is on call until #{@end_time.format('HH:mm')} (utc)."
 
   # ------------------------------------------------------------------------------------------------
+  describe '".pager schedules"', ->
+    context 'when something goes wrong,', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = { users: { } }
+        room.robot.brain.data.pagerv2.schedules = { }
+        nock('https://api.pagerduty.com')
+        .get('/schedules')
+        .reply 503, { error: { code: 503, message: "it's all broken!" } }
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pager schedules', ->
+        it 'returns the error message', ->
+          expect(hubotResponse())
+          .to.eql '503 it\'s all broken!'
+
+    context 'when everything goes right', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = { users: { } }
+        nock('https://api.pagerduty.com')
+        .get('/schedules')
+        .reply(200, require('./fixtures/schedules_list-ok.json'))
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+      say 'pager schedules', ->
+        it 'returns the available schedules', ->
+          expect(hubotResponse())
+          .to.eql 'daily_rotation : Daily Engineering Rotation'
+
+
+
+  # ------------------------------------------------------------------------------------------------
   describe '".pager schedule"', ->
     context 'when something goes wrong,', ->
       beforeEach ->
@@ -552,7 +586,7 @@ describe 'pagerv2_commands', ->
       say 'pager schedule a', ->
         it 'returns the error message', ->
           expect(hubotResponse())
-          .to.eql "503 it's all broken!"
+          .to.eql '503 it\'s all broken!'
 
     context 'when somebody is oncall', ->
       beforeEach ->
@@ -663,7 +697,7 @@ describe 'pagerv2_commands', ->
       say 'pager schedule no_matching', ->
         it 'returns name of who is on call', ->
           expect(hubotResponse())
-          .to.eql 'Error: no matching schedule found'
+          .to.eql 'Error: no matching "no_matching" schedule found'
 
 
     context 'when there is an error with schedules', ->

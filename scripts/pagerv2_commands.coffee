@@ -182,10 +182,23 @@ module.exports = (robot) ->
             robot.messageRoom(params.room, message)
       .catch (e) ->
         robot.messageRoom params.room, "Unable to get oncall : #{e}"
-        
+       
+
+#   hubot pager sched[ules] - list available schedules
+  robot.respond /pager sched(?:ules)?\s*$/, 'pager_sched', (res) ->
+    [_, schedule_name] = res.match
+    pagerv2.getSchedules()
+    .then (data) ->
+      for schedule in data.schedules
+        res.send "#{schedule.name} : #{schedule.summary}"
+    .catch (e) ->
+      res.send e
+    res.finish()
+
+
 
 #   hubot pager sched[ule] [schedule_name] - returns who is on call
-  robot.respond /pager sched(?:ule)? (.*)\s*$/, 'pager_sched', (res) ->
+  robot.respond /pager sched(?:ule)? (.*)$/, 'pager_sched', (res) ->
     [_, schedule_name] = res.match
     pagerv2.getScheduleIdByName(schedule_name)
     .then (schedule_id) =>

@@ -191,7 +191,10 @@ class Pagerv2
       else
         "Sorry, I can't figure #{user.name} email address. " +
         'Can you ask them to `.pager me as <email>`?'
-  
+ 
+  getSchedules: ->
+    return @request('GET', '/schedules')
+
   getScheduleIdByName: (name) ->
     new Promise (res, err) =>
       if @robot.brain.data.pagerv2.schedules[name]?
@@ -202,9 +205,10 @@ class Pagerv2
           for schedule in body.schedules
             @robot.brain.data.pagerv2.schedules[schedule.name] = schedule.id
             if schedule.name is name
+              console.log schedule
               res schedule.id
               return
-          throw new Error('no matching schedule found')
+          throw new Error("no matching \"#{name}\" schedule found")
         .catch (e) ->
           err "#{e}"
   
