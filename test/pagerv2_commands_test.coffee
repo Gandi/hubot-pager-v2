@@ -619,6 +619,45 @@ describe 'pagerv2_commands', ->
           .to.eql("Tim Wright is on call until #{@end_date_format} " +
                   '(utc) in Daily Engineering Rotation.')
 
+    context 'aaaaawhen somebody is oncall and we send a message from another chan', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = { users: { } }
+        room.robot.brain.data.pagerv2.schedules = { }
+        payload = require('./fixtures/oncall_list-ok.json')
+        payload.oncalls[0].start = moment().utc().subtract(5, 'minutes').format()
+        @end_date = moment.utc().add(1, 'days')
+        payload.oncalls[0].end = @end_date.format()
+        @end_date_format = @end_date.format('dddd HH:mm')
+        nock('https://api.pagerduty.com')
+        .get('/schedules')
+        .reply(200, require('./fixtures/schedules_list-ok.json'))
+        .get('/schedules/PI7DH85')
+        .reply(200, require('./fixtures/schedule_get-ok.json'))
+        .get('/oncalls')
+        .query({
+          time_zone: 'UTC',
+          schedule_ids: [ 'PI7DH85' ],
+          earliest: true
+        })
+        .reply 200, payload
+        @data = {
+          'room': 'console',
+          'message':'test',
+          'schedule_id':'PI7DH85',
+          'where': 'console',
+          'who': 'momo'
+        }
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      hubotEmit('schedule', @data)->
+        it 'when it\'s not the same day', ->
+          expect(hubotResponse())
+          .to.eql("Tim Wright is on call until #{@end_date_format} " +
+                  '(utc) in Daily Engineering Rotation.')
+
+
     context 'when nobody is oncall', ->
       beforeEach ->
         room.robot.brain.data.pagerv2 = { users: { } }

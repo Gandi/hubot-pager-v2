@@ -172,11 +172,20 @@ module.exports = (robot) ->
     res.finish()
 
   robot.on 'schedule', (params) ->
+    console.log params
     if params.room? and params.schedule_id?
       pagerv2.getOncall(null, params.schedule_id)
       .then (data) ->
         if data.length? and data.length > 0
-          robot.messageRoom(params.room, pagerv2.printOncall(data[0], true))
+          if params.message? and params.who? and params.where?
+            if params.where is params.room
+              robot.messageRoom(params.room, "cc #{data[0].user.summary}")
+            else
+              robot.messageRoom(
+                params.room,
+                "#{data[0].user.summary}: #{params.message} from #{params.who} in #{params.where}")
+          else
+            robot.messageRoom(params.room, pagerv2.printOncall(data[0], true))
         else
           pagerv2.getSchedule(params.schedule_id)
           .then (data) ->
