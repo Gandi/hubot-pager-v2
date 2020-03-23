@@ -468,6 +468,33 @@ describe 'pagerv2_commands', ->
           expect(hubotResponse())
               .to.eql 'Tim Wright: doing stuff somewhere else (from momo)'
 
+    context 'when nobody is on call', ->
+      beforeEach ->
+        room.robot.brain.data.pagerv2 = { users: { } }
+        room.receive = (userName, message) ->
+          new Promise (resolve) =>
+            @messages.push [userName, message]
+            user = { name: userName }
+            textMessage = new Hubot.TextMessage(user, message)
+            textMessage.room = 'somewhereelse'
+            @robot.receive(textMessage, resolve)
+
+        nock('https://api.pagerduty.com')
+        .get('/oncalls')
+        .query({
+          time_zone: 'UTC',
+          schedule_ids: [ 42 ],
+          earliest: true
+        })
+        .reply 200, { oncalls: [] }
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      say 'pager oncall doing stuff somewhere else', ->
+        it 'send a message to the right channel', ->
+          expect(hubotResponse())
+              .to.eql 'Nobody is oncall'
 
 
   # ------------------------------------------------------------------------------------------------
@@ -619,8 +646,8 @@ describe 'pagerv2_commands', ->
           .to.eql("Tim Wright is on call until #{@end_date_format} " +
                   '(utc) in Daily Engineering Rotation.')
 
-    context 'aaaaawhen somebody is oncall and we send a message from another chan', ->
-      beforeEach ->
+    context 'when somebody is oncall and we send a message from another chan', ->
+      beforeEach (done) ->
         room.robot.brain.data.pagerv2 = { users: { } }
         room.robot.brain.data.pagerv2.schedules = { }
         payload = require('./fixtures/oncall_list-ok.json')
@@ -640,22 +667,136 @@ describe 'pagerv2_commands', ->
           earliest: true
         })
         .reply 200, payload
-        @data = {
-          'room': 'console',
-          'message':'test',
-          'schedule_id':'PI7DH85',
-          'where': 'console',
+        data = {
+          'room': {
+            'name': 'room1'
+          },
+          'message': 'test',
+          'schedule_id': 'PI7DH85',
           'who': 'momo'
         }
+        room.robot.emit 'schedule', data
+        setTimeout (done), 40
       afterEach ->
         room.robot.brain.data.pagerv2 = { }
         nock.cleanAll()
 
-      hubotEmit('schedule', @data)->
-        it 'when it\'s not the same day', ->
-          expect(hubotResponse())
-          .to.eql("Tim Wright is on call until #{@end_date_format} " +
-                  '(utc) in Daily Engineering Rotation.')
+      it 'we notify the oncall with message', ->
+        expect(room.messages[0][1])
+        .to.eql('Tim Wright: test from momo in (private)')
+
+    context 'when somebody is oncall and we send a message from the same chan', ->
+      beforeEach (done) ->
+        room.robot.brain.data.pagerv2 = { users: { } }
+        room.robot.brain.data.pagerv2.schedules = { }
+        payload = require('./fixtures/oncall_list-ok.json')
+        payload.oncalls[0].start = moment().utc().subtract(5, 'minutes').format()
+        @end_date = moment.utc().add(1, 'days')
+        payload.oncalls[0].end = @end_date.format()
+        @end_date_format = @end_date.format('dddd HH:mm')
+        nock('https://api.pagerduty.com')
+        .get('/schedules')
+        .reply(200, require('./fixtures/schedules_list-ok.json'))
+        .get('/schedules/PI7DH85')
+        .reply(200, require('./fixtures/schedule_get-ok.json'))
+        .get('/oncalls')
+        .query({
+          time_zone: 'UTC',
+          schedule_ids: [ 'PI7DH85' ],
+          earliest: true
+        })
+        .reply 200, payload
+        data = {
+          'room': {
+            'name': 'console'
+          },
+          'message': 'test',
+          'schedule_id': 'PI7DH85',
+          'where': 'console',
+          'who': 'momo'
+        }
+        room.robot.emit 'schedule', data
+        setTimeout (done), 40
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      it 'we expect a cc', ->
+        expect(room.messages[0][1])
+        .to.eql('cc Tim Wright')
+
+
+    context 'when nobody is oncall and we send a message from the same chan', ->
+      beforeEach (done) ->
+        room.robot.brain.data.pagerv2 = { users: { } }
+        room.robot.brain.data.pagerv2.schedules = { }
+        nock('https://api.pagerduty.com')
+        .get('/schedules')
+        .reply(200, require('./fixtures/schedules_list-ok.json'))
+        .get('/schedules/PI7DH85')
+        .reply(200, require('./fixtures/schedule_get-ok.json'))
+        .get('/oncalls')
+        .query({
+          time_zone: 'UTC',
+          schedule_ids: [ 'PI7DH85' ],
+          earliest: true
+        })
+        .reply(200, { oncalls: [] })
+        data = {
+          'room': {
+            'name': 'room1'
+          },
+          'message': 'test',
+          'schedule_id': 'PI7DH85',
+          'where': 'room1',
+          'who': 'momo'
+        }
+        room.robot.emit 'schedule', data
+        setTimeout (done), 40
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      it 'when it\'s not the same day', ->
+        expect(room.messages[0][1])
+        .to.eql('Nobody is oncall at the moment on the '+
+        'schedule Daily Engineering Rotation : Rotation schedule for engineering')
+
+
+    context 'when nobody is oncall and we send a message from somewhere else', ->
+      beforeEach (done) ->
+        room.robot.brain.data.pagerv2 = { users: { } }
+        room.robot.brain.data.pagerv2.schedules = { }
+        nock('https://api.pagerduty.com')
+        .get('/schedules')
+        .reply(200, require('./fixtures/schedules_list-ok.json'))
+        .get('/schedules/PI7DH85')
+        .reply(200, require('./fixtures/schedule_get-ok.json'))
+        .get('/oncalls')
+        .query({
+          time_zone: 'UTC',
+          schedule_ids: [ 'PI7DH85' ],
+          earliest: true
+        })
+        .reply(200, { 'oncalls': [] })
+        data = {
+          'room': {
+            'name': 'room1'
+          },
+          'message': 'test',
+          'schedule_id': 'PI7DH85',
+          'who': 'momo'
+        }
+        room.robot.emit 'schedule', data
+        setTimeout (done), 40
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      it 'we send a message to the sender', ->
+        expect(room.messages[0][1])
+        .to.eql('Nobody is oncall at the moment on the '+
+        'schedule Daily Engineering Rotation : Rotation schedule for engineering')
 
 
     context 'when nobody is oncall', ->
