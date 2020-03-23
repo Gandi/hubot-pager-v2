@@ -150,6 +150,9 @@ module.exports = (robot) ->
     alertchan = process.env.PAGERV2_ANNOUNCE_ROOM
     pagerv2.getFirstOncall()
     .then (data) ->
+      if not data?
+        res.send 'Nobody is oncall'
+        return
       if res.envelope.room?
         res.send "cc #{data.user.summary}"
       else
@@ -172,15 +175,16 @@ module.exports = (robot) ->
     res.finish()
 
   robot.on 'schedule', (params) ->
-    console.log params
     if params.room? and params.schedule_id?
       pagerv2.getOncall(null, params.schedule_id)
       .then (data) ->
-        if data.length? and data.length > 0
-          if params.message? and params.who? and params.where?
-            if params.where is params.room
+        if data? and data.length? and data.length > 0
+          if params.message? and params.who?
+            if params.where is params.room.name
               robot.messageRoom(params.room, "cc #{data[0].user.summary}")
             else
+              if not params.where?
+                params.where = '(private)'
               robot.messageRoom(
                 params.room,
                 "#{data[0].user.summary}: #{params.message} from #{params.who} in #{params.where}")
@@ -191,7 +195,11 @@ module.exports = (robot) ->
           .then (data) ->
             message = 'Nobody is oncall at the moment on the schedule' +
                     " #{data.name} : #{data.description}"
-            robot.messageRoom(params.room, message)
+            if params.where?
+              target = params.where
+            else
+              target = params.who
+            robot.messageRoom(target, message)
       .catch (e) ->
         robot.messageRoom params.room, "Unable to get oncall : #{e}"
        
