@@ -1,5 +1,8 @@
 Hubot-pager-v2 Changelog
 ==========================
+### 1.1.9   2020-03-24
+ - fix inconsistency with schedule message
+
 ### 1.1.8   2020-03-23
  - send a message to a given oncall
 

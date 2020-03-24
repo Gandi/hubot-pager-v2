@@ -707,9 +707,7 @@ describe 'pagerv2_commands', ->
         })
         .reply 200, payload
         data = {
-          'room': {
-            'name': 'console'
-          },
+          'room': 'console',
           'message': 'test',
           'schedule_id': 'PI7DH85',
           'where': 'console',

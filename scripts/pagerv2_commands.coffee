@@ -180,7 +180,7 @@ module.exports = (robot) ->
       .then (data) ->
         if data? and data.length? and data.length > 0
           if params.message? and params.who?
-            if params.where is params.room.name
+            if params.where is params.room
               robot.messageRoom(params.room, "cc #{data[0].user.summary}")
             else
               if not params.where?
@@ -189,7 +189,11 @@ module.exports = (robot) ->
                 params.room,
                 "#{data[0].user.summary}: #{params.message} from #{params.who} in #{params.where}")
           else
-            robot.messageRoom(params.room, pagerv2.printOncall(data[0], true))
+            if params.where?
+              target = params.where
+            else
+              target = params.who
+            robot.messageRoom(target, pagerv2.printOncall(data[0], true))
         else
           pagerv2.getSchedule(params.schedule_id)
           .then (data) ->
