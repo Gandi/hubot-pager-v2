@@ -83,7 +83,7 @@ describe 'pagerv2_hook module', ->
     it 'should react', ->
       expected = [
         '[Production XDB Cluster] PRORDTY - [#33] My new incident - ' +
-        'trigger (Laura Haley)'
+        'trigger (Laura Haley,Jean Doe)'
       ]
       pagerv2 = new Pagerv2 room.robot
       pagerv2.parseWebhook(

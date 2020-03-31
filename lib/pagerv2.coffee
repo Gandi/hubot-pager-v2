@@ -646,7 +646,7 @@ class Pagerv2
       who = []
       for assignment in incident.assignments
         who.push(assignment.assignee.summary)
-        who = who.join(',')
+      who = who.join(',')
     else
       who = process.env.PAGERV2_DEFAULT_RESOLVER or 'nagios'
       @robot.logger.warning("fallback parsing triggered for incident #{incident.id}")

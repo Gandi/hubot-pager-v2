@@ -162,7 +162,18 @@
               "self": "https://api.pagerduty.com/users/P553OPV",
               "html_url": "https://webdemo.pagerduty.com/users/P553OPV"
             }
+          },
+          {
+            "at": "2017-09-26T15:14:36Z",
+            "assignee": {
+              "id": "P553OPD",
+              "type": "user_reference",
+              "summary": "Jean Doe",
+              "self": "https://api.pagerduty.com/users/P553OPD",
+              "html_url": "https://webdemo.pagerduty.com/users/P553OPD"
+            }
           }
+
         ],
         "acknowledgements": [],
         "last_status_change_at": "2017-09-26T15:14:36Z",
