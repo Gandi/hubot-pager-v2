@@ -1,5 +1,8 @@
 Hubot-pager-v2 Changelog
 ==========================
+### 1.1.10   2020-03-31
+ - fix multi assignement display
+
 ### 1.1.9   2020-03-24
  - fix inconsistency with schedule message
 
