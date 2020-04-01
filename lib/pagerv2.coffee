@@ -613,6 +613,38 @@ class Pagerv2
     else
       return actions
 
+  requestResponderIncidents: (user, who, incidents = '',
+    message = process.env.PAGERV2_RESPONDER_MESSAGE) ->
+    @getUser(user, user)
+    .bind({ from: null })
+    .then (email) =>
+      @from = email
+      respondersDone = Promise.map who.split(/,/), (responder) =>
+        @getUser(user, { name: responder })
+      Promise.all respondersDone
+    .then (responders) =>
+      @responders = responders
+      @listIncidents incidents
+    .then (data) =>
+      if data.incidents.length > 0
+        requestDone = Promise.map data.incidents, (inc) =>
+          payload = {
+            requester_id: @from
+            responder_request_targets: []
+            message: message
+          }
+          for r in @responders
+            payload.responder_request_targets.push {
+              responder_request_target: {
+                id: r,
+                type: 'user_reference'
+              }
+            }
+          @request('POST', "/incidents/#{inc.id}/responder_requests", payload, @from)
+        Promise.all requestDone
+      else
+        throw { message: 'There is no incidents at the moment.' }
+
   printIncident: (incident, type, adapter) =>
     level = type.split('.')[type.split('.').length - 1]
     service = 'unknown'
