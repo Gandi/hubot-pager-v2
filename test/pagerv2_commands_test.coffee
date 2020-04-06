@@ -2659,6 +2659,153 @@ describe 'pagerv2_commands', ->
             expect(hubotResponse())
             .to.eql 'Maintenance ended.'
 
+    # ----------------------------------------------------------------------------------------------
+    describe 'responder integration', ->
+      context 'when everything goes right', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+            .get('/incidents')
+            .query({
+              time_zone: 'UTC',
+              urgencies: [
+                'high'
+              ],
+              sort_by: 'created_at',
+              date_range: 'all',
+              statuses: [
+                'triggered',
+                'acknowledged'
+              ],
+              limit: 100,
+              total: 'true'
+            })
+            .reply(200, require('./fixtures/incident_list_multi-ok.json'))
+            .post('/incidents/PT4KHLK/responder_requests')
+            .query({
+              requester_id: "PEYSGVF",
+              responder_request_targets: [
+                {
+                  responder_request_target: {
+                    id: "PEYSGVF",
+                    type: "user_reference"
+                  }
+                }
+              ],
+              message: "blabla"
+            })
+            .reply(200, require('./fixtures/responder_request-ok.json'))
+            .post('/incidents/1234567/responder_requests')
+            .query({
+              requester_id: "PEYSGVF",
+              responder_request_targets: [
+                {
+                  responder_request_target: {
+                    id: "PEYSGVF",
+                    type: "user_reference"
+                  }
+                }
+              ],
+              message: "blabla"
+            })
+            .reply(200, require('./fixtures/responder_request-ok.json'))
+
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        say 'pager add me to all with blabla', ->
+          it 'returns the detailed answer', ->
+            expect(hubotResponse())
+            .to.eql "Incidents PXP12GZ, PXP12GZ responder momo requested."
+ 
+        say 'pager add me to PT4KHLK,1234567 with blabla', ->
+          it 'returns the detailed answer', ->
+            expect(hubotResponse())
+            .to.eql "Incidents PXP12GZ, PXP12GZ responder momo requested."
+
+
+
+      context 'when something goes wrong', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+            .get('/incidents')
+            .query({
+              time_zone: 'UTC',
+              urgencies: [
+                'high'
+              ],
+              sort_by: 'created_at',
+              date_range: 'all',
+              statuses: [
+                'triggered',
+                'acknowledged'
+              ],
+              limit: 100,
+              total: 'true'
+            })
+            .reply(404, 'ressource not found')
+            .post('/incidents/1234567/responder_requests')
+            .query({
+              requester_id: "PEYSGVF",
+              responder_request_targets: [
+                {
+                  responder_request_target: {
+                    id: "PEYSGVF",
+                    type: "user_reference"
+                  }
+                }
+              ],
+              message: "blabla"
+            })
+            .reply(404,'ressource not found')
+
+
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        say 'pager add me to all with blabla', ->
+          it 'returns the detailed answer', ->
+            expect(hubotResponse())
+            .to.eql "Unable to read request output"
+ 
+        say 'pager add me to 1234567 with blablaa', ->
+          it 'returns the detailed answer', ->
+            expect(hubotResponse())
+            .to.eql "Unable to read request output"
+
+
+      context 'when there is no incident', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+            .get('/incidents')
+            .query({
+              time_zone: 'UTC',
+              urgencies: [
+                'high'
+              ],
+              sort_by: 'created_at',
+              date_range: 'all',
+              statuses: [
+                'triggered',
+                'acknowledged'
+              ],
+              limit: 100,
+              total: 'true'
+            })
+            .reply(404, require('./fixtures/incident_list-empty.json'))
+
+
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+
+        say 'pager add me to all with blabla', ->
+          it 'returns the detailed answer', ->
+            expect(hubotResponse())
+            .to.eql "There is no incidents at the moment."
+
+
 # --------------------------------------------------------------------------------------------------
   context 'permissions system', ->
     beforeEach ->
@@ -2780,7 +2927,6 @@ describe 'pagerv2_commands', ->
             expect(hubotResponse())
             .to.eql 'Sorry, I can\'t figure toto email address. ' +
                     'Can you help me with `.pager toto as <email>`?'
-
 
 
 # --------------------------------------------------------------------------------------------------
