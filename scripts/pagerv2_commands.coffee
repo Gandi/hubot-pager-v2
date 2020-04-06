@@ -608,19 +608,19 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pager add <me|user_nick> [to all] [[with] message]      - add caller for responder on incidents
-  robot.respond /pager add (me|[^ ]+)(?: to all)(?: with)?( .+)?\s*$/, 'pager_request_all', (res) ->
+  robot.respond /pager add (me|[^ ]+)(?: to all)(?: with )?(.+)?\s*$/, 'pager_request_all', (res) ->
     [ _, who, msg ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
       if who is 'me'
         who = res.envelope.user.name
       pagerv2.requestResponderIncidents(res.envelope.user, who, '', msg)
-    .then (data) ->
-      plural = ''
-      if data.length > 1
-        plural = 's'
-      res.send "Incident#{plural} #{data.map( (r) -> r.incident.id).join(', ')} " +
-               "responder #{who} requested."
+      .then (data) ->
+        plural = ''
+        if data.length > 1
+          plural = 's'
+        res.send "Incident#{plural} #{data.map( (r) -> r.responder_request.incident.id).join(', ')} " +
+                 "responder #{who} requested."
     .catch (e) ->
       console.log e
       res.send e.message or e
@@ -628,18 +628,18 @@ module.exports = (robot) ->
 
 #   hubot pager add me to <#,#,#> [[with] message]    - add responder caller incidents <#,#,#>
 #   hubot pager add <user,user,user> to <#,#,#> [[with] message] - add responder user to incidents <#,#,#>
-  robot.respond /pager add (me|[^ ]+) to #?(.+)(?: with)?( .+)?\s*$/, 'pager_assign_one', (res) ->
+  robot.respond /pager add (me|[^ ]+) to #?([A-Z0-9,]+)(?: ?with )?(.+)?\s*$/, 'pager_assign_one', (res) ->
     [ _, who, incidents, msg ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
       if who is 'me'
         who = res.envelope.user.name
-      pagerv2.requestReponderIncidents(res.envelope.user, who, incidents, msg)
+      pagerv2.requestResponderIncidents(res.envelope.user, who, incidents, msg)
     .then (data) ->
       plural = ''
       if data.length > 1
         plural = 's'
-      res.send "Incident#{plural} #{data.map( (r) -> r.incident.id).join(', ')} " +
+      res.send "Incident#{plural} #{data.map( (r) -> r.responder_request.incident.id).join(', ')} " +
                "responder #{who} requested."
     .catch (e) ->
       res.send e.message or e
