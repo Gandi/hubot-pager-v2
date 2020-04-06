@@ -626,7 +626,6 @@ class Pagerv2
       @responders = responders
       @listIncidents(incidents)
       .then (data) =>
-        console.log data
         if data.incidents.length > 0
           requestDone = Promise.map data.incidents, (inc) =>
             payload = {

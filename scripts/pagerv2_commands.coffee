@@ -622,7 +622,6 @@ module.exports = (robot) ->
         res.send "Incident#{plural} #{data.map( (r) -> r.responder_request.incident.id).join(', ')} " +
                  "responder #{who} requested."
     .catch (e) ->
-      console.log e
       res.send e.message or e
     res.finish()
 
