@@ -1,5 +1,8 @@
 Hubot-pager-v2 Changelog
 ==========================
+### 1.1.11   2020-04-06
+ - add responder workflow
+
 ### 1.1.10   2020-03-31
  - fix multi assignement display
 
