@@ -1,5 +1,8 @@
 Hubot-pager-v2 Changelog
 ==========================
+### 1.1.12   2020-04-09
+ - add pager steal 
+
 ### 1.1.11   2020-04-06
  - add responder workflow
 

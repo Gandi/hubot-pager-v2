@@ -383,6 +383,32 @@ module.exports = (robot) ->
       res.send e.message or e
     res.finish()
 
+#   hubot pager steal <#,#,#> - assign and ack <#,#,#> to caller
+#   hubot pager steal all - assign and ack all to caller
+  robot.respond /pager steal #?(.+)/, 'pager_steal', (res) ->
+    [ _, incidents ] = res.match
+    if incidents is 'all'
+      incidents = ''
+    pagerv2.getPermission(res.envelope.user, 'pageruser')
+    .then ->
+      who = res.envelope.user.name
+      pagerv2.assignIncidents(res.envelope.user, who, incidents)
+      .then (data) ->
+        console.log data
+        who = res.envelope.user
+        pagerv2.upagerateIncidents(who, data.incidents.map((e) -> e.id).join(','),
+        'triggered', 'acknowledged')
+      .then (data) ->
+        console.log data
+        plural = ''
+        if data.incidents.length > 1
+          plural = 's'
+        res.send "Incident#{plural} #{data.incidents.map( (e) -> e.id).join(', ')}"+
+        " acknowledged and assigned to #{res.envelope.user.name}."
+      .catch (e) ->
+        res.send e.message or e
+    res.finish()
+
 #   hubot pager snooze [all] [for] [<duration>] [min]
 #   - snoozes all incidents for [<duration>] (default 120m)
   robot.respond (
@@ -607,7 +633,8 @@ module.exports = (robot) ->
       res.send e
     res.finish()
 
-#   hubot pager add <me|user_nick> [to all] [[with] message]      - add caller for responder on incidents
+#   hubot pager add <me|user_nick> [to all] [[with] message] -\
+#   add caller for responder on incidents
   robot.respond /pager add (me|[^ ]+)(?: to all)(?: with )?(.+)?\s*$/, 'pager_request_all', (res) ->
     [ _, who, msg ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
@@ -619,15 +646,18 @@ module.exports = (robot) ->
         plural = ''
         if data.length > 1
           plural = 's'
-        res.send "Incident#{plural} #{data.map( (r) -> r.responder_request.incident.id).join(', ')} " +
+        res.send "Incident#{plural} "+
+                 "#{data.map( (r) -> r.responder_request.incident.id).join(', ')} " +
                  "responder #{who} requested."
     .catch (e) ->
       res.send e.message or e
     res.finish()
 
-#   hubot pager add me to <#,#,#> [[with] message]    - add responder caller incidents <#,#,#>
-#   hubot pager add <user,user,user> to <#,#,#> [[with] message] - add responder user to incidents <#,#,#>
-  robot.respond /pager add (me|[^ ]+) to #?([A-Z0-9,]+)(?: ?with )?(.+)?\s*$/, 'pager_assign_one', (res) ->
+# hubot pager add me to <#,#,#> [[with] msg] - add responder caller incidents <#,#,#>
+# hubot pager add <user,user,user> to <#,#,#> [[with] msg] - add responder user to incidents <#,#,#>
+  robot.respond (
+    /pager add (me|[^ ]+) to #?([A-Z0-9,]+)(?: ?with )?(.+)?\s*$/
+  ), 'pager_assign_one', (res) ->
     [ _, who, incidents, msg ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
@@ -638,7 +668,8 @@ module.exports = (robot) ->
       plural = ''
       if data.length > 1
         plural = 's'
-      res.send "Incident#{plural} #{data.map( (r) -> r.responder_request.incident.id).join(', ')} " +
+      res.send "Incident#{plural} "+
+               "#{data.map( (r) -> r.responder_request.incident.id).join(', ')} " +
                "responder #{who} requested."
     .catch (e) ->
       res.send e.message or e

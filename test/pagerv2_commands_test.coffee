@@ -1928,6 +1928,69 @@ describe 'pagerv2_commands', ->
               .to.eql 'Incidents PT4KHLK, 1234567 resolved.'
 
     # ----------------------------------------------------------------------------------------------
+    describe '".pager steal all"', ->
+      context 'when something goes wrong', ->
+        beforeEach ->
+          nock('https://api.pagerduty.com')
+          .get('/incidents')
+          .query({
+            time_zone: 'UTC',
+            urgencies: [
+              'high'
+            ],
+            sort_by: 'created_at',
+            date_range: 'all',
+            statuses: [
+              'triggered',
+              'acknowledged'
+            ],
+            limit: 100,
+            total: 'true'
+          })
+          .reply 500, 'internal server error'
+        afterEach ->
+          room.robot.brain.data.pagerv2 = { }
+          nock.cleanAll()
+        say 'pager steal all', ->
+          it 'returns the error message', ->
+            expect(hubotResponse())
+            .to.eql 'Unable to read request output'
+
+      context 'when everything goes right', ->
+        context 'when there is many incidents', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .get('/incidents')
+            .query({
+              time_zone: 'UTC',
+              urgencies: [
+                'high'
+              ],
+              sort_by: 'created_at',
+              date_range: 'all',
+              statuses: [
+                'triggered',
+                'acknowledged'
+              ],
+              limit: 100,
+              total: 'true'
+            })
+            .reply(200, require('./fixtures/incident_list_multi-ok.json'))
+            .put('/incidents')
+            .reply(200, require('./fixtures/incident_manage_multi-ok.json'))
+            .put('/incidents')
+            .reply(200, require('./fixtures/incident_manage_multi-ok.json'))
+
+          afterEach ->
+            nock.cleanAll()
+
+          say 'pager steal all', ->
+            it 'says incident was assigned', ->
+              expect(hubotResponse())
+              .to.eql 'Incidents PT4KHLK, 1234567 acknowledged and assigned to momo.'
+
+
+    # ----------------------------------------------------------------------------------------------
     describe '".pager assign all to me"', ->
       context 'when something goes wrong,', ->
         beforeEach ->
@@ -2682,30 +2745,30 @@ describe 'pagerv2_commands', ->
             .reply(200, require('./fixtures/incident_list_multi-ok.json'))
             .post('/incidents/PT4KHLK/responder_requests')
             .query({
-              requester_id: "PEYSGVF",
+              requester_id: 'PEYSGVF',
               responder_request_targets: [
                 {
                   responder_request_target: {
-                    id: "PEYSGVF",
-                    type: "user_reference"
+                    id: 'PEYSGVF',
+                    type: 'user_reference'
                   }
                 }
               ],
-              message: "blabla"
+              message: 'blabla'
             })
             .reply(200, require('./fixtures/responder_request-ok.json'))
             .post('/incidents/1234567/responder_requests')
             .query({
-              requester_id: "PEYSGVF",
+              requester_id: 'PEYSGVF',
               responder_request_targets: [
                 {
                   responder_request_target: {
-                    id: "PEYSGVF",
-                    type: "user_reference"
+                    id: 'PEYSGVF',
+                    type: 'user_reference'
                   }
                 }
               ],
-              message: "blabla"
+              message: 'blabla'
             })
             .reply(200, require('./fixtures/responder_request-ok.json'))
 
@@ -2716,12 +2779,12 @@ describe 'pagerv2_commands', ->
         say 'pager add me to all with blabla', ->
           it 'returns the detailed answer', ->
             expect(hubotResponse())
-            .to.eql "Incidents PXP12GZ, PXP12GZ responder momo requested."
+            .to.eql 'Incidents PXP12GZ, PXP12GZ responder momo requested.'
  
         say 'pager add me to PT4KHLK,1234567 with blabla', ->
           it 'returns the detailed answer', ->
             expect(hubotResponse())
-            .to.eql "Incidents PXP12GZ, PXP12GZ responder momo requested."
+            .to.eql 'Incidents PXP12GZ, PXP12GZ responder momo requested.'
 
 
 
@@ -2746,18 +2809,18 @@ describe 'pagerv2_commands', ->
             .reply(404, 'ressource not found')
             .post('/incidents/1234567/responder_requests')
             .query({
-              requester_id: "PEYSGVF",
+              requester_id: 'PEYSGVF',
               responder_request_targets: [
                 {
                   responder_request_target: {
-                    id: "PEYSGVF",
-                    type: "user_reference"
+                    id: 'PEYSGVF',
+                    type: 'user_reference'
                   }
                 }
               ],
-              message: "blabla"
+              message: 'blabla'
             })
-            .reply(404,'ressource not found')
+            .reply(404, 'ressource not found')
 
 
         afterEach ->
@@ -2767,12 +2830,12 @@ describe 'pagerv2_commands', ->
         say 'pager add me to all with blabla', ->
           it 'returns the detailed answer', ->
             expect(hubotResponse())
-            .to.eql "Unable to read request output"
+            .to.eql 'Unable to read request output'
  
         say 'pager add me to 1234567 with blablaa', ->
           it 'returns the detailed answer', ->
             expect(hubotResponse())
-            .to.eql "Unable to read request output"
+            .to.eql 'Unable to read request output'
 
 
       context 'when there is no incident', ->
@@ -2803,7 +2866,7 @@ describe 'pagerv2_commands', ->
         say 'pager add me to all with blabla', ->
           it 'returns the detailed answer', ->
             expect(hubotResponse())
-            .to.eql "There is no incidents at the moment."
+            .to.eql 'There is no incidents at the moment.'
 
 
 # --------------------------------------------------------------------------------------------------
