@@ -1,0 +1,108 @@
+{
+    "alerts": [
+
+        {
+
+            "id": "PT4KHLK",
+
+            "type": "alert",
+
+            "summary": "The server is on fire.",
+
+            "self": "https://api.pagerduty.com/incidents/PT4KHLK/alerts/PXPGF42",
+
+            "html_url": "https://subdomain.pagerduty.com/alerts/PXPGF42",
+
+            "created_at": "2015-10-06T21:30:42Z",
+
+            "status": "resolved",
+
+            "alert_key": "baf7cf21b1da41b4b0221008339ff357",
+
+            "service": {
+
+                "id": "PIJ90N7",
+
+                "type": "generic_email_reference",
+
+                "summary": "My Mail Service",
+
+                "self": "https://api.pagerduty.com/services/PIJ90N7",
+
+                "html_url": "https://subdomain.pagerduty.com/services/PIJ90N7"
+
+            },
+
+            "body": {
+
+                "type": "alert_body",
+
+                "contexts": [
+
+                    {
+
+                        "type": "link"
+
+                    }
+
+                ],
+
+                "details": {
+			 "incident_parameters":
+      { "TIMEZONE": "Europe/Paris",
+        "TAGS": ["a"],
+        "STATUS": "DOWN",
+        "RCA_LINK":         "https://www.site24x7.eu/rca.do?id=2",
+        "POLLFREQUENCY": 15,
+        "OUTAGE_TIME_UNIX_FORMAT": "1588700908640",
+        "MONITOR_ID": 1,
+        "MONITOR_GROUPNAME": "ownservice",
+        "MONITOR_DASHBOARD_LINK":
+         "https://www.site24x7.eu/app/client#/home/monitors/1/Summary",
+        "MONITORURL": "http://myservice",
+        "MONITORTYPE": "URL",
+        "MONITORNAME": "my service",
+        "JSON_TAGS": ["a"],
+        "INCIDENT_TIME_ISO": "2020-05-05T19:48:28+0200",
+        "INCIDENT_TIME": "May 5, 2020 7:48 PM CEST",
+        "INCIDENT_REASON": "Service Unavailable.",
+        "FAILED_LOCATIONS": "Moscow-RU,NewYork-US" }
+            },
+
+            "incident": {
+
+                "id": "PT4KHLK",
+
+                "type": "incident_reference"
+
+            },
+
+            "suppressed": false,
+
+            "severity": "critical",
+
+            "integration": {
+
+                "id": "PQ12345",
+
+                "type": "generic_email_inbound_integration_reference",
+
+                "summary": "Email Integration",
+
+                "self": "https://api.pagerduty.com/services/PIJ90N7/integrations/PQ12345",
+
+                "html_url": "https://subdomain.pagerduty.com/services/PIJ90N7/integrations/PQ12345"
+	    }
+            }
+
+        }
+
+    ],
+
+    "limit": 1,
+
+    "offset": 0,
+
+    "more": true
+
+}

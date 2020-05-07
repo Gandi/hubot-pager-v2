@@ -1487,6 +1487,68 @@ describe 'pagerv2_commands', ->
               .to.eql '[My Mail Service] PT4KHLK - The server is on fire. - ' +
                       'resolved (Earline Greenholt)'
 
+        context 'and there are incidents with alerts from nagios', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .get('/incidents')
+            .query({
+              time_zone: 'UTC',
+              urgencies: [
+                'high'
+              ],
+              sort_by: 'created_at',
+              date_range: 'all',
+              statuses: [
+                'triggered',
+                'acknowledged'
+              ],
+              limit: 100,
+              total: 'true'
+            })
+            .reply(200, require('./fixtures/incident_list-ok.json'))
+            .get('/incidents/PT4KHLK/alerts')
+            .reply(200, require('./fixtures/alerts_pd-ok.json'))
+          afterEach ->
+            nock.cleanAll()
+
+          say 'pager sup', ->
+            it 'returns list of incidents', ->
+              expect(hubotResponse())
+              .to.eql '[My Mail Service] PT4KHLK - a very long and'+
+              ' extensive description - resolved (Earline Greenholt)'
+
+        context 'and there are incidents with alerts from s24', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .get('/incidents')
+            .query({
+              time_zone: 'UTC',
+              urgencies: [
+                'high'
+              ],
+              sort_by: 'created_at',
+              date_range: 'all',
+              statuses: [
+                'triggered',
+                'acknowledged'
+              ],
+              limit: 100,
+              total: 'true'
+            })
+            .reply(200, require('./fixtures/incident_list-prio-ok.json'))
+            .get('/incidents/PT4KHLK/alerts')
+            .reply(200, require('./fixtures/alerts_s24-ok.json'))
+          afterEach ->
+            nock.cleanAll()
+
+          say 'pager sup', ->
+            it 'returns list of incidents', ->
+              expect(hubotResponse())
+              .to.eql '[My Mail Service] {Sev2} PT4KHLK - |a| http://myservice :'+
+              ' DOWN Service Unavailable. from Moscow-RU,NewYork-US - resolved (Earline Greenholt)'
+
+
+
         context 'and we want incidents for the past 2 hours', ->
           beforeEach ->
             nock('https://api.pagerduty.com')

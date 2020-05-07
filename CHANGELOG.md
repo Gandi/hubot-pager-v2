@@ -1,5 +1,8 @@
 Hubot-pager-v2 Changelog
 ==========================
+### 1.1.13   2020-05-07
+ - support alerts and priority
+
 ### 1.1.12   2020-04-09
  - add pager steal 
 

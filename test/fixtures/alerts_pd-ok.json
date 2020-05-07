@@ -1,0 +1,99 @@
+{
+    "alerts": [
+
+        {
+
+            "id": "PT4KHLK",
+
+            "type": "alert",
+
+            "summary": "The server is on fire.",
+
+            "self": "https://api.pagerduty.com/incidents/PT4KHLK/alerts/PXPGF42",
+
+            "html_url": "https://subdomain.pagerduty.com/alerts/PXPGF42",
+
+            "created_at": "2015-10-06T21:30:42Z",
+
+            "status": "resolved",
+
+            "alert_key": "baf7cf21b1da41b4b0221008339ff357",
+
+            "service": {
+
+                "id": "PIJ90N7",
+
+                "type": "generic_email_reference",
+
+                "summary": "My Mail Service",
+
+                "self": "https://api.pagerduty.com/services/PIJ90N7",
+
+                "html_url": "https://subdomain.pagerduty.com/services/PIJ90N7"
+
+            },
+
+            "body": {
+
+                "type": "alert_body",
+
+                "contexts": [
+
+                    {
+
+                        "type": "link"
+
+                    }
+
+                ],
+
+                "details": {
+  "pd_nagios_object": "service",
+     "pd_description":
+      "a very long and extensive description",
+     "SERVICESTATE": "CRITICAL",
+     "SERVICEOUTPUT": "The service is exposing an error 503 on /path",
+     "SERVICEDESC":
+      "check_service_health",
+     "HOSTNAME": "myservice",
+     "CONTACTPAGER": "contact" }
+
+            },
+
+            "incident": {
+
+                "id": "PT4KHLK",
+
+                "type": "incident_reference"
+
+            },
+
+            "suppressed": false,
+
+            "severity": "critical",
+
+            "integration": {
+
+                "id": "PQ12345",
+
+                "type": "generic_email_inbound_integration_reference",
+
+                "summary": "Email Integration",
+
+                "self": "https://api.pagerduty.com/services/PIJ90N7/integrations/PQ12345",
+
+                "html_url": "https://subdomain.pagerduty.com/services/PIJ90N7/integrations/PQ12345"
+
+            }
+
+        }
+
+    ],
+
+    "limit": 1,
+
+    "offset": 0,
+
+    "more": true
+
+}

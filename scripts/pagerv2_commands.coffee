@@ -255,7 +255,10 @@ module.exports = (robot) ->
     .then ->
       pagerv2.getIncident(incident)
     .then (data) ->
-      res.send pagerv2.printIncident(data.incident, data.incident.status, robot.adapterName)
+      pagerv2.getIncidentAlerts(data.incident.id)
+      .then (alertsData) ->
+        data.incident.alerts = alertsData.alerts
+        res.send pagerv2.printIncident(data.incident, data.incident.status, robot.adapterName)
       #"#{origin}#{data.incident.id} #{data.incident.summary} - #{data.incident.status}" +
       #         "#{assigned}"
     .catch (e) ->
@@ -279,7 +282,10 @@ module.exports = (robot) ->
     .then (data) ->
       if data.incidents.length > 0
         for inc in data.incidents
-          res.send pagerv2.printIncident(inc, inc.status, robot.adapterName)
+          pagerv2.getIncidentAlerts(inc.id)
+          .then (alertsData) ->
+            inc.alerts = alertsData.alerts
+            res.send pagerv2.printIncident(inc, inc.status, robot.adapterName)
           #"#{origin}#{inc.id} #{inc.summary} - #{inc.status}#{assigned}"
       else
         res.send 'There are no open incidents for now.'
@@ -394,12 +400,10 @@ module.exports = (robot) ->
       who = res.envelope.user.name
       pagerv2.assignIncidents(res.envelope.user, who, incidents)
       .then (data) ->
-        console.log data
         who = res.envelope.user
         pagerv2.upagerateIncidents(who, data.incidents.map((e) -> e.id).join(','),
         'triggered', 'acknowledged')
       .then (data) ->
-        console.log data
         plural = ''
         if data.incidents.length > 1
           plural = 's'

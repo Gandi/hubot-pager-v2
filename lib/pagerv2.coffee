@@ -335,6 +335,14 @@ class Pagerv2
           else
             res null
 
+  getIncidentAlerts: (incident) =>
+    @request('GET', "/incidents/#{incident}/alerts")
+    .then (data) ->
+      return data
+    .catch (e) =>
+      @robot.logger.debug(e)
+      return { alerts: [] }
+
   getIncident: (incident) ->
     @request('GET', "/incidents/#{incident}")
 
@@ -380,6 +388,7 @@ class Pagerv2
           .then ->
             data
         else
+          console.log data
           data
 
   completeIncidentWithNotes: (incident) =>
@@ -656,6 +665,17 @@ class Pagerv2
       level,
       "[#{service}]"
     )
+    description = @getDescriptionFromIncident(incident)
+    who = @get_assignee(incident, type)
+    priority = ''
+    if incident.priority?.name?
+      priority = @colorer(adapter,
+        incident.priority.name,
+        "{#{incident.priority.name}} "
+      )
+    "#{origin} #{priority}#{incident.id} - #{description} - #{level} (#{who})"
+  
+  getDescriptionFromIncident: (incident) ->
     if incident.trigger_summary_data?
       if incident.trigger_summary_data.subject?
         description = incident.trigger_summary_data.subject.
@@ -666,8 +686,28 @@ class Pagerv2
       description = incident.summary
     if not description?
       description = '(no subject)'
-    who = @get_assignee(incident, type)
-    "#{origin} #{incident.id} - #{description} - #{level} (#{who})"
+    if incident.alerts?.length > 0
+      alertsDescription = @getDetailsFromAlerts(incident.alerts)
+      if alertsDescription.length > 0
+        description = alertsDescription.join(' -')
+    return description
+
+  getDetailsFromAlerts: (alerts) ->
+    result = []
+    for alert in alerts
+      if alert.body?.details?.incident_parameters?.FAILED_LOCATIONS?
+        tags = alert.body.details.incident_parameters.TAGS.join(',')
+        url = alert.body.details.incident_parameters.MONITORURL
+        status = alert.body.details.incident_parameters.STATUS
+        reason = alert.body.details.incident_parameters.INCIDENT_REASON
+        locations = alert.body.details.incident_parameters.FAILED_LOCATIONS
+        result.push("|#{tags}| #{url} : #{status} #{reason} from #{locations}")
+      else if alert.body?.details?.pd_description?
+        result.push(alert.body.details.pd_description)
+      else
+        @robot.logger.warning 'no details found in the alerts'
+    return result
+
 
   get_assignee: (incident, type) =>
     if type? and type is 'incident.resolve' and incident.resolved_by_user?
@@ -696,7 +736,11 @@ class Pagerv2
       resolve: 'green',
       resolved: 'green',
       assign: 'blue',
-      escalate: 'blue'
+      escalate: 'blue',
+      Sev1: 'teal',
+      Sev2: 'cyan',
+      Sev3: 'royal',
+      Sev4: 'grey'
     }
     if @coloring[adapter]?
       @coloring[adapter](text, colors[level])
