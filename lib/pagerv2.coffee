@@ -388,7 +388,6 @@ class Pagerv2
           .then ->
             data
         else
-          console.log data
           data
 
   completeIncidentWithNotes: (incident) =>
