@@ -705,7 +705,7 @@ class Pagerv2
         result.push(alert.body.details.pd_description)
       else
         @robot.logger.warning 'no details found in the alerts'
-	@robot.logger.warning alert.body
+        @robot.logger.warning alert.body
     return result
 
 
