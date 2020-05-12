@@ -1,5 +1,9 @@
 Hubot-pager-v2 Changelog
 ==========================
+### 1.1.14   2020-05-12
+ - remove log flooding
+ - add alerts log fallback
+
 ### 1.1.13   2020-05-07
  - support alerts and priority
 
