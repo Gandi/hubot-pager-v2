@@ -335,13 +335,15 @@ class Pagerv2
           else
             res null
 
-  getIncidentAlerts: (incident) =>
-    @request('GET', "/incidents/#{incident}/alerts")
+  getIncidentWithAlerts: (incident) =>
+    @request('GET', "/incidents/#{incident.id}/alerts")
     .then (data) ->
-      return data
+      incident.alerts = data.alerts
+      return incident
     .catch (e) =>
       @robot.logger.debug(e)
-      return { alerts: [] }
+      incident.alerts = []
+      return incident
 
   getIncident: (incident) ->
     @request('GET', "/incidents/#{incident}")

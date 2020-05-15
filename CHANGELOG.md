@@ -1,5 +1,8 @@
 Hubot-pager-v2 Changelog
 ==========================
+### 1.1.15   2020-05-15
+ - fix incident listing with sup sharing id
+
 ### 1.1.14   2020-05-12
  - remove log flooding
  - add alerts log fallback

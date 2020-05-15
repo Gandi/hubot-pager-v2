@@ -255,10 +255,9 @@ module.exports = (robot) ->
     .then ->
       pagerv2.getIncident(incident)
     .then (data) ->
-      pagerv2.getIncidentAlerts(data.incident.id)
-      .then (alertsData) ->
-        data.incident.alerts = alertsData.alerts
-        res.send pagerv2.printIncident(data.incident, data.incident.status, robot.adapterName)
+      pagerv2.getIncidentWithAlerts(data.incident)
+      .then (incWithAlerts) ->
+        res.send pagerv2.printIncident(incWithAlerts, incWithAlerts.status, robot.adapterName)
       #"#{origin}#{data.incident.id} #{data.incident.summary} - #{data.incident.status}" +
       #         "#{assigned}"
     .catch (e) ->
@@ -282,10 +281,9 @@ module.exports = (robot) ->
     .then (data) ->
       if data.incidents.length > 0
         for inc in data.incidents
-          pagerv2.getIncidentAlerts(inc.id)
-          .then (alertsData) ->
-            inc.alerts = alertsData.alerts
-            res.send pagerv2.printIncident(inc, inc.status, robot.adapterName)
+          pagerv2.getIncidentWithAlerts(inc)
+          .then (incWithAlerts) ->
+            res.send pagerv2.printIncident(incWithAlerts, incWithAlerts.status, robot.adapterName)
           #"#{origin}#{inc.id} #{inc.summary} - #{inc.status}#{assigned}"
       else
         res.send 'There are no open incidents for now.'
