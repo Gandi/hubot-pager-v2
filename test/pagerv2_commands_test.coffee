@@ -723,6 +723,43 @@ describe 'pagerv2_commands', ->
         expect(room.messages[0][1])
         .to.eql('cc Tim Wright')
 
+    context 'when somebody is oncall and we check from somewhere else', ->
+      beforeEach (done) ->
+        room.robot.brain.data.pagerv2 = { users: { } }
+        room.robot.brain.data.pagerv2.schedules = { }
+        payload = require('./fixtures/oncall_list-ok.json')
+        payload.oncalls[0].start = moment().utc().subtract(5, 'minutes').format()
+        @end_date = moment.utc().add(1, 'days')
+        payload.oncalls[0].end = @end_date.format()
+        @end_date_format = @end_date.format('dddd HH:mm')
+        nock('https://api.pagerduty.com')
+        .get('/schedules')
+        .reply(200, require('./fixtures/schedules_list-ok.json'))
+        .get('/schedules/PI7DH85')
+        .reply(200, require('./fixtures/schedule_get-ok.json'))
+        .get('/oncalls')
+        .query({
+          time_zone: 'UTC',
+          schedule_ids: [ 'PI7DH85' ],
+          earliest: true
+        })
+        .reply 200, payload
+        data = {
+          'room': 'console',
+          'schedule_id': 'PI7DH85',
+          'where': 'console',
+          'who': 'momo'
+        }
+        room.robot.emit 'schedule', data
+        setTimeout (done), 40
+      afterEach ->
+        room.robot.brain.data.pagerv2 = { }
+        nock.cleanAll()
+
+      it 'we expect a cc', ->
+        expect(room.messages[0][1])
+        .to.eql('Tim Wright is on call until Friday 02:02 (utc) in Daily Engineering Rotation.')
+
 
     context 'when nobody is oncall and we send a message from the same chan', ->
       beforeEach (done) ->
@@ -795,6 +832,12 @@ describe 'pagerv2_commands', ->
         expect(room.messages[0][1])
         .to.eql('Nobody is oncall at the moment on the '+
         'schedule Daily Engineering Rotation : Rotation schedule for engineering')
+
+      it 'we send a message to the sender', ->
+        expect(room.messages[0][1])
+        .to.eql('Nobody is oncall at the moment on the '+
+        'schedule Daily Engineering Rotation : Rotation schedule for engineering')
+
 
 
     context 'when nobody is oncall', ->
@@ -1547,7 +1590,36 @@ describe 'pagerv2_commands', ->
               .to.eql '[My Mail Service] {Sev2} PT4KHLK - |a| http://myservice :'+
               ' DOWN Service Unavailable. from Moscow-RU,NewYork-US - resolved (Earline Greenholt)'
 
+        context 'and there are incidents with alerts from grafana', ->
+          beforeEach ->
+            nock('https://api.pagerduty.com')
+            .get('/incidents')
+            .query({
+              time_zone: 'UTC',
+              urgencies: [
+                'high'
+              ],
+              sort_by: 'created_at',
+              date_range: 'all',
+              statuses: [
+                'triggered',
+                'acknowledged'
+              ],
+              limit: 100,
+              total: 'true'
+            })
+            .reply(200, require('./fixtures/incident_list-prio-ok.json'))
+            .get('/incidents/PT4KHLK/alerts')
+            .reply(200, require('./fixtures/alerts_grafana-ok.json'))
+          afterEach ->
+            nock.cleanAll()
 
+          say 'pager sup', ->
+            it 'returns list of incidents', ->
+              expect(hubotResponse())
+              .to.eql '[My Mail Service] {Sev2} PT4KHLK - something happens '+
+              '- {"some.metric":"some value"} - https://grafana.example.com/d/abc/ici '+
+              '- resolved (Earline Greenholt)'
 
         context 'and we want incidents for the past 2 hours', ->
           beforeEach ->

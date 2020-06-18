@@ -1,0 +1,79 @@
+{
+  "alerts": [
+    {
+      "id": "123456",
+      "type": "alert",
+      "summary": "something happens!",
+      "self": "https://api.pagerduty.com/alerts/123456",
+      "html_url": "https://example.pagerduty.com/alerts/123456",
+      "created_at": "2020-06-16T14:56:51+02:00",
+      "status": "resolved",
+      "resolved_at": "2020-06-16T14:57:42+02:00",
+      "alert_key": "alertId-8",
+      "suppressed": false,
+      "service": {
+        "id": "234567",
+        "type": "service_reference",
+        "summary": "Partner",
+        "self": "https://api.pagerduty.com/services/234567",
+        "html_url": "https://example.pagerduty.com/service-directory/234567"
+      },
+      "severity": "critical",
+      "incident": {
+        "id": "345678",
+        "type": "incident_reference",
+        "summary": "something happens",
+        "self": "https://api.pagerduty.com/incidents/345678",
+        "html_url": "https://example.pagerduty.com/incidents/345678"
+      },
+      "first_trigger_log_entry": {
+        "id": "averylongstringofcharinupperandnumber",
+        "type": "trigger_log_entry_reference",
+        "summary": "Triggered through the API",
+        "self": "https://api.pagerduty.com/log_entries/averylongstringofcharinupperandnumber",
+        "html_url": "https://example.pagerduty.com/alerts/123456/log_entries/averylongstringofcharinupperandnumber"
+      },
+      "body": {
+        "contexts": [],
+        "details": {
+          "some.metric": "some value"
+        },
+        "cef_details": {
+          "client": "Grafana",
+          "client_url": "https://grafana.example.com/d/abc/ici",
+          "contexts": [
+            {
+              "type": "link",
+              "href": "https://grafana.example.com/d/abc/ici"
+            }
+          ],
+          "creation_time": "2020-06-16T14:56:50.76999743+02:00",
+          "dedup_key": "alertId-8",
+          "description": "something happens",
+          "details": {
+            "some.metric": "soma value"
+          },
+          "message": "something happens",
+          "mutations": [],
+          "severity": "critical",
+          "source_component": "Grafana",
+          "source_origin": "example",
+          "version": "1.0"
+        },
+        "type": "alert_body"
+      },
+      "integration": {
+        "id": "456789",
+        "type": "events_api_v2_inbound_integration_reference",
+        "summary": "grafana",
+        "self": "https://api.pagerduty.com/services/123456/integrations/456789",
+        "html_url": "https://example.pagerduty.com/services/123456/integrations/456789"
+      },
+      "privilege": null
+    }
+  ],
+  "limit": 25,
+  "offset": 0,
+  "more": false,
+  "total": null
+}

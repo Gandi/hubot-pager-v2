@@ -66,7 +66,7 @@ class Pagerv2
       else
         res()
 
-  request: (method, endpoint, query, from = false, retry_count) ->
+  request: (method, endpoint, query, from = 'noc@gandi.net', retry_count) ->
     return new Promise (res, err) =>
       if process.env.PAGERV2_API_KEY?
         auth = "Token token=#{process.env.PAGERV2_API_KEY}"
@@ -690,7 +690,7 @@ class Pagerv2
     if incident.alerts?.length > 0
       alertsDescription = @getDetailsFromAlerts(incident.alerts)
       if alertsDescription.length > 0
-        description = alertsDescription.join(' -')
+        description = alertsDescription.join(' - ')
     return description
 
   getDetailsFromAlerts: (alerts) ->
@@ -705,6 +705,11 @@ class Pagerv2
         result.push("|#{tags}| #{url} : #{status} #{reason} from #{locations}")
       else if alert.body?.details?.pd_description?
         result.push(alert.body.details.pd_description)
+      else if alert.body?.details? and alert.body.cef_details?.description? and
+              alert.body.cef_details.client_url?
+        result.push(alert.body.cef_details.description)
+        result.push(JSON.stringify(alert.body.details))
+        result.push(alert.body.cef_details.client_url)
       else
         @robot.logger.warning 'no details found in the alerts'
         @robot.logger.warning alert.body

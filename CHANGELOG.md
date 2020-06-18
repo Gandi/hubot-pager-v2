@@ -1,5 +1,9 @@
 Hubot-pager-v2 Changelog
 ==========================
+### 1.1.16   2020-06-18
+ - fix grafana detail fetching
+ - add missing schedule test case
+
 ### 1.1.15   2020-05-15
  - fix incident listing with sup sharing id
 
