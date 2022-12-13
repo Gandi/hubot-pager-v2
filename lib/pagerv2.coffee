@@ -564,6 +564,7 @@ class Pagerv2
         .then (payload) =>
           @robot.brain.data.pagerv2.services[name] = payload.services[0].id
           res @robot.brain.data.pagerv2.services[name]
+
   listExtensions: (name) ->
     if name?
       query = {
@@ -589,6 +590,20 @@ class Pagerv2
           @robot.logger.error message
           @robot.logger.error e
           return 'Message parsing failed'
+
+  parseWebhookv3: (adapter, messages) =>
+    return new Promise (res, err) =>
+      res Array.from(messages).map (message) =>
+        try
+          incident = if message.event.data? then message.event # data + agent
+          type = if message.event.event_type? then message.event.event_type
+          level = type.substring(type.indexOf('.') + 1)
+          return @printIncidentv3(incident, type, adapter)
+        catch e
+          @robot.logger.error 'unable to parse message v3'
+          @robot.logger.error message
+          @robot.logger.error e
+          return 'Message v3 parsing failed'
 
   launchActionById: (action_id) =>
     if @robot.brain.data.pagerv2.custom?[action_id]?
@@ -655,6 +670,27 @@ class Pagerv2
         else
           throw { message: 'There is no incidents at the moment.' }
 
+  printIncidentv3: (incident, type, adapter) =>
+    level = type.split('.')[type.split('.').length - 1]
+    service = 'unknown'
+    if type is "incident.annotated"
+      v3_id = incident.data["incident"].id
+      description = incident.data["incident"].summary
+      note = incident.data.content
+      who = incident.agent.summary
+      "#{who} added note: #{note} on: #{v3_id} - #{description}"
+    else
+      if incident.data.service? and incident.data.service.summary?
+        service = incident.data.service.summary
+      origin = @colorer(adapter, level, "[#{service}]")
+      description = @getDescriptionFromIncident(incident.data)
+      who = @get_assignee(incident, type)
+      priority = ''
+
+      if incident.data?.number?
+        priority = @colorer(adapter, "#{level}", "#{incident.data.number}")
+      "#{origin} #{incident.data.id} - [##{priority}] #{description} - #{level} (#{who})"
+
   printIncident: (incident, type, adapter) =>
     level = type.split('.')[type.split('.').length - 1]
     service = 'unknown'
@@ -683,6 +719,10 @@ class Pagerv2
                       replace(' (CRITICAL)', '')
       else if incident.trigger_summary_data.description?
         description = incident.trigger_summary_data.description
+    # V3
+    else if incident.title?
+      description = incident.title
+
     if not description? and incident.summary?
       description = incident.summary
     if not description?
@@ -717,6 +757,7 @@ class Pagerv2
 
 
   get_assignee: (incident, type) =>
+    # V1/2
     if type? and type is 'incident.resolve' and incident.resolved_by_user?
       who = incident.resolved_by_user.name
     else if incident.assigned_to_user?
@@ -726,10 +767,24 @@ class Pagerv2
       for assignment in incident.assignments
         who.push(assignment.assignee.summary)
       who = who.join(',')
+    # V3
+    else if type? and type is 'incident.resolved'
+      if incident.agent?
+        who = if incident.agent.summary? then incident.agent.summary
+      else if incident.data.assignees?
+        who = []
+        for assignment in incident.data.assignees
+          who.push(assignment.summary)
+    else if incident.data.assignees?
+      who = []
+      for assignment in incident.data.assignees
+        who.push(assignment.summary)
+    # Fallback
     else
       who = process.env.PAGERV2_DEFAULT_RESOLVER or 'nagios'
       @robot.logger.warning("fallback parsing triggered for incident #{incident.id}")
       @robot.logger.debug(incident)
+
     return who
 
   colorer: (adapter, level, text) ->

@@ -33,7 +33,8 @@ module.exports = (robot) ->
               (req.body.messages[0].type? or req.body.messages[0].event?)
         robot.logger.debug req.body
         if (/^incident.*$/.test(req.body.messages[0].type)) or
-                /^incident.*$/.test(req.body.messages[0].event)
+                /^incident.*$/.test(req.body.messages[0].event) or
+                /^incident.*$/.test(req.body.messages.event)
           pagerv2.parseWebhook(robot.adapterName, req.body.messages)
           .then (messages) ->
             for message in messages
@@ -44,7 +45,15 @@ module.exports = (robot) ->
                                "type #{req.body.messages[0].type} from #{req.ip}"
           pagerv2.logError 'invalid payload', req.body
           res.status(422).end()
+      # WebHook V3
+      else if req.body? and req.body.event?
+        if req.body.event.data?
+          pagerv2.parseWebhookv3(robot.adapterName, [req.body])
+          .then (messages) ->
+            for message in messages
+              robot.messageRoom pagerAnnounceRoom, message
+          res.status(200).end()
       else
-        robot.logger.warning "[pagerv2] Invalid hook payload from #{req.ip}"
+        robot.logger.warning "[pagerv3] Invalid hook payload from #{req.ip}"
         pagerv2.logError 'invalid payload', req.body
         res.status(422).end()
