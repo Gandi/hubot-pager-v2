@@ -673,9 +673,9 @@ class Pagerv2
   printIncidentv3: (incident, type, adapter) =>
     level = type.split('.')[type.split('.').length - 1]
     service = 'unknown'
-    if type is "incident.annotated"
-      v3_id = incident.data["incident"].id
-      description = incident.data["incident"].summary
+    if type is 'incident.annotated'
+      v3_id = incident.data['incident'].id
+      description = incident.data['incident'].summary
       note = incident.data.content
       who = incident.agent.summary
       "#{who} added note: #{note} on: #{v3_id} - #{description}"
