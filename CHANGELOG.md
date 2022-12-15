@@ -1,5 +1,8 @@
 Hubot-pager-v2 Changelog
 ==========================
+### 1.1.17   2022-12-15
+ - support v3 webhooks subscriptions
+
 ### 1.1.16   2020-06-18
  - fix grafana detail fetching
  - add missing schedule test case
