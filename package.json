@@ -12,6 +12,11 @@
           "name": "kolo",
           "email": "kolo@kolo.fr",
           "url" : "https://github.com/baptistem"
+      },
+      {
+          "name": "araujobsd",
+          "email": "araujobsdport@gmail.com",
+          "url" : "https://github.com/araujobsd"
       }
   ],
   "license": "MIT",
