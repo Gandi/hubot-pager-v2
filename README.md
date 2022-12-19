@@ -1,4 +1,4 @@
-Hubot-pager-v2
+Hubot-pager-v2 and v3 webhooks
 ==================
 
 [![Version](https://img.shields.io/npm/v/hubot-pager-v2.svg)](https://www.npmjs.com/package/hubot-pager-v2)
@@ -12,6 +12,11 @@ This plugin is based on the usage we have in Gandi of Pagerduty. It may, in its 
 - we have on main schedule that is for the general alert dispatch (`PAGERV2_SCHEDULE_ID`)
 - only one person is on call at any given time
 - we don't use teams
+
+V3 Webhooks Subscriptions
+-----------
+We have added support to V3 Subscriptions, [follow the official guide](https://support.pagerduty.com/docs/webhooks#migrating-from-v1v2-generic-extensions-to-v3-webhook-subscriptions) for more information about how to migrate from Webhooks V1/V2 to V3.
+
 
 Configuration
 ---------------
@@ -128,6 +133,7 @@ Attribution
 
 - [@mose](https://github.com/mose) - author
 - [@baptistem](https://github.com/baptistem) - author and maintainer
+- [@araujobsd](https://github.com/araujobsd) - contributor
 
 ### License
 
@@ -135,4 +141,4 @@ This source code is available under [MIT license](LICENSE).
 
 ### Copyright
 
-Copyright (c) 2017 - Gandi - https://gandi.net
+Copyright (c) 2022 - Gandi - https://gandi.net
