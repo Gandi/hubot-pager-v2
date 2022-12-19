@@ -1,23 +1,11 @@
 {
-  "name": "hubot-pager-v2",
+  "name": "hubot-pager-v2-ng",
   "description": "A hubot plugin for Pagerduty API v2.",
   "version": "1.1.17",
-  "author": {
-    "name": "mose",
-    "email": "mose@mose.com",
-    "url": "https://github.com/mose"
-  },
+  "author": "mose <mose@mose.com> (https://github.com/mose)",
   "contributors": [
-      {
-          "name": "kolo",
-          "email": "kolo@kolo.fr",
-          "url" : "https://github.com/baptistem"
-      },
-      {
-          "name": "araujobsd",
-          "email": "araujobsdport@gmail.com",
-          "url" : "https://github.com/araujobsd"
-      }
+    "kolo <kolo@kolo.fr> (https://github.com/baptistem)",
+    "araujobsd <araujobsdport@gmail.com> (https://github.com/araujobsd)"
   ],
   "license": "MIT",
   "keywords": [
@@ -62,5 +50,10 @@
     "test": "make test",
     "posttest": "coffeelint lib/* scripts/* test/* index.coffee"
   },
-  "main": "index.js"
+  "main": "index.js",
+  "homepage": "https://github.com/Gandi/hubot-pager-v2#readme",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  }
 }
