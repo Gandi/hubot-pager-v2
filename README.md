@@ -141,4 +141,4 @@ This source code is available under [MIT license](LICENSE).
 
 ### Copyright
 
-Copyright (c) 2022 - Gandi - https://gandi.net
+Copyright (c) 2016-2023 - Gandi - https://gandi.net
